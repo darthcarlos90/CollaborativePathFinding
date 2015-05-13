@@ -2,16 +2,7 @@
 #include <hash_map>
 #include <vector>
 #include "Node.h"
-
-
-struct Location{
-	Location(int new_x, int new_y){
-		x = new_x;
-		y = new_y;
-	}
-	int x;
-	int y;
-};
+#include "Utils.h"
 
 class ReservationTable{
 public:

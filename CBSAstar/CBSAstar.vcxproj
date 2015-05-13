@@ -78,16 +78,22 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="CBTNode.h" />
     <ClInclude Include="FileReader.h" />
     <ClInclude Include="Map.h" />
+    <ClInclude Include="MAPF.h" />
     <ClInclude Include="Matrix.h" />
     <ClInclude Include="Node.h" />
+    <ClInclude Include="ConstraintTree.h" />
     <ClInclude Include="ReservationTable.h" />
     <ClInclude Include="Unit.h" />
+    <ClInclude Include="Utils.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="FileReader.cpp" />
+    <ClCompile Include="main.cpp" />
     <ClCompile Include="Map.cpp" />
+    <ClCompile Include="MAPF.cpp" />
     <ClCompile Include="Node.cpp" />
     <ClCompile Include="ReservationTable.cpp" />
     <ClCompile Include="Unit.cpp" />

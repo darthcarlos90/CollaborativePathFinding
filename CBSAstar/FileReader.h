@@ -3,24 +3,11 @@
 #include <string>
 #include <vector>
 #include "Matrix.h"
+#include "Utils.h"
 
 using namespace std;
 
 
-/*
-	Struct created to easily group the locations being read.
-*/
-struct location{
-	location(int x, int y, int id){
-		this->x = x;
-		this->y = y;
-		this->id = id;
-	};
-
-	int x;
-	int y;
-	int id; //id of tthis location (id of the unit-to-be)
-};
 
 
 
@@ -63,8 +50,8 @@ public:
 	int rows;
 	int columns;
 	int players;
-	vector<location> startings;
-	vector<location> endings;
+	vector<Location> startings;
+	vector<Location> endings;
 
 	Matrix<int>* data;// I feel I'm gonna regret making this public 
 

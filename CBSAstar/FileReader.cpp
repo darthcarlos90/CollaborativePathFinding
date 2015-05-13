@@ -78,7 +78,7 @@ void FileReader::readData(std::string filename){
 					}
 					temp_y += reader[i];
 				}
-				location start(stoi(temp_x.c_str()),stoi(temp_y.c_str()), id);
+				Location start(stoi(temp_x.c_str()),stoi(temp_y.c_str()), id);
 				startings.push_back(start);
 				temp_x = "";
 				temp_y = "";
@@ -97,7 +97,7 @@ void FileReader::readData(std::string filename){
 					temp_y += reader[i];
 				}
 
-				location destination(stoi(temp_x.c_str()), stoi(temp_y.c_str()), id);
+				Location destination(stoi(temp_x.c_str()), stoi(temp_y.c_str()), id);
 				endings.push_back(destination);
 				id++;
 			}
