@@ -30,6 +30,7 @@ public:
 		be able to do all the calculations of Astar.
 	*/
 
+	void calculateRoute();// calculates the route using spatial astar
 	//Execute a normal Astar using manhattan distance as heuristic
 	void executeSpatialAstar(Node start, Node finish);
 
@@ -40,7 +41,13 @@ public:
 
 	void calculateRealHeuristic(Node* toCalculate, Node finish);
 
+	
+	int getSic();
+
+
+
 	std::vector<Node> getSpatialRoute() { return spatial_route; }
+	std::vector<Node> getPath() { return time_route; }
 
 	
 
@@ -68,6 +75,7 @@ private:
 	bool AtOpenList(Node n);
 	bool AtTimedClosedList(Node n);
 	bool AtTimedOpenList( Node n);
+	void calculateSIC();
 
 
 	Node actualNode;
@@ -85,6 +93,8 @@ private:
 	int stepsTaken;
 	bool replan;
 	int tempD;
+
+	int SIC; //Sum of Individual Costs
 
 
 	int t;// as said, I will add t to every element to see who needs it and who doesnt

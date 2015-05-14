@@ -62,7 +62,7 @@ struct Conflict{
 		users.push_back(id);
 	}
 
-	void addUser(Unit u){
+	void addUser(Agent u){
 		users.push_back(u.getId());
 	}
 

@@ -12,6 +12,7 @@ actualNode(location)
 	this->destination = destination;
 	replan = false;
 	tempD = 0;
+	SIC = 0;
 }
 
 Agent::~Agent(void){
@@ -482,4 +483,24 @@ bool Agent::AtOpenList(Node n){
 	else {
 		return false;
 	}
+}
+
+void Agent::calculateSIC(){
+	if (time_route.size() > 0){
+		for (int i = 0; i < time_route.size(); i++){
+			SIC += time_route[i].getF();
+		}
+	}
+}
+
+int Agent::getSic(){
+	if (SIC == 0) calculateSIC();
+	return SIC;
+}
+
+void Agent::calculateRoute(){
+	executeSpatialAstar(actualNode, destination);
+	time_route = spatial_route; // Because the route was saved on the spatial route
+	spatial_route.clear();
+	calculateSIC();
 }

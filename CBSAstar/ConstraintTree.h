@@ -12,12 +12,14 @@ public:
 	ConstraintTree(void);
 	~ConstraintTree();
 	
-	CBTNode* getRoot();
-	CBTNode getSolution();
+	void insertRoot(CBTNode* n) { root = n; }
+	CBTNode* getRoot() { return root; }
+	CBTNode getSolution(); // Look for the solution, which will always be the leftmost node
 
 
 
 private:
+	void terminate_tree(CBTNode* n);
 	CBTNode * root;
 	
 };

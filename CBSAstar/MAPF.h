@@ -1,5 +1,6 @@
 #include "FileReader.h"
-#include "Unit.h"
+#include "Agent.h"
+#include "ConstraintTree.h"
 
 /*
 	Class MAPF
@@ -16,13 +17,14 @@ public:
 	~MAPF(void); //Destructor
 	
 	void Start(); //start the pathfinding
+	
 
 private:
 	//TODO: Keep adding more elements throught the development of this project.
 	FileReader* fr;
 	Map* map;
-
-	vector<Unit> players;
+	ConstraintTree* tree;
+	vector<Agent> players;
 
 	bool broken;
 };

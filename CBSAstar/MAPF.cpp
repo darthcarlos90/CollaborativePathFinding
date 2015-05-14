@@ -27,7 +27,7 @@ MAPF::MAPF(string filename){
 
 		Node node_location(0, 0, l.x, l.y);
 		Node destination(0, 0, d.x, d.y);
-		Unit u(node_location, destination, map, l.id, 4);
+		Agent u(node_location, destination, map, l.id, 4);
 		players.push_back(u);
 	}
 
@@ -46,6 +46,7 @@ MAPF::MAPF(int size_x, int size_y){
 MAPF::~MAPF(void){
 	delete fr;
 	delete map;
+	//TODO: Dont delete the nodes, thats the tree's job
 }
 
 void MAPF::Start(){
