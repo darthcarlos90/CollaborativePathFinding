@@ -86,7 +86,7 @@
     <ClInclude Include="Node.h" />
     <ClInclude Include="ConstraintTree.h" />
     <ClInclude Include="ReservationTable.h" />
-    <ClInclude Include="Unit.h" />
+    <ClInclude Include="Agent.h" />
     <ClInclude Include="Utils.h" />
   </ItemGroup>
   <ItemGroup>
@@ -96,7 +96,7 @@
     <ClCompile Include="MAPF.cpp" />
     <ClCompile Include="Node.cpp" />
     <ClCompile Include="ReservationTable.cpp" />
-    <ClCompile Include="Unit.cpp" />
+    <ClCompile Include="Agent.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

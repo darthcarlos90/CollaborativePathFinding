@@ -1,7 +1,7 @@
-#include "Unit.h"
+#include "Agent.h"
 
 
-Unit::Unit(Node location,Node destination, Map* m, int id, int D):
+Agent::Agent(Node location,Node destination, Map* m, int id, int D):
 actualNode(location)
 {
 	map = m;
@@ -14,7 +14,7 @@ actualNode(location)
 	tempD = 0;
 }
 
-Unit::~Unit(void){
+Agent::~Agent(void){
 	map = NULL;//There is only one map, it is not my job to delete it
 }
 
@@ -23,7 +23,7 @@ Astar algorithm built from the Tutorial 2 on AI and from the
 video at this link: https ://www.youtube.com/watch?v=KNXfSOx4eEE
 
 */
-void Unit::executeSpatialAstar(Node start, Node finish){
+void Agent::executeSpatialAstar(Node start, Node finish){
 	bool pathFound = false;
 	//Let A be the starting point
 	Node A = start;
@@ -89,7 +89,7 @@ void Unit::executeSpatialAstar(Node start, Node finish){
 	//}
 }
 
-void Unit::move(int time_to_move){
+void Agent::move(int time_to_move){
 	/*
 	Step 3: Every t, advance one spot in the road.
 	- If d has been reached or we reaced to the end of the road, stop;
@@ -114,7 +114,7 @@ void Unit::move(int time_to_move){
 		/*
 		Step 4: If the d has been reached:
 		- If the destination has been reached:
-			- Set this unit as unactive
+			- Set this Agent as unactive
 		- Repeat from step 1, BUT
 		- Now use Heuristic distances (I still can't understand why, but thats what the paper says :S)
 		*/
@@ -145,7 +145,7 @@ void Unit::move(int time_to_move){
 This algorithm was created based on the work done by David Silver in his paper
 named Cooperative Pathfinding. Some other code was also added by myself.
 */
-void Unit::executeTimeSpaceAstar(){
+void Agent::executeTimeSpaceAstar(){
 	/*
 	Steps 1 and 2 are described in the function that will execute.
 	*/
@@ -159,7 +159,7 @@ void Unit::executeTimeSpaceAstar(){
 	//move();
 }
 
-void Unit::TimeSpaceAstarHelper(Node start, Node finish){
+void Agent::TimeSpaceAstarHelper(Node start, Node finish){
 	int time = t + 1;
 	//TODO: Find the bug, there must be something going wrong here 
 	/*
@@ -316,13 +316,13 @@ void Unit::TimeSpaceAstarHelper(Node start, Node finish){
 }
 
 
-void Unit::executeSpatialAstarUntilFound(Node start, Node toFind){
+void Agent::executeSpatialAstarUntilFound(Node start, Node toFind){
 	if (!AtClosedList(toFind)){
 		executeSpatialAstar(start, toFind);
 	}
 }
 
-bool Unit::AtClosedList(Node n){
+bool Agent::AtClosedList(Node n){
 	/*bool found = false;
 	if (spatial_closedList.size() > 0){
 		for (unsigned int i = 0; i < spatial_closedList.size(); i++){
@@ -350,7 +350,7 @@ bool Unit::AtClosedList(Node n){
 	}
 }
 
-void Unit::calculateRealHeuristic(Node* toCalculate, Node finish){
+void Agent::calculateRealHeuristic(Node* toCalculate, Node finish){
 	executeSpatialAstarUntilFound(finish, *toCalculate);
 	/*for (unsigned int i = 0; i < spatial_closedList.size(); i++){
 		if (spatial_closedList[i] == *toCalculate){
@@ -365,7 +365,7 @@ void Unit::calculateRealHeuristic(Node* toCalculate, Node finish){
 }
 
 
-vector<Node> Unit::getAdjacents(Node element){
+vector<Node> Agent::getAdjacents(Node element){
 	vector<Node> result;
 
 	result = map->adjacentHelper(element); // Use helper function to make life easier
@@ -382,7 +382,7 @@ vector<Node> Unit::getAdjacents(Node element){
 }
 
 //Basically remove all the reserved adjacent nodes
-std::vector<Node> Unit::getTimedAdjacents(Node element, int res_time){
+std::vector<Node> Agent::getTimedAdjacents(Node element, int res_time){
 	//First, get the adjacents of the node
 	std::vector<Node> temp = map->adjacentHelper(element);
 
@@ -408,7 +408,7 @@ std::vector<Node> Unit::getTimedAdjacents(Node element, int res_time){
 	return result;
 }
 
-bool Unit::AtTimedClosedList(Node n){
+bool Agent::AtTimedClosedList(Node n){
 	/*bool found = false;
 	if (time_closedList.size() > 0){
 		for (unsigned int i = 0; i < time_closedList.size(); i++){
@@ -437,7 +437,7 @@ bool Unit::AtTimedClosedList(Node n){
 }
 
 
-bool Unit::AtTimedOpenList(Node n){
+bool Agent::AtTimedOpenList(Node n){
 	/*bool found = false;
 	for (int i = 0; i < time_openList.size(); i++){
 		if (time_openList[i] == n){
@@ -462,7 +462,7 @@ bool Unit::AtTimedOpenList(Node n){
 	//return ListContains(time_openList, n);
 }
 
-void Unit::setTime(int time_to_set){
+void Agent::setTime(int time_to_set){
 	t = time_to_set;
 
 	for (int i = 0; i < t; i++){
@@ -470,7 +470,7 @@ void Unit::setTime(int time_to_set){
 	}
 }
 
-bool Unit::AtOpenList(Node n){
+bool Agent::AtOpenList(Node n){
 	if (!spatial_openList.empty()){
 		if (std::find(spatial_openList.begin(), spatial_openList.end(), n) != spatial_openList.end()){
 			return true;

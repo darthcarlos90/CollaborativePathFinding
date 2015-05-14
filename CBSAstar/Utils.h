@@ -22,8 +22,51 @@ struct Location{
 		id = -1; //no id, plain location
 	}
 
+	Location(){
+		x = 0;
+		y = 0;
+		id = -1;
+	}
+
 	int x;
 	int y;
 	int id; //id of tthis location (id of the unit-to-be)
 };
 
+/*
+Struct created to represent the Constraints and its elements
+*/
+struct Constraint{
+	Constraint(int id, Location location, int t){
+		this->id = id;
+		this->location = location;
+		this->t = t;
+	}
+
+	int id; // The id of the node in this constraint
+	Location location; // The location on th grid that is reserved
+	int t; // The time when it is reserved
+};
+
+
+/*
+	A struct that represents the conflict element
+*/
+struct Conflict{
+	Conflict(Location v, int t){
+		this->v = v;
+		this->t = t;
+	}
+
+	void addUser(int id){
+		users.push_back(id);
+	}
+
+	void addUser(Unit u){
+		users.push_back(u.getId());
+	}
+
+	vector<int> users;
+	Location v;
+	int t;
+};

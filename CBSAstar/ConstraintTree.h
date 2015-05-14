@@ -12,14 +12,12 @@ public:
 	ConstraintTree(void);
 	~ConstraintTree();
 	
-	bool isEmpty();
-	CBTNode getSolution();
 	CBTNode* getRoot();
-	
+	CBTNode getSolution();
 
 
 
 private:
 	CBTNode * root;
-	CBTNode* solution;
+	
 };

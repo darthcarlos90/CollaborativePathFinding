@@ -4,10 +4,10 @@
 #include <algorithm>
 
 
-class Unit{
+class Agent{
 public:
-	Unit(Node location, Node destination, Map *m, int id, int D);
-	~Unit(void);
+	Agent(Node location, Node destination, Map *m, int id, int D);
+	~Agent(void);
 
 	void SetLocationNode(Node n) { actualNode = n; }
 
@@ -26,7 +26,7 @@ public:
 		Fix: All the Astar elements where moved here.
 		Date: 30/04/2015
 		Why?
-		Because the unit is the one that is "thinking", that's why it must
+		Because the Agent is the one that is "thinking", that's why it must
 		be able to do all the calculations of Astar.
 	*/
 
