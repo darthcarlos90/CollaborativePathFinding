@@ -14,7 +14,7 @@ public:
 	
 	void insertRoot(CBTNode* n) { root = n; }
 	CBTNode* getRoot() { return root; }
-	CBTNode getSolution(); // Look for the solution, which will always be the leftmost node
+	CBTNode* getSolution(); // Look for the solution, which will always be the leftmost node
 
 
 

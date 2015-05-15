@@ -8,6 +8,7 @@ CBTNode::CBTNode(vector<Constraint> parent_constraints, vector<Agent*> agents){
 	this->constraints = parent_constraints;
 	this->agents = agents;
 	cost = 0;
+	goal = false;
 }
 
 CBTNode::CBTNode(vector<Constraint> parent_constraints, vector<Conflict> conflicts, vector<Agent*> parents_agents){
@@ -15,7 +16,15 @@ CBTNode::CBTNode(vector<Constraint> parent_constraints, vector<Conflict> conflic
 	this->conflicts = conflicts;
 	this->agents = parents_agents;
 	cost = 0;
+	goal = false;
 }
+
+//Copy constructor
+CBTNode::CBTNode(const CBTNode& n):
+children(n.children), cost(n.cost), agents(n.agents),
+paths(n.paths), constraints(n.constraints),
+conflicts(n.conflicts)
+{}
 
 CBTNode::~CBTNode(void){
 	//No need for a destructor for now
@@ -50,7 +59,7 @@ void CBTNode::CalculatePaths(){
 	}
 }
 
-void CBTNode::ExpandNode(CBTNode n){
+void CBTNode::ExpandNode(){
 	Conflict c = conflicts[0]; // Get the first conflict
 	conflicts.erase(conflicts.begin()); // Delete the conflict being dealt with
 	for (unsigned int i = 0; i < c.users.size(); i++){
@@ -75,6 +84,10 @@ void CBTNode::validatePaths(){
 	*/
 	for (unsigned int i = 0; i < largest_size; i++){
 		findConstraintsConflicts(i);
+	}
+
+	if (conflicts.size() == 0){
+		goal = true;
 	}
 }
 

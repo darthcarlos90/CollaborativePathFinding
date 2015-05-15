@@ -35,6 +35,8 @@ MAPF::MAPF(string filename){
 		cout << "The data on the file given is incorrect, please try again" << endl;
 	else cout << "Finished loading data from the file" << endl;
 
+	tree = new ConstraintTree();
+
 }
 
 //Constructor that asks the user what are the specifications of the grid and randomly creates it
@@ -47,13 +49,53 @@ MAPF::~MAPF(void){
 	delete fr;
 	delete map;
 	//TODO: Dont delete the nodes, thats the tree's job
+	delete tree;
 }
 
 void MAPF::Start(){
 	if (!broken){
-		//DO the stuff
+		//Create the root node
+		root = new CBTNode();
+
+		//Add the agents to the root node
+		for (unsigned int i = 0; i < players.size(); i++){
+			root->addAgent(&players[i]);
+		}
+
+		//find the individual paths of the elements
+		root->CalculatePaths();
+
+		//calculate the cost of this node
+		root->calculateCost();
+
+		//insert the root into the tree
+		tree->insertRoot(root);
+
+		bool solutionFound = false;
+		//While we can't find the solution
+		while (!solutionFound){
+			//Get the best node of the tree
+			CBTNode* P = tree->getSolution();
+
+			//Validate the paths until a conflict occurs
+			P->validatePaths();
+
+			//If it is a goal node, end this, we found the solution
+			if (P->isGoal()) solutionFound = true;
+			else {
+				P->ExpandNode();
+			}
+		}
+		
 	}
 	else {
-		cout << "Exiting" << endl;
+		cout << "Broken file, exiting...." << endl;
+	}
+}
+
+void MAPF::MoveEntities(){
+	//TODO: Left here, implement the movement of the entities
+	for (unsigned int i = 0; i < players.size(); i++){
+		players[i].move();
 	}
 }

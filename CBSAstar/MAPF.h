@@ -1,6 +1,6 @@
 #include "FileReader.h"
-#include "Agent.h"
 #include "ConstraintTree.h"
+#include "CBTNode.h"
 
 /*
 	Class MAPF
@@ -17,6 +17,7 @@ public:
 	~MAPF(void); //Destructor
 	
 	void Start(); //start the pathfinding
+	void MoveEntities(); //Self explanatory
 	
 
 private:
@@ -25,6 +26,8 @@ private:
 	Map* map;
 	ConstraintTree* tree;
 	vector<Agent> players;
+
+	CBTNode* root; // The root node of the Tree
 
 	bool broken;
 };

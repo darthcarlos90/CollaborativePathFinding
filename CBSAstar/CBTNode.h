@@ -10,8 +10,7 @@ public:
 	CBTNode(void); // When you are creating a root node
 	CBTNode(vector<Constraint> parent_constraints, vector<Agent*> parents_agents); // When you are creating a child node, it inherits its dads nodes
 	CBTNode(vector<Constraint> parent_constraints, vector<Conflict> conflicts, vector<Agent*> parents_agents); // When expanding a node with more than one conflict
-	//Coment it for now, not sure if I will use it later
-	//CBTNode(const CBTNode& n); //copy constructor
+	CBTNode(const CBTNode& n); //copy constructor
 	~CBTNode(void);
 
 	bool hasChildren() { return children.size() > 0; }
@@ -21,18 +20,19 @@ public:
 	
 	CBTNode* getSmallestChild();
 
-	void CalculatePaths(); // Calculates the paths of all the agents
-	void ExpandNode(CBTNode n); // Expand a node when a conflict is found
+	void CalculatePaths(); // Calculates the individual paths of all the agents
+	void ExpandNode(); // Expand a node when a conflict is found
 	void validatePaths(); // Validates the paths of the elements
 	
 
 	vector<Conflict> getConflicts() { return conflicts; }
 
 	bool isValid() { return (conflicts.size() == 0); } // if it has conflicts
+	bool isGoal() { return goal; } // Check if the node is a goal node
 	
 
 	int getCost() const { return cost; }
-	void calculateCost();
+	void calculateCost(); // calculates the cost of the node
 
 	//CBTNode& operator = (const CBTNode& n); // Asigment operator
 	bool operator < (const CBTNode& n);
@@ -68,5 +68,7 @@ private:
 
 	vector<Constraint> constraints;
 	vector<Conflict> conflicts;
+
+	bool goal;
 	
 };

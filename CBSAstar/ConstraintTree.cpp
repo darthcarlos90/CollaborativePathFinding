@@ -8,18 +8,24 @@ ConstraintTree::~ConstraintTree(void){
 	terminate_tree(root);
 }
 
-CBTNode ConstraintTree::getSolution(){
+/*
+	Fix: Changed the return type to be a pointer
+	Date: 15/05/2015
+	Why?
+	Because we need to modify the contents of the best node, not the contents of a copy
+*/
+CBTNode* ConstraintTree::getSolution(){
 	if (root->hasChildren()){
-		CBTNode n = *root;
-		while (n.hasChildren()){
-			n = *n.getSmallestChild();
+		CBTNode* n = root;
+		while (n->hasChildren()){
+			n = n->getSmallestChild();
 		}
 
 		return n;
 	}
 	//Otherwise the root is the actual solution
 	else {
-		return *root;
+		return root;
 	}
 
 }
