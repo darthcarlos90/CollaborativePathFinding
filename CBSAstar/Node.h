@@ -1,6 +1,7 @@
 #pragma once
 #include <cmath>
 #include <vector>
+#include "Utils.h"
 
 
 class Node{
@@ -47,6 +48,8 @@ public:
 
 	void clearParent(); //Method used so that the parent is forgotten
 
+	Location getLocation() const { return my_location; }
+
 
 private:
 	int f;
@@ -63,4 +66,5 @@ private:
 
 	Node* parent;
 	
+	Location my_location;
 };

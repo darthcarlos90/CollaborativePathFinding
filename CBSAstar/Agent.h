@@ -18,6 +18,7 @@ public:
 	int getD() { return d; }
 
 	int getId() { return id; }
+	int setId(int new_id) { id = new_id; }
 
 	void move(int time_to_move);
 	void setTime(int time_to_set);
@@ -44,7 +45,7 @@ public:
 	
 	int getSic();
 
-
+	void ModifyRouteOnConstraints(vector<Constraint> constraints); // Modifies the rute based on the constraints given
 
 	std::vector<Node> getSpatialRoute() { return spatial_route; }
 	std::vector<Node> getPath() { return time_route; }

@@ -26,7 +26,6 @@ public:
 	void validatePaths(); // Validates the paths of the elements
 	
 
-	bool isConsistent() { return consistent; }// all paths satisfy all constraints
 	vector<Conflict> getConflicts() { return conflicts; }
 
 	bool isValid() { return (conflicts.size() == 0); } // if it has conflicts
@@ -39,15 +38,21 @@ public:
 	bool operator < (const CBTNode& n);
 	bool operator > (const CBTNode& n);
 
-	void addAgent(Agent * a){ agents.push_back(a); }
-	void addConstraint(Constraint c) { constraints.push_back(c); }
+	void addAgent(Agent * a);
+	//This is probably not used, Ill left it comented in case of need
+	//void addConstraint(Constraint c) { constraints.push_back(c); }
 
+	void RecalculateRoutesOnConstraints();
 
 
 
 private:
 	//Helper functions
-	void findConstraint(int i);
+	//void findConstraint(int i); // Forgot what is this for, Ill coment it until I remember why this is here
+	void findConstraintsConflicts(int t); //Finds the constraints and conflictsd at time t
+	int conflictAt(Location location); // Looks if a conflict exists regarding the location
+	void addAgentToConflict(int index, int id); // Add the agent with id id, to the conflict at index
+	bool isAtList(int element, vector<int> list); //Looks for a int on a list of ints, if it is there, returns true
 
 
 	//Properties
@@ -62,7 +67,6 @@ private:
 	*/
 
 	vector<Constraint> constraints;
-	bool consistent;
 	vector<Conflict> conflicts;
 	
 };

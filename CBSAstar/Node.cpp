@@ -24,6 +24,9 @@ Node::Node(int type, int tempg, int x_pos, int y_pos){
 	f = g + h;
 	parent = NULL;
 	has_parent = false;
+	my_location.id = type;
+	my_location.x = x_pos;
+	my_location.y = y_pos;
 }
 
 Node::~Node(void){
@@ -49,6 +52,7 @@ Node::Node(const Node& n){
 		parent = NULL; 
 		this->has_parent = false;
 	}
+	this->my_location = n.getLocation();
 }
 
 Node& Node::operator= (const Node& n){
@@ -68,6 +72,8 @@ Node& Node::operator= (const Node& n){
 		parent = NULL;
 		this->has_parent = false;
 	}
+	this->my_location = n.getLocation();
+
 	return *this;
 }
 

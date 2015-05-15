@@ -504,3 +504,34 @@ void Agent::calculateRoute(){
 	spatial_route.clear();
 	calculateSIC();
 }
+
+void Agent::ModifyRouteOnConstraints(vector<Constraint> constraints){
+	for (unsigned int i = 0; i < constraints.size(); i++){
+		Constraint c = constraints[i];
+		//If the constraint is from another agent
+		if (c.id != id){
+			// If this agent has a movement at time t
+			if (time_route.size() > c.t){
+				//If the movement at time t is the same as the constraint
+				if (time_route[c.t].getLocation() == c.location){
+					//Make the element wait for a t, before moving to that spot
+					vector<Node> temp_path;
+					// push all the elements of the path from 0 till t -1 of the constraint
+					for (unsigned int i = 0; i < c.t; i++){
+						temp_path.push_back(time_route[i]);
+					}
+					// Repeat the last step so the agent waits for some other element to use the other cell
+					temp_path.push_back(temp_path[temp_path.size() - 1]);
+
+					//finish adding the elements of the route
+					for (unsigned int i = c.t; i < time_route.size(); i++){
+						temp_path.push_back(time_route[i]);
+					}
+
+					//replace the old route with the new one
+					time_route = temp_path;
+				}
+			}
+		}
+	}
+}

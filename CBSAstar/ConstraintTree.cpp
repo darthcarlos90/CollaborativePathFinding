@@ -12,7 +12,7 @@ CBTNode ConstraintTree::getSolution(){
 	if (root->hasChildren()){
 		CBTNode n = *root;
 		while (n.hasChildren()){
-			n = *n.getSmallesChild();
+			n = *n.getSmallestChild();
 		}
 
 		return n;

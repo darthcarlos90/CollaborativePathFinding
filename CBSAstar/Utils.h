@@ -28,6 +28,10 @@ struct Location{
 		id = -1;
 	}
 
+	bool operator == (const Location& l){
+		return (this->x == l.x && this->y == l.y);
+	}
+
 	int x;
 	int y;
 	int id; //id of tthis location (id of the unit-to-be)
