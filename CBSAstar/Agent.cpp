@@ -99,7 +99,7 @@ void Agent::move(int time_to_move){
 
 	if (stepsTaken < d){
 		t++;
-		if (time_route.size() == 0) {
+		if (actualNode == destination) {
 			active = false; //we reached the end of the route 
 		}
 		else {
@@ -208,13 +208,16 @@ void Agent::TimeSpaceAstarHelper(Node start, Node finish){
 				- Set active to true, so that the element starts using Astar to go back to its place.
 				*/
 				active = true; //set to active, so the element can come back to its position after its finished
+				tempD = d;
+				d = time_route.size(); // so you can progress the next time
+				replan = true;// so you can start pathfinding from that point
 				break;// exit method;
 			}
 
 			//else
 			else{
 				//add to the route that you are staying in your place that period of time
-				time_route.push_back(A);
+				time_route.push_back(A); // push the elements, but dont reserve them so other entities can use them
 				time++;
 			}
 		}
@@ -286,9 +289,46 @@ void Agent::TimeSpaceAstarHelper(Node start, Node finish){
 		for (int i = 0; i < d; i++){
 			//Check if the node is reserved for this given time
 			if (map->isReserved(time_route[i], reservation_time)){
-				reserved = true;
-				reserved_index = i;
-				break;
+				//If the next node is reserved
+
+				//First see if the last node, is reserved for this timestep
+				if (map->isReserved(time_route[i - 1], reservation_time)){
+					//if your last step is reserved for the next time, replan your route
+					reserved = true;
+					reserved_index = i;
+					break;
+				}
+				else{
+					/*
+						If the last step is not reserved for this time, then modifly the route and wait
+						in the place until the other entity moves.
+					*/
+					vector<Node> temp_route;
+
+					//Get all the nodes before the incident
+					for (unsigned int index = 0; index < i; index++){
+						temp_route.push_back(time_route[index]);
+					}
+
+					//repeat the node so that it can wait on the path, and continue
+					temp_route.push_back(time_route[i - 1]);
+
+					//now finish adding the rest of the elements
+					for (unsigned int index = i; index < time_route.size(); index++){
+						temp_route.push_back(time_route[index]);
+					}
+
+					//finally, replace the old route with the new one
+					time_route = temp_route;
+
+					/*
+						The the next element to be checked in the for loop will be
+						the element previously blocked by the incident. Now the agent will check if
+						it is pertinent to occupy it.
+					*/
+
+				}
+				
 			}
 			else {
 				map->reserve(reservation_time, time_route[i], id);

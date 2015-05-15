@@ -39,8 +39,8 @@ public:
 	bool operator > (const CBTNode& n);
 
 	void addAgent(Agent * a);
-	//This is probably not used, Ill left it comented in case of need
-	//void addConstraint(Constraint c) { constraints.push_back(c); }
+	
+	void addConstraint(Constraint c) { constraints.push_back(c); }
 
 	void RecalculateRoutesOnConstraints();
 
