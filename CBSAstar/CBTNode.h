@@ -8,8 +8,7 @@
 class CBTNode{
 public:
 	CBTNode(void); // When you are creating a root node
-	CBTNode(vector<Constraint> parent_constraints, vector<Agent*> parents_agents); // When you are creating a child node, it inherits its dads nodes
-	CBTNode(vector<Constraint> parent_constraints, vector<Conflict> conflicts, vector<Agent*> parents_agents); // When expanding a node with more than one conflict
+	CBTNode(vector<Constraint> parent_constraints, vector<Agent*> parents_agents, vector<vector<Node>> parents_paths); // When you are creating a child node, it inherits its dads nodes
 	CBTNode(const CBTNode& n); //copy constructor
 	~CBTNode(void);
 
@@ -25,9 +24,9 @@ public:
 	void validatePaths(); // Validates the paths of the elements
 	
 
-	vector<Conflict> getConflicts() { return conflicts; }
+	Conflict getConflict() const { return conflict; }
 
-	bool isValid() { return (conflicts.size() == 0); } // if it has conflicts
+	bool isValid() { return conflict.empty; } // if it has conflicts
 	bool isGoal() { return goal; } // Check if the node is a goal node
 	
 
@@ -40,7 +39,7 @@ public:
 
 	void addAgent(Agent * a);
 	
-	void addConstraint(Constraint c) { constraints.push_back(c); }
+	void addConstraint(Constraint c);
 
 	void RecalculateRoutesOnConstraints();
 
@@ -49,9 +48,7 @@ public:
 private:
 	//Helper functions
 	//void findConstraint(int i); // Forgot what is this for, Ill coment it until I remember why this is here
-	void findConstraintsConflicts(int t); //Finds the constraints and conflictsd at time t
-	int conflictAt(Location location); // Looks if a conflict exists regarding the location
-	void addAgentToConflict(int index, int id); // Add the agent with id id, to the conflict at index
+	bool findConstraintsConflicts(unsigned int t); //Finds the constraints and conflictsd at time t
 	bool isAtList(int element, vector<int> list); //Looks for a int on a list of ints, if it is there, returns true
 
 
@@ -67,7 +64,7 @@ private:
 	*/
 
 	vector<Constraint> constraints;
-	vector<Conflict> conflicts;
+	Conflict conflict;
 
 	bool goal;
 	

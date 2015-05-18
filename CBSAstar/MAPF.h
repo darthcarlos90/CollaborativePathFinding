@@ -1,6 +1,6 @@
+#pragma once
 #include "FileReader.h"
 #include "ConstraintTree.h"
-#include "CBTNode.h"
 
 /*
 	Class MAPF
@@ -30,4 +30,6 @@ private:
 	CBTNode* root; // The root node of the Tree
 
 	bool broken;
+
+	int time;
 };

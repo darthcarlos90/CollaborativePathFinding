@@ -21,7 +21,7 @@ void ReservationTable::Reserve(int t, Node n, int userId){
 bool ReservationTable::isReserved(Node element, int t){
 	bool reserved = false;
 	std::vector<Location> temp = reservations[t];
-	for (int i = 0; i < temp.size(); i++){
+	for (unsigned int i = 0; i < temp.size(); i++){
 		if (temp[i].x == element.getX() && temp[i].y == element.getY()){
 			reserved = true;
 			break;

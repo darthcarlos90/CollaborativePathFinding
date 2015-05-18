@@ -4,17 +4,10 @@ CBTNode::CBTNode(void){
 	cost = 0;
 }
 
-CBTNode::CBTNode(vector<Constraint> parent_constraints, vector<Agent*> agents){
+CBTNode::CBTNode(vector<Constraint> parent_constraints, vector<Agent*> parents_agents,vector<vector<Node>> parents_paths){
 	this->constraints = parent_constraints;
-	this->agents = agents;
-	cost = 0;
-	goal = false;
-}
-
-CBTNode::CBTNode(vector<Constraint> parent_constraints, vector<Conflict> conflicts, vector<Agent*> parents_agents){
-	this->constraints = parent_constraints;
-	this->conflicts = conflicts;
 	this->agents = parents_agents;
+	this->paths = parents_paths;
 	cost = 0;
 	goal = false;
 }
@@ -23,7 +16,7 @@ CBTNode::CBTNode(vector<Constraint> parent_constraints, vector<Conflict> conflic
 CBTNode::CBTNode(const CBTNode& n):
 children(n.children), cost(n.cost), agents(n.agents),
 paths(n.paths), constraints(n.constraints),
-conflicts(n.conflicts)
+conflict(n.conflict)
 {}
 
 CBTNode::~CBTNode(void){
@@ -60,11 +53,14 @@ void CBTNode::CalculatePaths(){
 }
 
 void CBTNode::ExpandNode(){
-	Conflict c = conflicts[0]; // Get the first conflict
-	conflicts.erase(conflicts.begin()); // Delete the conflict being dealt with
-	for (unsigned int i = 0; i < c.users.size(); i++){
-		Constraint cnst(c.users[i], c.v, c.t);
-		CBTNode* child = new CBTNode(constraints, conflicts, agents);
+	//For catching erros
+	if (conflict.empty){
+		return;
+	}
+
+	for (unsigned int i = 0; i < conflict.users.size(); i++){
+		Constraint cnst(conflict.users[i], conflict.v, conflict.t);
+		CBTNode* child = new CBTNode(constraints, agents, paths);
 		child->addConstraint(cnst);
 		child->RecalculateRoutesOnConstraints();
 		children.push_back(child);
@@ -83,88 +79,82 @@ void CBTNode::validatePaths(){
 		t = 0, the second element on t = 1 and so on
 	*/
 	for (unsigned int i = 0; i < largest_size; i++){
-		findConstraintsConflicts(i);
+		if (findConstraintsConflicts(i)){
+			break;
+		}
 	}
 
-	if (conflicts.size() == 0){
+	if (conflict.empty){
 		goal = true;
 	}
 }
 
-void CBTNode::findConstraintsConflicts(int t){
-	
+bool CBTNode::findConstraintsConflicts(unsigned int t){
+	bool foundConflict = false;
 	vector<int> participateOnConflict;
 	for (unsigned int toCompareId = 0; toCompareId < paths.size(); toCompareId++){
 		// if the current path that we are analizing has an element on time t
-		if (paths[toCompareId].size() > t){
-			Node toCompare = paths[toCompareId][t];
+		if (!foundConflict){
+			if (paths[toCompareId].size() > t){
+				Node toCompare = paths[toCompareId][t];
 
-			for (unsigned int i = toCompareId + 1; i < paths.size(); i++){
-				//if the other element being analized, has an element on time t
-				if (paths[i].size() > t){
-					if (toCompare == paths[i][t]){ // There is a conflict
-						int conflictIndex = conflictAt(toCompare.getLocation());
-						if (conflictIndex > -1){ //If the conflict index is bigger than -1, the conflict exists
-							addAgentToConflict(conflictIndex, toCompareId);
-							addAgentToConflict(conflictIndex, i);
+				for (unsigned int i = toCompareId + 1; i < paths.size(); i++){
+					//if the other element being analized, has an element on time t
+					if (!foundConflict){
+						if (paths[i].size() > t){
+							if (toCompare == paths[i][t]){ // There is a conflict
+								conflict.v = toCompare.getLocation();
+								conflict.t = t;
+								conflict.addUser(toCompareId);
+								conflict.addUser(i);
+								conflict.empty = false;
+								foundConflict = true;
+								
+								if (!isAtList(toCompareId, participateOnConflict)) 
+									participateOnConflict.push_back(toCompareId);
+								if (!isAtList(i, participateOnConflict)) 
+									participateOnConflict.push_back(i);
+							}
 						}
-						else {
-							Conflict c(toCompare.getLocation(), t);
-							c.addUser(toCompareId);
-							c.addUser(i);
-							conflicts.push_back(c);
-						}
-						if (!isAtList(toCompareId, participateOnConflict)) participateOnConflict.push_back(toCompareId);
-						if (!isAtList(i, participateOnConflict)) participateOnConflict.push_back(i);
 					}
+					//Found a conflict, break
+					else break;
 				}
 			}
 		}
+		//Found conflict, break
+		else break;
 	}
 
 	//Now we need to create constraints with the elements that are not participating in conflicts
 	//TODO: Beware on errors at debug on here :D
 	std::sort(participateOnConflict.begin(), participateOnConflict.end());
+	
 	for (unsigned int i = 0; i < paths.size(); i++){
-		if (i == participateOnConflict[0]){
-			//This element is on conflict, no constraint needed
-			//pop it out of the list
-			participateOnConflict.erase(participateOnConflict.begin());
-		}
-		else {
-			//Create a constraint and push it back into the list
-			Constraint c(i, paths[i][t].getLocation(), t);
-			constraints.push_back(c);
-		}
-	}
+		if (participateOnConflict.size() > 0){
+			if (i == participateOnConflict[0]){
+				//This element is on conflict, no constraint needed
+				//pop it out of the list
+				participateOnConflict.erase(participateOnConflict.begin());
 
-}
-
-void CBTNode::addAgentToConflict(int index, int id){
-	bool found = false;
-	for (unsigned int i = 0; i < conflicts[index].users.size(); i++){
-		if (conflicts[index].users[i] == id){
-			found = true;
-			break;
-		}
-	}
-
-	if (!found) conflicts[index].users.push_back(id);
-}
-
-int CBTNode::conflictAt(Location location){
-	bool result = -1;
-	if (conflicts.size() == 0) return result;
-	else {
-		for (unsigned int i = 0; i < conflicts.size(); i++){
-			if (conflicts[i].v == location){
-				result = i;
-				break;
+			}
+			else {
+				//Create a constraint and push it back into the list
+				Constraint c(i, paths[i][t].getLocation(), t);
+				addConstraint(c);
 			}
 		}
+		else {
+			//I know its repeating, I just want to test it for now !!!!
+			//Create a constraint and push it back into the list
+			Constraint c(i, paths[i][t].getLocation(), t);
+			addConstraint(c);
+			//TODO: A index out of bounds exception was found, fix this, lets go home
+		}
 	}
 
-	return result;
+	return foundConflict;
+
 }
 
 bool CBTNode::isAtList(int element, vector<int> list){
@@ -182,7 +172,7 @@ bool CBTNode::isAtList(int element, vector<int> list){
 }
 
 void CBTNode::calculateCost(){
-	for (int i = 0; i < agents.size(); i++){
+	for (unsigned int i = 0; i < agents.size(); i++){
 		cost += agents[i]->getSic();
 	}
 }
@@ -197,6 +187,23 @@ void CBTNode::addAgent(Agent* a){
 
 void CBTNode::RecalculateRoutesOnConstraints(){
 	for (unsigned int i = 0; i < agents.size(); i++){
-		agents[i]->ModifyRouteOnConstraints(constraints);
+		agents[i]->ModifyRouteOnConstraints(constraints);// Update the paths on the agent
+		paths[i] = agents[i]->getPath(); // Let the node know the new paths
+	}
+}
+
+void CBTNode::addConstraint(Constraint c){
+	if (!constraints.empty()){
+		if (std::find(constraints.begin(), constraints.end(), c) != constraints.end()){
+			//The element is found, do nothing
+		}
+		else{
+			//The constraint is not found, push it to the vector
+			constraints.push_back(c);
+		}
+	}
+	else{
+		//The list is empty, add the element
+		constraints.push_back(c);
 	}
 }

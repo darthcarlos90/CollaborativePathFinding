@@ -5,6 +5,7 @@
 */
 
 #pragma once
+#include <vector>
 
 /*
 Struct created to easily group the locations being read.
@@ -34,7 +35,7 @@ struct Location{
 
 	int x;
 	int y;
-	int id; //id of tthis location (id of the unit-to-be)
+	int id; //id of this location (id of the unit-to-be)
 };
 
 /*
@@ -45,6 +46,12 @@ struct Constraint{
 		this->id = id;
 		this->location = location;
 		this->t = t;
+	}
+
+	bool operator == (const Constraint& c){
+		return (this->id == c.id 
+			&& this->location == c.location 
+			&& this->t == c.t);
 	}
 
 	int id; // The id of the node in this constraint
@@ -60,17 +67,21 @@ struct Conflict{
 	Conflict(Location v, int t){
 		this->v = v;
 		this->t = t;
+		empty = false;
+	}
+
+	//Empty constructor, literally
+	Conflict(){
+		t = -1;
+		empty = true;
 	}
 
 	void addUser(int id){
 		users.push_back(id);
 	}
 
-	void addUser(Agent u){
-		users.push_back(u.getId());
-	}
-
-	vector<int> users;
+	std::vector<int> users;
 	Location v;
 	int t;
+	bool empty;
 };

@@ -37,6 +37,8 @@ MAPF::MAPF(string filename){
 
 	tree = new ConstraintTree();
 
+	time = 0;
+
 }
 
 //Constructor that asks the user what are the specifications of the grid and randomly creates it
@@ -48,7 +50,7 @@ MAPF::MAPF(int size_x, int size_y){
 MAPF::~MAPF(void){
 	delete fr;
 	delete map;
-	//TODO: Dont delete the nodes, thats the tree's job
+	//Dont delete the nodes, thats the tree's job
 	delete tree;
 }
 
@@ -81,7 +83,8 @@ void MAPF::Start(){
 			P->validatePaths();
 
 			//If it is a goal node, end this, we found the solution
-			if (P->isGoal()) solutionFound = true;
+			if (P->isGoal()) 
+				solutionFound = true;
 			else {
 				P->ExpandNode();
 			}
@@ -94,8 +97,24 @@ void MAPF::Start(){
 }
 
 void MAPF::MoveEntities(){
-	//TODO: Left here, implement the movement of the entities
-	for (unsigned int i = 0; i < players.size(); i++){
-		players[i].move();
+	bool finished = false;
+
+	while (!finished){
+		system("cls");
+		for (unsigned int i = 0; i < players.size(); i++){
+			players[i].moveEntity(time);
+			map->setElement(players[i].getX(), players[i].getY(), (players[i].getId() + 2));
+		}
+		time++;
+
+		finished = players[0].finished();
+		for (unsigned int i = 1; i < players.size(); i++){
+			finished = finished && players[i].finished(); 
+		}
+		map->printData();
+		
+		
+		system("pause");
 	}
+
 }

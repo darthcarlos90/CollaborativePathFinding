@@ -13,6 +13,9 @@ actualNode(location)
 	replan = false;
 	tempD = 0;
 	SIC = 0;
+	map->setElement(actualNode.getX(), actualNode.getY(), id + 2);
+	system("cls");
+	map->printData();
 }
 
 Agent::~Agent(void){
@@ -69,18 +72,17 @@ void Agent::executeSpatialAstar(Node start, Node finish){
 		}
 		std::sort(spatial_openList.begin(), spatial_openList.end());
 	}
-
+	vector<Node> inverse_route;
 	//Once the path has been found, retrace your steps
 	while (P.hasParent()){
-		spatial_route.push_back(P);
+		inverse_route.push_back(P);
 		P = P.getParent();
 	}
+	//For some reason the route is backwards, lets but it on the corect order
+	for (int i = inverse_route.size() - 1; i >= 0; i--){
+		spatial_route.push_back(inverse_route[i]);
+	}
 
-	
-	//vector<Node> inverse_route = P.getFamily();
-	//for (int i = inverse_route.size() - 1; i >= 0; i--){
-	//	spatial_route.push_back(inverse_route[i]);
-	//}
 	////Print the route, just for debugging
 	//for (int i = 0; i < spatial_route.size(); i++){
 	//	system("cls");
@@ -546,6 +548,7 @@ void Agent::calculateRoute(){
 }
 
 void Agent::ModifyRouteOnConstraints(vector<Constraint> constraints){
+	
 	for (unsigned int i = 0; i < constraints.size(); i++){
 		Constraint c = constraints[i];
 		//If the constraint is from another agent
@@ -554,7 +557,7 @@ void Agent::ModifyRouteOnConstraints(vector<Constraint> constraints){
 			if (time_route.size() > c.t){
 				//If the movement at time t is the same as the constraint
 				if (time_route[c.t].getLocation() == c.location){
-					//Make the element wait for a t, before moving to that spot
+					//Make the element wait for a t = 1 before moving to that spot
 					vector<Node> temp_path;
 					// push all the elements of the path from 0 till t -1 of the constraint
 					for (unsigned int i = 0; i < c.t; i++){
@@ -572,6 +575,21 @@ void Agent::ModifyRouteOnConstraints(vector<Constraint> constraints){
 					time_route = temp_path;
 				}
 			}
+		}
+	}
+	
+}
+
+void Agent::moveEntity(int t){
+	
+	if (t < time_route.size()){
+		actualNode = time_route[t];
+	} else if (t > time_route.size()){ // If the time overpasses the amount of steps available
+		//Just checking if the acual node is the destination
+		
+		
+		if (actualNode == destination){
+			active = false;
 		}
 	}
 }

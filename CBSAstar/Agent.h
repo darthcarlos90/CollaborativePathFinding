@@ -18,9 +18,15 @@ public:
 	int getD() { return d; }
 
 	int getId() { return id; }
-	int setId(int new_id) { id = new_id; }
+	void setId(int new_id) { id = new_id; }
 
 	void move(int time_to_move);
+
+	/*
+		This function moves the entity to the spot their suposed to be on the time t
+	*/
+	void moveEntity(int t);
+
 	void setTime(int time_to_set);
 
 	/*
@@ -65,6 +71,9 @@ public:
 	std::vector<Node> getTimedAdjacents(Node element, int res_time);
 
 	bool finished() { return !active; }
+
+	int getX() const { return actualNode.getX(); }
+	int getY() const { return actualNode.getY(); }
 
 	
 
