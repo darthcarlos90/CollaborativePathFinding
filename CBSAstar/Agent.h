@@ -27,6 +27,11 @@ public:
 	*/
 	void moveEntity(int t);
 
+	/*
+		This function will reroute using spatial astar 
+	*/
+	void Reroute(int t);
+
 	void setTime(int time_to_set);
 
 	/*

@@ -21,6 +21,8 @@ public:
 	
 
 private:
+	void StartCBSPathFinding();
+	void StartSilversPathFinding();
 	//TODO: Keep adding more elements throught the development of this project.
 	FileReader* fr;
 	Map* map;

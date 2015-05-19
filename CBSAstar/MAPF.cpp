@@ -116,7 +116,8 @@ void MAPF::MoveEntities(){
 			finished = finished && players[i].finished(); 
 		}
 		map->printData();
-		
+		//TODO: Add the dynamic change of path either by d steps, or because of the dynamic change of obstacles
+		//TODO: Update the constraints at the node
 		
 		system("pause");
 	}

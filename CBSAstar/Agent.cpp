@@ -143,6 +143,12 @@ void Agent::move(int time_to_move){
 	
 }
 
+void Agent::Reroute(int t){
+	//Rerouting the agent
+	//Step 1, delete everything from the current path starting on t
+	//TODO: See if this element is going to be needed on the future
+}
+
 
 /*
 This algorithm was created based on the work done by David Silver in his paper
