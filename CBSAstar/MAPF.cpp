@@ -35,7 +35,7 @@ MAPF::MAPF(string filename){
 		cout << "The data on the file given is incorrect, please try again" << endl;
 	else cout << "Finished loading data from the file" << endl;
 
-	tree = new ConstraintTree();
+	
 
 	time = 0;
 
@@ -54,53 +54,99 @@ MAPF::~MAPF(void){
 	delete tree;
 }
 
-void MAPF::Start(){
+void MAPF::Start(int type){
 	if (!broken){
-		//Create the root node
-		root = new CBTNode();
-
-		//Add the agents to the root node
-		for (unsigned int i = 0; i < players.size(); i++){
-			root->addAgent(&players[i]);
+		switch (type){
+		case 1:
+			StartSilversPathFinding();
+			break;
+		case 2:
+			StartCBSPathFinding();
+			break;
 		}
-
-		//find the individual paths of the elements
-		root->CalculatePaths();
-
-		//calculate the cost of this node
-		root->calculateCost();
-
-		//insert the root into the tree
-		tree->insertRoot(root);
-
-		bool solutionFound = false;
-		//While we can't find the solution
-		while (!solutionFound){
-			//Get the best node of the tree
-			CBTNode* P = tree->getSolution();
-
-			//Validate the paths until a conflict occurs
-			P->validatePaths();
-
-			//If it is a goal node, end this, we found the solution
-			if (P->isGoal()) {
-				solutionFound = true;
-				P->UpdateAgentsPaths();
-			}
-			else {
-				P->ExpandNode();
-			}
-		}
-
-		
-		
 	}
 	else {
 		cout << "Broken file, exiting...." << endl;
 	}
 }
 
-void MAPF::MoveEntities(){
+void MAPF::StartSilversPathFinding(){
+	cout << "Calculating Routes" << endl;
+	for (unsigned int i = 0; i < players.size(); i++){
+		players[i].setTime(time);
+		players[i].executeTimeSpaceAstar();
+	}
+}
+
+void MAPF::StartCBSPathFinding(){
+	//Create the constraint tree
+	tree = new ConstraintTree();
+	
+	//Create the root node
+	root = new CBTNode();
+
+	//Add the agents to the root node
+	for (unsigned int i = 0; i < players.size(); i++){
+		root->addAgent(&players[i]);
+	}
+
+	//find the individual paths of the elements
+	root->CalculatePaths();
+
+	//calculate the cost of this node
+	root->calculateCost();
+
+	//insert the root into the tree
+	tree->insertRoot(root);
+
+	bool solutionFound = false;
+	//While we can't find the solution
+	while (!solutionFound){
+		//Get the best node of the tree
+		CBTNode* P = tree->getSolution();
+
+		//Validate the paths until a conflict occurs
+		P->validatePaths();
+
+		//If it is a goal node, end this, we found the solution
+		if (P->isGoal()) {
+			solutionFound = true;
+			P->UpdateAgentsPaths();
+		}
+		else {
+			P->ExpandNode();
+		}
+	}
+}
+
+void MAPF::MoveEntities(int type){
+	switch (type){
+	case 1:
+		MoveBySilvers();
+		break;
+	case 2:
+		MoveByCBS();
+		break;
+	}
+}
+
+void MAPF::MoveBySilvers(){
+	bool finished = false;
+	while (!finished){
+		system("cls");
+		finished = players[0].finished();
+		for (unsigned int i = 0; i < players.size(); i++){
+			players[i].move(time);
+			if (i > 0) finished = finished && players[i].finished();
+		}
+
+		map->printData();
+		system("pause");
+	}
+
+}
+
+void MAPF::MoveByCBS(){
 	bool finished = false;
 
 	while (!finished){

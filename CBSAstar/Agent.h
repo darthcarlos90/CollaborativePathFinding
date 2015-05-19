@@ -6,7 +6,7 @@
 
 class Agent{
 public:
-	Agent(Node location, Node destination, Map *m, int id, int D);
+	Agent(Node location, Node destination, Map *m, int id, unsigned int D);
 	~Agent(void);
 
 	void SetLocationNode(Node n) { actualNode = n; }
@@ -25,7 +25,7 @@ public:
 	/*
 		This function moves the entity to the spot their suposed to be on the time t
 	*/
-	void moveEntity(int t);
+	void moveEntity(unsigned int t);
 
 	/*
 		This function will reroute using spatial astar 
@@ -100,7 +100,7 @@ private:
 
 	Map* map;
 	
-	int d;
+	unsigned int d;
 
 	bool active;
 	bool reachedD;

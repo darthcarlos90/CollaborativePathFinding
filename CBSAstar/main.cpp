@@ -9,8 +9,8 @@ int main(void){
 	MAPF m(filename);*/
 	MAPF m("file.txt"); //Just for debugging Ill hardcode the filename
 	//Load the routes for the entities
-	m.Start();
-	m.MoveEntities();
+	m.Start(1); //hardoced for now
+	m.MoveEntities(1);
 	cout << "Finished" << endl;
 	system("pause");
 

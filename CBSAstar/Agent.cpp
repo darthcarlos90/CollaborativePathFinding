@@ -1,7 +1,7 @@
 #include "Agent.h"
 
 
-Agent::Agent(Node location,Node destination, Map* m, int id, int D):
+Agent::Agent(Node location,Node destination, Map* m, int id, unsigned int D):
 actualNode(location)
 {
 	map = m;
@@ -28,6 +28,10 @@ video at this link: https ://www.youtube.com/watch?v=KNXfSOx4eEE
 
 */
 void Agent::executeSpatialAstar(Node start, Node finish){
+
+	/*
+		TODO: Some routes are not being calculated correctly. Check this bug.
+	*/
 	bool pathFound = false;
 	//Let A be the starting point
 	Node A = start;
@@ -98,7 +102,7 @@ void Agent::move(int time_to_move){
 	- If d has been reached or we reaced to the end of the road, stop;
 	otherwise, continue advancing.
 	*/
-
+	
 	if (stepsTaken < d){
 		t++;
 		if (actualNode == destination) {
@@ -110,8 +114,8 @@ void Agent::move(int time_to_move){
 		}
 		stepsTaken++;
 		map->setElement(actualNode.getX(), actualNode.getY(), id);
-		system("cls");
-		map->printData();
+
+		cout << "Unit: " << id + 2 << " at location: " << actualNode.getX() << " , " << actualNode.getY() << endl;
 	}
 	else if(stepsTaken == d){
 		/*
@@ -170,7 +174,13 @@ void Agent::executeTimeSpaceAstar(){
 
 void Agent::TimeSpaceAstarHelper(Node start, Node finish){
 	int time = t + 1;
-	//TODO: Find the bug, there must be something going wrong here 
+	/*
+		TODO: Find the bug, there must be something going wrong here	
+		Update: Found the bug, it waits 3 steps instead of 1 when a conflict is found, I believe it is because of the
+		move method.
+		Update 2: The element first waits for d steps, then retraces its steps.
+	
+	*/
 	/*
 	Step 1: Calculate the route.
 	- Calculate the route using regular Astar, BUT the H used on every node will be
@@ -184,7 +194,6 @@ void Agent::TimeSpaceAstarHelper(Node start, Node finish){
 	A.setG(10);
 	calculateRealHeuristic(&A, finish);
 	A.calculateF();
-	map->setElement(A.getX(), A.getY(), id);
 	time_openList.push_back(A); //We put it on the open list
 	Node P;
 	
@@ -514,6 +523,7 @@ bool Agent::AtTimedOpenList(Node n){
 void Agent::setTime(int time_to_set){
 	t = time_to_set;
 
+	//Why dis??
 	for (int i = 0; i < t; i++){
 		time_route.push_back(actualNode);
 	}
@@ -586,7 +596,7 @@ void Agent::ModifyRouteOnConstraints(vector<Constraint> constraints){
 	
 }
 
-void Agent::moveEntity(int t){
+void Agent::moveEntity(unsigned int t){
 	
 	if (t < time_route.size()){
 		actualNode = time_route[t];

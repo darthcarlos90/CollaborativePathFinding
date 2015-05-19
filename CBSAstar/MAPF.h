@@ -16,13 +16,22 @@ public:
 	MAPF(int size_x, int size_y); //inputs for random generation of map (for dynamic maps)
 	~MAPF(void); //Destructor
 	
-	void Start(); //start the pathfinding
-	void MoveEntities(); //Self explanatory
+	/*
+		start the pathfinding, type represents what algorithm to use
+		1 - Represents Silvers Algorithm for Pathfinding, and CBS for conflict resolution.
+		2 - Represents CBS for pathfinding, and Silvers for conflict resolution
+	*/
+	void Start(int type);
+	void MoveEntities(int type); //The type thing is temporal
 	
 
 private:
 	void StartCBSPathFinding();
 	void StartSilversPathFinding();
+
+	void MoveBySilvers();
+	void MoveByCBS();
+
 	//TODO: Keep adding more elements throught the development of this project.
 	FileReader* fr;
 	Map* map;
