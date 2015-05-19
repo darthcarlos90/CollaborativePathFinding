@@ -127,7 +127,6 @@ bool CBTNode::findConstraintsConflicts(unsigned int t){
 	}
 
 	//Now we need to create constraints with the elements that are not participating in conflicts
-	//TODO: Beware on errors at debug on here :D
 	std::sort(participateOnConflict.begin(), participateOnConflict.end());
 	
 	for (unsigned int i = 0; i < paths.size(); i++){
@@ -140,16 +139,20 @@ bool CBTNode::findConstraintsConflicts(unsigned int t){
 			}
 			else {
 				//Create a constraint and push it back into the list
-				Constraint c(i, paths[i][t].getLocation(), t);
-				addConstraint(c);
+				if (paths[i].size() > t){
+					Constraint c(i, paths[i][t].getLocation(), t);
+					addConstraint(c);
+				}
 			}
 		}
 		else {
 			//I know its repeating, I just want to test it for now !!!!
 			//Create a constraint and push it back into the list
-			Constraint c(i, paths[i][t].getLocation(), t);
-			addConstraint(c);
-			//TODO: A index out of bounds exception was found, fix this, lets go home
+			if (paths[i].size() > t){ // If there is actually a move at time t
+				//save it
+				Constraint c(i, paths[i][t].getLocation(), t);
+				addConstraint(c);
+			}
 		}
 	}
 
@@ -205,5 +208,11 @@ void CBTNode::addConstraint(Constraint c){
 	else{
 		//The list is empty, add the element
 		constraints.push_back(c);
+	}
+}
+
+void CBTNode::UpdateAgentsPaths(){
+	for (unsigned int i = 0; i < agents.size(); i++){
+		agents[i]->setPath(paths[i]);
 	}
 }

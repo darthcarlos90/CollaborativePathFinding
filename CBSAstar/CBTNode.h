@@ -43,6 +43,8 @@ public:
 
 	void RecalculateRoutesOnConstraints();
 
+	void UpdateAgentsPaths(); // This method updates the path of their agents
+
 
 
 private:

@@ -83,12 +83,16 @@ void MAPF::Start(){
 			P->validatePaths();
 
 			//If it is a goal node, end this, we found the solution
-			if (P->isGoal()) 
+			if (P->isGoal()) {
 				solutionFound = true;
+				P->UpdateAgentsPaths();
+			}
 			else {
 				P->ExpandNode();
 			}
 		}
+
+		
 		
 	}
 	else {

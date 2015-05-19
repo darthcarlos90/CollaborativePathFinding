@@ -56,6 +56,8 @@ public:
 	std::vector<Node> getSpatialRoute() { return spatial_route; }
 	std::vector<Node> getPath() { return time_route; }
 
+	//Used to solve the bug fix where both entities stop and advance
+	void setPath(std::vector<Node> new_path) { time_route = new_path; }
 	
 
 	/*

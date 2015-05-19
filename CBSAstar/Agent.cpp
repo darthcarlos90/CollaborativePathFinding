@@ -584,10 +584,9 @@ void Agent::moveEntity(int t){
 	
 	if (t < time_route.size()){
 		actualNode = time_route[t];
+		cout << "Unit: " << id + 2 << " at location: " << actualNode.getX() << " , " << actualNode.getY() << endl;
 	} else if (t > time_route.size()){ // If the time overpasses the amount of steps available
 		//Just checking if the acual node is the destination
-		
-		
 		if (actualNode == destination){
 			active = false;
 		}
