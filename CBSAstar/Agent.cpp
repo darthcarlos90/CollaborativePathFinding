@@ -14,6 +14,7 @@ actualNode(location)
 	tempD = 0;
 	SIC = 0;
 	map->setElement(actualNode.getX(), actualNode.getY(), id + 2);
+	map->setElement(destination.getX(), destination.getY(), id + 2);
 	system("cls");
 	map->printData();
 }
