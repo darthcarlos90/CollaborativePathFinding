@@ -56,7 +56,7 @@ struct Constraint{
 
 	int id; // The id of the node in this constraint
 	Location location; // The location on th grid that is reserved
-	int t; // The time when it is reserved
+	unsigned int t; // The time when it is reserved
 };
 
 
@@ -82,6 +82,6 @@ struct Conflict{
 
 	std::vector<int> users;
 	Location v;
-	int t;
+	unsigned int t;
 	bool empty;
 };

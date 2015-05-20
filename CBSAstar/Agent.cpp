@@ -29,9 +29,6 @@ video at this link: https ://www.youtube.com/watch?v=KNXfSOx4eEE
 */
 void Agent::executeSpatialAstar(Node start, Node finish){
 
-	/*
-		TODO: Some routes are not being calculated correctly. Check this bug.
-	*/
 	bool pathFound = false;
 	//Let A be the starting point
 	Node A = start;
@@ -43,12 +40,15 @@ void Agent::executeSpatialAstar(Node start, Node finish){
 	spatial_openList.push_back(A);
 
 	Node P;
-	//if the open list is empty, or the goal was found, quit
-	while (!pathFound || spatial_openList.size() > 0){
+	//If the goal was found, break
+	while (!pathFound){
+
+		// If the open list is empty, no path was found, break
+		if (spatial_openList.size() == 0) break;
 
 		//let p be the best node in the open list
 		/*	Since the openList is sorted every time an item is added, then the best
-		option to select is the first item
+			option to select is the first item
 		*/
 		P = spatial_openList[0];
 		spatial_closedList.push_back(P);
@@ -69,13 +69,14 @@ void Agent::executeSpatialAstar(Node start, Node finish){
 
 		vector<Node> adjacents = getAdjacents(P);
 		for (unsigned int i = 0; i < adjacents.size(); i++){
-			if (!AtClosedList(adjacents[i])){
-				if (!AtOpenList(adjacents[i]))
+			if (!FindNodeAtList(adjacents[i], spatial_closedList)){
+				if (!FindNodeAtList(adjacents[i], spatial_openList))
 					spatial_openList.push_back(adjacents[i]);
 			}
 		}
 		std::sort(spatial_openList.begin(), spatial_openList.end());
 	}
+
 	vector<Node> inverse_route;
 	//Once the path has been found, retrace your steps
 	while (P.hasParent()){
@@ -86,14 +87,6 @@ void Agent::executeSpatialAstar(Node start, Node finish){
 	for (int i = inverse_route.size() - 1; i >= 0; i--){
 		spatial_route.push_back(inverse_route[i]);
 	}
-
-	////Print the route, just for debugging
-	//for (int i = 0; i < spatial_route.size(); i++){
-	//	system("cls");
-	//	Node n = spatial_route[i];
-	//	map->setElement(n.getX(), n.getY(), 9);
-	//	map->printData();
-	//}
 }
 
 void Agent::move(int time_to_move){
@@ -165,22 +158,10 @@ void Agent::executeTimeSpaceAstar(){
 	
 
 	TimeSpaceAstarHelper(actualNode, destination);
-	
-	//TODO: Find a way to make it move automatically
-	//The user will tell when to move, for now
-	// That is why the move method is commented
-	//move();
 }
 
 void Agent::TimeSpaceAstarHelper(Node start, Node finish){
 	int time = t + 1;
-	/*
-		TODO: Find the bug, there must be something going wrong here	
-		Update: Found the bug, it waits 3 steps instead of 1 when a conflict is found, I believe it is because of the
-		move method.
-		Update 2: The element first waits for d steps, then retraces its steps.
-	
-	*/
 	/*
 	Step 1: Calculate the route.
 	- Calculate the route using regular Astar, BUT the H used on every node will be
@@ -199,17 +180,22 @@ void Agent::TimeSpaceAstarHelper(Node start, Node finish){
 	
 	
 	/*
-	(Sorry for the disorder of the steps :( )
 	Step 5: If you are in the end, stay there untl someone else needs your space.
 	- In case that someone needs to pass, move n places away, then, star again calculating
 	the spatial Astar.
 	*/
 	//Check if you already finished
 	if (!active){
+		/*
+		TODO: Alert! Here we have a conflict to be solved by CBS. 
+		what happens when an agent needs to use your space when you
+		are finished moving
+		*/
+		
 		//Set the cost of staying to 0
 		A.setG(0);
 		//If finished, stay the next seven steps where you are, unless someone needs to pass
-		for (int i = 0; i < d; i++){
+		for (unsigned int i = 0; i < d; i++){
 			//if someone needs to use your space
 			if (map->isReserved(A, time)){
 				//move out
@@ -243,16 +229,14 @@ void Agent::TimeSpaceAstarHelper(Node start, Node finish){
 	else {
 		//if the open list is empty, or the goal was found, quit
 		while (!pathFound){
-
+			if (time_openList.empty()) break; // If the open list is empty, no path found
 			//let p be the best node in the open list
 			/*	Since the openList is sorted every time an item is added, then the best
 			option to select is the first item
 			*/
 			P = time_openList[0];
 			time_closedList.push_back(P);
-			time_openList.erase(time_openList.begin()); //Lets keep it here for a while
-			//here, we dont erase the element we just used from the open list, this because we want to be able
-			//to "wait" on the same place
+			time_openList.erase(time_openList.begin()); 
 
 			// If P is the goal node, then finished this 
 			if (P == finish){
@@ -264,8 +248,8 @@ void Agent::TimeSpaceAstarHelper(Node start, Node finish){
 			vector<Node> adjacents = getTimedAdjacents(P, time);
 
 			for (unsigned int i = 0; i < adjacents.size(); i++){
-				if (!AtTimedClosedList(adjacents[i])){
-					if (!AtTimedOpenList(adjacents[i]))
+				if (!FindNodeAtList(adjacents[i], time_closedList)){
+					if (!FindNodeAtList(adjacents[i], time_openList))
 						time_openList.push_back(adjacents[i]);
 				}
 			}
@@ -301,36 +285,8 @@ void Agent::TimeSpaceAstarHelper(Node start, Node finish){
 
 
 void Agent::executeSpatialAstarUntilFound(Node start, Node toFind){
-	if (!AtClosedList(toFind)){
+	if (!FindNodeAtList(toFind, spatial_closedList)){
 		executeSpatialAstar(start, toFind);
-	}
-}
-
-bool Agent::AtClosedList(Node n){
-	/*bool found = false;
-	if (spatial_closedList.size() > 0){
-		for (unsigned int i = 0; i < spatial_closedList.size(); i++){
-			if (spatial_closedList[i] == n){
-				found = true;
-				break;
-			}
-		}
-	}
-
-	return found;*/
-
-	//return ListContains(spatial_closedList, n);
-
-	if (!spatial_closedList.empty()){
-		if (std::find(spatial_closedList.begin(), spatial_closedList.end(), n) != spatial_closedList.end()){
-			return true;
-		}
-		else {
-			return false;
-		}
-	}
-	else {
-		return false;
 	}
 }
 
@@ -392,59 +348,10 @@ std::vector<Node> Agent::getTimedAdjacents(Node element, int res_time){
 	return result;
 }
 
-bool Agent::AtTimedClosedList(Node n){
-	/*bool found = false;
-	if (time_closedList.size() > 0){
-		for (unsigned int i = 0; i < time_closedList.size(); i++){
-			if (time_closedList[i] == n){
-				found = true;
-				break;
-			}
-		}
-	}
-	return found;*/
-
-	//return ListContains(time_closedList, n);
-
-	if (!time_closedList.empty()){
-		if (std::find(time_closedList.begin(), time_closedList.end(), n) != time_closedList.end()){
-			return true;
-		}
-		else {
-			return false;
-		}
-	}
-	else {
-		return false;
-	}
-	
-}
 
 
-bool Agent::AtTimedOpenList(Node n){
-	/*bool found = false;
-	for (int i = 0; i < time_openList.size(); i++){
-		if (time_openList[i] == n){
-			found = true;
-			break;
-		}
-	}
 
-	return found;*/
-	if (!time_openList.empty()){
-		if (std::find(time_openList.begin(), time_openList.end(), n) != time_openList.end()){
-			return true;
-		}
-		else {
-			return false;
-		}
-	}
-	else {
-		return false;
-	}
 
-	//return ListContains(time_openList, n);
-}
 
 void Agent::setTime(int time_to_set){
 	t = time_to_set;
@@ -455,23 +362,11 @@ void Agent::setTime(int time_to_set){
 	}
 }
 
-bool Agent::AtOpenList(Node n){
-	if (!spatial_openList.empty()){
-		if (std::find(spatial_openList.begin(), spatial_openList.end(), n) != spatial_openList.end()){
-			return true;
-		}
-		else {
-			return false;
-		}
-	}
-	else {
-		return false;
-	}
-}
+
 
 void Agent::calculateSIC(){
 	if (time_route.size() > 0){
-		for (int i = 0; i < time_route.size(); i++){
+		for (unsigned int i = 0; i < time_route.size(); i++){
 			SIC += time_route[i].getF();
 		}
 	}
@@ -542,7 +437,7 @@ void Agent::reserveRoute(int starting_time){
 		We are going to reserve d nodes, since after d, we are going to replan our route.
 	*/
 	bool reserved = false;
-	int reserved_index = 0;
+	unsigned int reserved_index = 0;
 
 	//If the route is smaller than d, just fill up the rest of the steps with your destination
 	if (time_route.size() < d){
@@ -553,7 +448,7 @@ void Agent::reserveRoute(int starting_time){
 	}
 
 	//Traverse the route untill d steps
-	for (int i = 0; i < d; i++){
+	for (unsigned int i = 0; i < d; i++){
 
 		//Check if the node is reserved for this given time
 		if (map->isReserved(time_route[i], reservation_time)){
@@ -625,4 +520,12 @@ void Agent::reserveRoute(int starting_time){
 		}
 	}
 
+}
+
+bool Agent::FindNodeAtList(Node n, vector<Node> list){
+	//return std::binary_search(list.begin(), list.end(), n);
+	if (std::find(list.begin(), list.end(), n) != list.end()){
+		return true;
+	}
+	return false;
 }

@@ -37,9 +37,10 @@ public:
 	int getX() const { return x; }
 	int getY() const { return y; }
 
-	bool operator < (const Node& n);
-	bool operator == (const Node& n);
-	bool operator != (const Node& n);
+	bool operator < (const Node& n)const;
+	bool operator > (const Node& n)const;
+	bool operator == (const Node& n)const;
+	bool operator != (const Node& n)const;
 	Node& operator = (const Node& n);
 
 	void setParent(Node value);

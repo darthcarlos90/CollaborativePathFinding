@@ -87,10 +87,7 @@ public:
 private:
 	//Helper functions
 	void TimeSpaceAstarHelper(Node start, Node finish);
-	bool AtClosedList(Node n);
-	bool AtOpenList(Node n);
-	bool AtTimedClosedList(Node n);
-	bool AtTimedOpenList( Node n);
+	bool FindNodeAtList(Node n, vector<Node> list); //Find a node at a given list
 	void calculateSIC();
 	void reserveRoute(int starting_time); // To be used in the Silver's Astar
 
@@ -107,7 +104,7 @@ private:
 
 	int id;
 
-	int stepsTaken;
+	unsigned int stepsTaken;
 	bool replan;
 	int tempD;
 

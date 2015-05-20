@@ -93,15 +93,19 @@ void Node::calculateManhattanHeuristic(Node destination){
 }
 
 
-bool Node::operator< (const Node & n){
+bool Node::operator < (const Node & n)const{
 	return (f < n.getF());
 }
 
-bool Node::operator==(const Node &n){
+bool Node::operator >(const Node &n)const{
+	return (f > n.getF());
+}
+
+bool Node::operator==(const Node &n)const{
 	return (this->x == n.getX() && this->y == n.getY());
 }
 
-bool Node::operator!=(const Node& n){
+bool Node::operator!=(const Node& n)const{
 	return !(this->x == n.getX() && this->y == n.getY());
 }
 
