@@ -1,7 +1,7 @@
 #include "Node.h"
 #include <iostream>
 
-//TODO: Stack overflow, check it!
+
 Node::Node(void){
 	//type -1 means empty node
 	type = -1;

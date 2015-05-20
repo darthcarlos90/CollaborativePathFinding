@@ -132,7 +132,7 @@ void Agent::move(int time_to_move){
 			active = true;
 		}
 		else {
-			if (time_route.size() == 0) active = false;
+			if (actualNode == destination) active = false;
 			reachedD = true;
 			t++;
 		}
@@ -265,7 +265,7 @@ void Agent::TimeSpaceAstarHelper(Node start, Node finish){
 
 			for (unsigned int i = 0; i < adjacents.size(); i++){
 				if (!AtTimedClosedList(adjacents[i])){
-					if (!AtTimedOpenList(adjacents[i])) 
+					if (!AtTimedOpenList(adjacents[i]))
 						time_openList.push_back(adjacents[i]);
 				}
 			}
@@ -280,8 +280,7 @@ void Agent::TimeSpaceAstarHelper(Node start, Node finish){
 
 		//First populate the path
 		vector<Node> temp;
-		//while (P != A){
-		
+
 		while (P.hasParent()){
 			temp.push_back(P);
 			P = P.getParent();
@@ -292,82 +291,9 @@ void Agent::TimeSpaceAstarHelper(Node start, Node finish){
 			time_route.push_back(temp[i]);
 		}
 
-		if (time_route.size() < d){
-			Node n = time_route[time_route.size() - 1];
-			while (time_route.size() < d){
-				time_route.push_back(n);
-			}
-		}
-
-		int reservation_time = t + 1;
-		//reserve d nodes
-		bool reserved = false;
-		int reserved_index = 0;
-		for (int i = 0; i < d; i++){
-			//Check if the node is reserved for this given time
-			if (map->isReserved(time_route[i], reservation_time)){
-				//If the next node is reserved
-
-				//First see if the last node, is reserved for this timestep
-				if (map->isReserved(time_route[i - 1], reservation_time)){
-					//if your last step is reserved for the next time, replan your route
-					reserved = true;
-					reserved_index = i;
-					break;
-				}
-				else{
-					/*
-						If the last step is not reserved for this time, then modifly the route and wait
-						in the place until the other entity moves.
-					*/
-					vector<Node> temp_route;
-
-					//Get all the nodes before the incident
-					for (unsigned int index = 0; index < i; index++){
-						temp_route.push_back(time_route[index]);
-					}
-
-					//repeat the node so that it can wait on the path, and continue
-					temp_route.push_back(time_route[i - 1]);
-
-					//now finish adding the rest of the elements
-					for (unsigned int index = i; index < time_route.size(); index++){
-						temp_route.push_back(time_route[index]);
-					}
-
-					//finally, replace the old route with the new one
-					time_route = temp_route;
-
-					/*
-						The the next element to be checked in the for loop will be
-						the element previously blocked by the incident. Now the agent will check if
-						it is pertinent to occupy it.
-					*/
-
-				}
-				
-			}
-			else {
-				map->reserve(reservation_time, time_route[i], id);
-				reservation_time++;
-			}
-		}
-
-		if (reserved){
-			//Eliminate the nodes from the back of the list
-			while (time_route.size() > reserved_index){
-				time_route.pop_back();
-			}
-
-			//Replan the route recursively using the last node
-			/*t = reservation_time;
-
-			TimeSpaceAstarHelper(time_route[time_route.size() - 1], finish);*/
-			replan = true;
-			tempD = d;
-			d = time_route.size();
-			
-		}
+		
+		// Now that we have a route, reserve it
+		reserveRoute(t + 1);
 	}
 
 	
@@ -607,4 +533,96 @@ void Agent::moveEntity(unsigned int t){
 			active = false;
 		}
 	}
+}
+
+// The starting time means the time t where the agent will start moving
+void Agent::reserveRoute(int starting_time){
+	int reservation_time = starting_time;
+	/*
+		We are going to reserve d nodes, since after d, we are going to replan our route.
+	*/
+	bool reserved = false;
+	int reserved_index = 0;
+
+	//If the route is smaller than d, just fill up the rest of the steps with your destination
+	if (time_route.size() < d){
+		Node n = time_route[time_route.size() - 1];
+		while (time_route.size() < d){
+			time_route.push_back(n);
+		}
+	}
+
+	//Traverse the route untill d steps
+	for (int i = 0; i < d; i++){
+
+		//Check if the node is reserved for this given time
+		if (map->isReserved(time_route[i], reservation_time)){
+			//If it is reserved
+
+			//Check if the node before that is reserved
+			if (map->isReserved(time_route[i - 1], reservation_time)){
+				//if your last step is reserved for the next time, replan your route
+				reserved = true;
+				reserved_index = i;
+				break;
+			}
+			else{
+				/*
+				If the last step is not reserved for this time, then modifly the route and wait
+				in the place until the other entity moves.
+				*/
+				vector<Node> temp_route;
+
+				//Get all the nodes before the incident
+				for (unsigned int index = 0; index < i; index++){
+					temp_route.push_back(time_route[index]);
+				}
+
+				//repeat the node so that it can wait on the path, and continue
+				temp_route.push_back(time_route[i - 1]);
+
+				//now finish adding the rest of the elements
+				for (unsigned int index = i; index < time_route.size(); index++){
+					temp_route.push_back(time_route[index]);
+				}
+
+				//finally, replace the old route with the new one
+				time_route = temp_route;
+
+				//Now, reserve the new element
+				map->reserve(reservation_time, time_route[i], id);
+				reservation_time++; // increase the time, dont forget this
+
+			}
+
+		}
+		else {
+			//If it is not reserved, reserve it
+			map->reserve(reservation_time, time_route[i], id);
+			reservation_time++;
+		}
+	}
+
+	if (reserved){
+		//Eliminate the nodes from the back of the list
+		while (time_route.size() > reserved_index){
+			time_route.pop_back();
+		}
+
+		//Set the replan flag on
+		replan = true;
+		tempD = d;
+		d = time_route.size();
+
+	}
+	else{
+		/*
+			Now that the route has been replaned, we can now remove all the elements after d
+		*/
+
+		while (time_route.size() > d){
+			time_route.pop_back();
+		}
+	}
+
 }

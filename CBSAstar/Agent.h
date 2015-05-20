@@ -85,14 +85,14 @@ public:
 	
 
 private:
-	//Helper of the logit of time-space Astar
+	//Helper functions
 	void TimeSpaceAstarHelper(Node start, Node finish);
-	//Making code mode readable, sort of ...
 	bool AtClosedList(Node n);
 	bool AtOpenList(Node n);
 	bool AtTimedClosedList(Node n);
 	bool AtTimedOpenList( Node n);
 	void calculateSIC();
+	void reserveRoute(int starting_time); // To be used in the Silver's Astar
 
 
 	Node actualNode;
