@@ -22,14 +22,22 @@ vector<Node> Map::adjacentHelper(Node element){
 	//x & y elements of the element in consideration
 	int x = element.getX();
 	int y = element.getY();
-
+	/*
+		Fix: The diagonal movements are disbaled.
+		Date: 21/05/2015
+		Why?
+		Because there are certain scenarios where two elements should collision, but because there is a 
+		diagonal movement, they dont.
+		TODO: Find a way to avoid collision on diagonal movemens.
+		NOTE: For now, the diagonal movements are commented.
+	*/
 	//pretty much self explanatory, if not, then I'll try to explain in on a coment ... later ... yeah ..
-	if (x - 1 >= 0 && y - 1 >= 0){
+	/*if (x - 1 >= 0 && y - 1 >= 0){
 		type = data->get_element(x - 1, y - 1);
 		if (type != 1){
-			result.push_back(Node(type, 10, x - 1, y - 1));
+			result.push_back(Node(type, 14, x - 1, y - 1));
 		}
-	}
+	}*/
 
 	if (y - 1 >= 0){
 		type = data->get_element(x, y - 1);
@@ -38,12 +46,12 @@ vector<Node> Map::adjacentHelper(Node element){
 		}
 	}
 
-	if (x + 1 < data->get_x_size() && y - 1 >= 0){
+	/*if (x + 1 < data->get_x_size() && y - 1 >= 0){
 		type = data->get_element(x + 1, y - 1);
 		if (type != 1){
 			result.push_back(Node(type, 14, x + 1, y - 1));
 		}
-	}
+	}*/
 
 	if (x - 1 >= 0){
 		type = data->get_element(x - 1, y);
@@ -59,12 +67,12 @@ vector<Node> Map::adjacentHelper(Node element){
 		}
 	}
 
-	if (y + 1 < data->get_y_size() && x - 1 >= 0){
+	/*if (y + 1 < data->get_y_size() && x - 1 >= 0){
 		type = data->get_element(x - 1, y + 1);
 		if (type != 1){
 			result.push_back(Node(type, 14, x - 1, y + 1));
 		}
-	}
+	}*/
 
 	if (y + 1 < data->get_y_size()){
 		type = data->get_element(x, y + 1);
@@ -73,12 +81,12 @@ vector<Node> Map::adjacentHelper(Node element){
 		}
 	}
 
-	if (x + 1 < data->get_x_size() && y + 1 < data->get_y_size()){
+	/*if (x + 1 < data->get_x_size() && y + 1 < data->get_y_size()){
 		type = data->get_element(x + 1, y + 1);
 		if (type != 1){
 			result.push_back(Node(type, 14, x + 1, y + 1));
 		}
-	}
+	}*/
 
 	return result;
 

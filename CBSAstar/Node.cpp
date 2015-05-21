@@ -83,10 +83,11 @@ Node& Node::operator= (const Node& n){
 
 
 void Node::calculateManhattanHeuristic(Node destination){
+	
 	int finalX = abs(x - destination.getX());
 	int finalY = abs(y - destination.getY());
 
-	if (finalX > finalY){
+	if (finalX < finalY){
 		h = (finalX * 14);
 	}
 	else {
@@ -98,10 +99,16 @@ void Node::calculateManhattanHeuristic(Node destination){
 
 
 bool Node::operator < (const Node & n)const{
+	if (f == n.getF()){
+		return (h < n.getH());
+	}
 	return (f < n.getF());
 }
 
 bool Node::operator >(const Node &n)const{
+	if (f == n.getF()){
+		return (h > n.getH());
+	}
 	return (f > n.getF());
 }
 

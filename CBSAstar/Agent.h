@@ -74,7 +74,7 @@ public:
 		Note: This methods will remain public, if not used elsewhere, they will be changed
 		to private.
 	*/
-	std::vector<Node> getAdjacents(Node element);
+	std::vector<Node> getAdjacents(Node element, Node ending);
 	std::vector<Node> getTimedAdjacents(Node element, int res_time);
 
 	bool finished() { return !active; }

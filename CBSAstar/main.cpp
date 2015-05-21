@@ -13,7 +13,7 @@ int main(void){
 	m.MoveEntities(1);
 	cout << "Finished" << endl;
 	system("pause");
-
+	//TODO: When an agent is close to reach the end, it restarts it's search. Check the flags and the lists.
 
 	return 0;
 }

@@ -28,13 +28,16 @@ video at this link: https ://www.youtube.com/watch?v=KNXfSOx4eEE
 
 */
 void Agent::executeSpatialAstar(Node start, Node finish){
-
+	if (id == 4){
+		int lakjsdg = 1;
+	}
 	bool pathFound = false;
 	//Let A be the starting point
 	Node A = start;
 	// Assign f, g and h values to A
-	A.calculateG();
+	A.setG(0);
 	A.calculateManhattanHeuristic(finish);
+	A.calculateF();
 
 	//Add A to the open list, At this point, A shoul be the only node on the open list
 	spatial_openList.push_back(A);
@@ -67,7 +70,7 @@ void Agent::executeSpatialAstar(Node start, Node finish){
 			break;
 		}
 
-		vector<Node> adjacents = getAdjacents(P);
+		vector<Node> adjacents = getAdjacents(P, finish);
 		for (unsigned int i = 0; i < adjacents.size(); i++){
 			if (!FindNodeAtList(adjacents[i], spatial_closedList)){
 				if (!FindNodeAtList(adjacents[i], spatial_openList))
@@ -159,8 +162,8 @@ void Agent::executeTimeSpaceAstar(){
 	/*
 	Steps 1 and 2 are described in the function that will execute.
 	*/
-	if (actualNode.getLocation() == Location(5, 2)){
-		cout << "smthgn" << endl;
+	if (id == 4){
+		cout << id << endl;
 	}
 	TimeSpaceAstarHelper(actualNode, destination);
 }
@@ -374,14 +377,14 @@ void Agent::calculateRealHeuristic(Node* toCalculate, Node finish){
 }
 
 
-vector<Node> Agent::getAdjacents(Node element){
+vector<Node> Agent::getAdjacents(Node element, Node ending){
 	vector<Node> result;
 
 	result = map->adjacentHelper(element); // Use helper function to make life easier
 
 	//calculate heuristic of every element
 	for (unsigned int i = 0; i < result.size(); i++){
-		result[i].calculateManhattanHeuristic(destination);
+		result[i].calculateManhattanHeuristic(ending);
 		result[i].setParent(element);
 		result[i].calculateG();
 		result[i].calculateF();
