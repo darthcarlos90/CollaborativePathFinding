@@ -37,6 +37,8 @@ public:
 	int getX() const { return x; }
 	int getY() const { return y; }
 
+	int getDepth() const { return depth; }
+
 	bool operator < (const Node& n)const;
 	bool operator > (const Node& n)const;
 	bool operator == (const Node& n)const;
@@ -62,6 +64,8 @@ private:
 	
 	
 	int type;
+
+	int depth; // how many parents there are?
 	
 	bool has_parent;
 

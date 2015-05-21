@@ -22,9 +22,14 @@ public:
 
 	
 	void reserve(int t, Node n, int id);
-	bool isReserved(Node n, int t);
+	bool isReserved(Node n, int t, int id);
 	void cleanMap();
 
+	/*
+		Helper function that returns a suggested D for hte Silvers
+		algorithm based on the size of the grid
+	*/
+	int CalculateD(); 
 
 
 private:

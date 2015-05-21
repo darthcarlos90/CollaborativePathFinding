@@ -95,10 +95,11 @@ void Map::printData(){
 
 void Map::reserve(int t, Node n, int id){
 	reservationTable.Reserve(t, n, id);
+	//reservationTable.Reserve(t + 1, n, id); // Al reservations must include a reservation for next t
 }
 
-bool Map::isReserved(Node n, int t){
-	return reservationTable.isReserved(n, t);
+bool Map::isReserved(Node n, int t, int id){
+	return reservationTable.isReserved(n, t, id);
 }
 
 int Map::getValueAt(int x, int y){
@@ -117,4 +118,8 @@ void Map::cleanMap(){
 			}
 		}
 	}
+}
+
+int Map::CalculateD(){
+	return ((data->get_x_size() * data->get_y_size()) / 4);
 }

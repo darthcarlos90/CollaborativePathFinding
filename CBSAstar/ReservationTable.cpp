@@ -40,7 +40,7 @@ void ReservationTable::addConstraint(Constraint c){
 }
 
 //Look for a node to see if it is reserved at time t
-bool ReservationTable::isReserved(Node element, int t){
+bool ReservationTable::isReserved(Node element, int t, int id){
 	bool reserved = false;
 
 	//Get the constraints at time t
@@ -49,8 +49,10 @@ bool ReservationTable::isReserved(Node element, int t){
 	for (unsigned int i = 0; i < temp.size(); i++){
 		//If the current constraint has the same location as the input
 		if (temp[i].location == element.getLocation()){
-			reserved = true;
-			break;
+			if (temp[i].id != id){ // it is reserved by someone else
+				reserved = true;
+				break;
+			}
 		}
 	}
 	return reserved;

@@ -1,1 +1,1 @@
-Project that intends to create a real-time collaborative path-finding.
+Project that intends to create a real-time collaborative path-finding algorithm.

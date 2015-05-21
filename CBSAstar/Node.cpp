@@ -12,6 +12,7 @@ Node::Node(void){
 	f = -1;
 	parent = NULL;
 	has_parent = false;
+	depth = 0;
 }
 
 Node::Node(int type, int tempg, int x_pos, int y_pos){
@@ -27,6 +28,7 @@ Node::Node(int type, int tempg, int x_pos, int y_pos){
 	my_location.id = type;
 	my_location.x = x_pos;
 	my_location.y = y_pos;
+	depth = 0;
 }
 
 Node::~Node(void){
@@ -53,6 +55,7 @@ Node::Node(const Node& n){
 		this->has_parent = false;
 	}
 	this->my_location = n.getLocation();
+	this->depth = n.depth;
 }
 
 Node& Node::operator= (const Node& n){
@@ -73,6 +76,7 @@ Node& Node::operator= (const Node& n){
 		this->has_parent = false;
 	}
 	this->my_location = n.getLocation();
+	this->depth = n.depth;
 
 	return *this;
 }
@@ -115,6 +119,7 @@ void Node::setParent(Node value){
 	}
 	*parent = value;
 	has_parent = true;
+	depth += value.getDepth() + 1;
 }
 
 bool Node::hasParent() const{

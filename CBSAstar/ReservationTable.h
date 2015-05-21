@@ -10,7 +10,7 @@ public:
 
 	void Reserve(int t, Node n, int userId);
 	void addConstraint(Constraint c);
-	bool isReserved(Node element, int t);
+	bool isReserved(Node element, int t, int id); // an element is reserved by someone
 	void addConstraints(std::vector<Constraint> constraints);
 	void updateConstraint(int t, int userId, Node n);
 	std::vector<Constraint> getConstraintList(int t);

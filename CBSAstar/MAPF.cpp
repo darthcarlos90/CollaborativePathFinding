@@ -9,8 +9,11 @@ MAPF::MAPF(string filename){
 	map = new Map(fr->data);
 	
 	broken = false;
+	
 	//Create the players using the data from the file
 	for (unsigned int i = 0; i < fr->startings.size(); i++){
+		int D = map->CalculateD();
+		if (i % 2 == 1) D = D / 2;
 		Location l = fr->startings[i];
 		Location d = fr->endings[i];
 
@@ -27,7 +30,7 @@ MAPF::MAPF(string filename){
 
 		Node node_location(0, 0, l.x, l.y);
 		Node destination(0, 0, d.x, d.y);
-		Agent u(node_location, destination, map, l.id, 4);
+		Agent u(node_location, destination, map, l.id, D);
 		players.push_back(u);
 	}
 
@@ -136,7 +139,7 @@ void MAPF::MoveBySilvers(){
 		system("cls");
 		finished = players[0].finished();
 		for (unsigned int i = 0; i < players.size(); i++){
-			players[i].move(time);
+			players[i].move();
 			if (i > 0) finished = finished && players[i].finished();
 		}
 

@@ -20,7 +20,7 @@ public:
 	int getId() { return id; }
 	void setId(int new_id) { id = new_id; }
 
-	void move(int time_to_move);
+	void move();
 
 	/*
 		This function moves the entity to the spot their suposed to be on the time t
@@ -100,7 +100,6 @@ private:
 	unsigned int d;
 
 	bool active;
-	bool reachedD;
 
 	int id;
 
@@ -120,4 +119,6 @@ private:
 	std::vector<Node> time_openList;
 	std::vector<Node> time_closedList;
 	std::vector<Node> time_route;
+
+	std::vector<Node> partial_path_nodes;
 };
