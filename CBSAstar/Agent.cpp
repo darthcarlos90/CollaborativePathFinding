@@ -119,6 +119,9 @@ void Agent::move(){
 		cout << endl;
 	}
 	else if(stepsTaken == d){
+		if (id == 4){
+			int something = 1;
+		}
 		/*
 		Step 4: If the d has been reached:
 		- If the destination has been reached:
@@ -136,8 +139,12 @@ void Agent::move(){
 			if (actualNode == destination) active = false;
 			t++;
 		}
-		//time_openList.clear(); // Why dis?
-		//time_closedList.clear();// Why dis?
+		/*
+			This are cleared because the g, h, and f values of the nodes have changed, since now we
+			are repathing from the perspective of the actualNode, not the beggining node.
+		*/
+		time_openList.clear(); 
+		time_closedList.clear();
 		time_route.clear(); //clear the route as a new route will start to be calculated
 		actualNode.clearParent(); //Clear the parent, so this is a true starting point
 		stepsTaken = 0;
@@ -162,9 +169,6 @@ void Agent::executeTimeSpaceAstar(){
 	/*
 	Steps 1 and 2 are described in the function that will execute.
 	*/
-	if (id == 4){
-		cout << id << endl;
-	}
 	TimeSpaceAstarHelper(actualNode, destination);
 }
 
@@ -245,11 +249,6 @@ void Agent::TimeSpaceAstarHelper(Node start, Node finish){
 			option to select is the first item
 			*/
 			P = time_openList[0];
-			if (P.getLocation() == Location(5, 2) && id == 4 ){
-
-
-				cout << "mth" << endl;
-			}
 			time_closedList.push_back(P);
 			time_openList.erase(time_openList.begin()); 
 
@@ -290,7 +289,7 @@ void Agent::TimeSpaceAstarHelper(Node start, Node finish){
 		}
 
 		/*
-		Step 2: Once the route has been found, reserve theon your path.
+		Step 2: Once the route has been found, reserve your path.
 		- Only reserve the blocks of your path where nPath <= steps
 		*/
 
@@ -300,7 +299,7 @@ void Agent::TimeSpaceAstarHelper(Node start, Node finish){
 			if (partial_path_nodes.size() > 1){
 				int smaller_index =  0;
 				int smaller_value = 0;
-				//Get the element with the smalles value from d + 1 till the end
+				//Get the element with the smallest value from d + 1 till the end
 				for (unsigned int i = 0; i < partial_path_nodes.size(); i++){
 					vector<Node> around = getTimedAdjacents(partial_path_nodes[i], time); // get the adjacents
 					std::sort(around.begin(), around.end()); //sort so the first element is the smaller
@@ -308,9 +307,7 @@ void Agent::TimeSpaceAstarHelper(Node start, Node finish){
 					
 					executeSpatialAstar(around[0], destination);
 					int route_value = 0;
-					if (spatial_route.size() == 0){
-						break;
-					}
+					
 					//Get the value of the route
 					for (unsigned int j = 0; j < spatial_route.size(); j++){
 						route_value += spatial_route[j].getF();
@@ -331,6 +328,7 @@ void Agent::TimeSpaceAstarHelper(Node start, Node finish){
 				//Now that we've got the smaller route, we will follow it
 				//Set P to be the node of the smalles route
 				P = partial_path_nodes[smaller_index];
+				partial_path_nodes.clear(); // Eliminate this one so it doesn't gets stuck in an infinite loop
 			}
 		}
 
@@ -558,7 +556,6 @@ void Agent::reserveRoute(int starting_time){
 				//Now, reserve the new element
 				map->reserve(reservation_time, time_route[i], id);
 				reservation_time++; // increase the time, dont forget this
-
 			}
 
 		}

@@ -86,15 +86,16 @@ void Node::calculateManhattanHeuristic(Node destination){
 	
 	int finalX = abs(x - destination.getX());
 	int finalY = abs(y - destination.getY());
-
-	if (finalX < finalY){
+	//We are now blocking diagonal movements
+	/*if (finalX < finalY){
 		h = (finalX * 14);
 	}
 	else {
 		h = finalY * 14;
 	}
 
-	h += (abs(finalX - finalY) * 10);
+	h += (abs(finalX - finalY) * 10);*/
+	h = (finalX + finalY) * 10;
 }
 
 
