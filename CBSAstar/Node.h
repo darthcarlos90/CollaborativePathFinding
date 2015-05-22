@@ -37,7 +37,7 @@ public:
 	int getX() const { return x; }
 	int getY() const { return y; }
 
-	int getDepth() const { return depth; }
+	int getDepth() const;
 
 	bool operator < (const Node& n)const;
 	bool operator > (const Node& n)const;

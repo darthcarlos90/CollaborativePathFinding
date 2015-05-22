@@ -23,6 +23,8 @@ public:
 	*/
 	void Start(int type);
 	void MoveEntities(int type); //The type thing is temporal
+	//This method will revise the paths in look for any conflict
+	void RevisePaths();
 	
 
 private:
@@ -31,6 +33,14 @@ private:
 
 	void MoveBySilvers();
 	void MoveByCBS();
+
+	
+
+	//Each method consists detects one type of conflict
+	void NarrowPath();
+	void HeadToHead();
+	void BottleNeck();
+	void Blocking();
 
 	//TODO: Keep adding more elements throught the development of this project.
 	FileReader* fr;
@@ -43,4 +53,7 @@ private:
 	bool broken;
 
 	int time;
+
+	vector<Conflicted> agent_conflicts;
+	vector<vector<Node>> paths; // This is used to analyze the paths looking for conflicts
 };

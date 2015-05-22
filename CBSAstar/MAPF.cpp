@@ -20,6 +20,7 @@ MAPF::MAPF(string filename){
 		//Check for valid locations
 		if (map->getValueAt(l.x, l.y) == 1){
 			broken = true;
+			map->printData();
 			break;
 		}
 
@@ -78,6 +79,7 @@ void MAPF::StartSilversPathFinding(){
 	for (unsigned int i = 0; i < players.size(); i++){
 		players[i].setTime(time);
 		players[i].executeTimeSpaceAstar();
+		paths.push_back(players[i].getPath());
 	}
 }
 
@@ -171,4 +173,32 @@ void MAPF::MoveByCBS(){
 		system("pause");
 	}
 
+}
+
+//This method will check for any conflicts with the paths of the agents
+void MAPF::RevisePaths(){
+	cout << "Checking the path for any conflict" << endl;
+	
+	//First, check for the Narrow Path conflict
+	NarrowPath();
+
+}
+
+void MAPF::NarrowPath(){
+	int toCompare = 0; // This represent the index of the element we are comparing
+	for (unsigned int index = 1; index < paths.size(); index++){ // this will traverse the second compared element
+		// Ugh, nested for loops, simply ugh
+		for (unsigned int i = 0; i < paths[toCompare].size() - 2; i++){ // this represents the element on the first agent
+			for (unsigned int j = 0; j < paths[index].size() - 2; i++){ // this represents the element on the second agent
+				int progressiveAccumulator = 0; // To calculate how many progressive steps we can find
+				if (paths[toCompare][i] == paths[index][j]){ // if the elements are equal, lets see if the progress of the route is the same
+					/*
+						If the next element of toCompare, is the element before of the current element
+					*/
+					//TODO: Me quede aqui, en el algoritmo, checa el diagrama que deje en cuaderno perro!
+
+				}
+			}
+		}
+	}
 }

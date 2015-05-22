@@ -39,7 +39,7 @@ void ReservationTable::addConstraint(Constraint c){
 	}
 }
 
-//Look for a node to see if it is reserved at time t
+//Look for a node to see if it is reserved at time t by someone different to id
 bool ReservationTable::isReserved(Node element, int t, int id){
 	bool reserved = false;
 

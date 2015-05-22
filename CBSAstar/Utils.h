@@ -6,6 +6,16 @@
 
 #pragma once
 #include <vector>
+#include "Map.h"
+
+/*
+	This enum represents the types of conflicts that the Silvers algorithm
+	could't solve.
+*/
+
+enum conflict_type{
+	NARROW_PATH, HEAD_TO_HEAD, BOTTLENECK, BLOCKING
+};
 
 /*
 Struct created to easily group the locations being read.
@@ -84,4 +94,15 @@ struct Conflict{
 	Location v;
 	unsigned int t;
 	bool empty;
+};
+
+/*
+	This struct represents 2 or more conflicted entities 
+*/
+
+struct Conflicted{
+	vector<int> agents; //The ids of the agents involved in the conflict detected
+	int type; //The type of the conflict;
+	Map m; // A peace of the map where the conflict will be solved;
+
 };

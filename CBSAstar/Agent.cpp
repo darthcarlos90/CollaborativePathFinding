@@ -172,7 +172,7 @@ void Agent::executeTimeSpaceAstar(){
 	TimeSpaceAstarHelper(actualNode, destination);
 }
 
-void Agent::TimeSpaceAstarHelper(Node start, Node finish){
+void Agent::TimeSpaceAstarHelper(Node start, Node finish){	
 	int time = t + 1;
 	/*
 	Step 1: Calculate the route.
@@ -206,10 +206,12 @@ void Agent::TimeSpaceAstarHelper(Node start, Node finish){
 		
 		//Set the cost of staying to 0
 		A.setG(0);
+		A.setH(0);
+		A.calculateF();
 		//If finished, stay the next seven steps where you are, unless someone needs to pass
 		for (unsigned int i = 0; i < d; i++){
 			//if someone needs to use your space
-			if (map->isReserved(A, time, id)){
+			if (map->isReserved(start, time, id)){
 				//move out
 				//First, get the adjacents of that specific element
 				vector<Node> adjacents = getTimedAdjacents(A, time);
@@ -262,9 +264,14 @@ void Agent::TimeSpaceAstarHelper(Node start, Node finish){
 			vector<Node> adjacents = getTimedAdjacents(P, time);
 
 			for (unsigned int i = 0; i < adjacents.size(); i++){
-				if (!FindNodeAtList(adjacents[i], time_closedList)){
-					if (!FindNodeAtList(adjacents[i], time_openList))
-						time_openList.push_back(adjacents[i]);
+				if (adjacents[i] == P){ //if the option is to stay, dont ignore it
+					time_openList.push_back(adjacents[i]);
+				}
+				else {
+					if (!FindNodeAtList(adjacents[i], time_closedList)){
+						if (!FindNodeAtList(adjacents[i], time_openList))
+							time_openList.push_back(adjacents[i]);
+					}
 				}
 			}
 			std::sort(time_openList.begin(), time_openList.end());
@@ -395,13 +402,14 @@ vector<Node> Agent::getAdjacents(Node element, Node ending){
 std::vector<Node> Agent::getTimedAdjacents(Node element, int res_time){
 	//First, get the adjacents of the node
 	std::vector<Node> temp = map->adjacentHelper(element);
-
+	bool reservedElement = false;
 	//Then, check if they where reserved
 	std::vector<Node> result;
 	for (unsigned int i = 0; i < temp.size(); i++){
 		if (!map->isReserved(temp[i], res_time, id)){
 			result.push_back(temp[i]);
 		}
+		else reservedElement = true;
 	}
 
 	//Now that we have all the available nodes, we calculate their real heuristic value
@@ -412,6 +420,13 @@ std::vector<Node> Agent::getTimedAdjacents(Node element, int res_time){
 		result[i].setParent(element);
 		result[i].calculateG();
 		result[i].calculateF();
+	}
+	//If a reserved element was found, give the option of stay on your place
+	if (reservedElement){
+		element.setG(10);
+		calculateRealHeuristic(&element, destination);
+		element.calculateF();
+		result.push_back(element);
 	}
 
 	return result;

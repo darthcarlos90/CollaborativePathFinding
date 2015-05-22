@@ -148,4 +148,10 @@ void Node::clearParent(){
 	delete parent;
 	parent = NULL;
 	has_parent = false;
+	depth = 0;
+}
+
+int Node::getDepth() const{ 
+	if(has_parent) return depth; // Security measure
+	else return 0;
 }
