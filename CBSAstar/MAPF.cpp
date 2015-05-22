@@ -189,13 +189,28 @@ void MAPF::NarrowPath(){
 	for (unsigned int index = 1; index < paths.size(); index++){ // this will traverse the second compared element
 		// Ugh, nested for loops, simply ugh
 		for (unsigned int i = 0; i < paths[toCompare].size() - 2; i++){ // this represents the element on the first agent
+			bool break_loop = false;
 			for (unsigned int j = 0; j < paths[index].size() - 2; i++){ // this represents the element on the second agent
 				int progressiveAccumulator = 0; // To calculate how many progressive steps we can find
 				if (paths[toCompare][i] == paths[index][j]){ // if the elements are equal, lets see if the progress of the route is the same
 					/*
 						If the next element of toCompare, is the element before of the current element
 					*/
-					//TODO: Me quede aqui, en el algoritmo, checa el diagrama que deje en cuaderno perro!
+					if (paths[toCompare][i + 1] == paths[index][j - 1]){
+						/* 
+							Means that the second element is also in each others route, we have a possible
+							bottleneck lets check the tird element.
+						*/
+
+						if (paths[toCompare][i + 2] == paths[index][j - 2]){
+							// We have a narrow path conflict
+							Conflicted c;
+							c.type = NARROW_PATH;
+							c.agents.push_back(players[toCompare].getId());
+							c.agents.push_back(players[index].getId());
+							
+						}
+					}
 
 				}
 			}

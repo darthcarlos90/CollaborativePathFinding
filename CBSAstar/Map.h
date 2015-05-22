@@ -9,6 +9,7 @@
 class Map{
 public:
 	Map(Matrix<int>* mat);
+	Map(const Map& m);// TODO: Left here, implement a copy constructor!!!!
 	~Map(void);
 	int getRows() { return data->get_x_size(); }
 	int getColumns() { return data->get_y_size(); }
@@ -30,6 +31,9 @@ public:
 		algorithm based on the size of the grid
 	*/
 	int CalculateD(); 
+
+	//Returns a submap made up of the specifications given on the parameters
+	Map getSubMap(int lowerX, int lowerY, int upperX, int upperY); 
 
 
 private:

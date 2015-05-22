@@ -11,8 +11,14 @@ FileReader::~FileReader(void){
 		this class must call the method delete. The rest of the classes that
 		use this pointer, must only set it to null.
 	*/
-
-	delete data;
+	/*
+		Fix: The pointer is now deleted on the map class, not in this class.
+		Date: 22/05/2015
+		Why?
+		Because we need to do this fix in order to make the sub map tha solves conflicts.
+	*/
+	//delete data;
+	data = NULL;
 
 }
 
