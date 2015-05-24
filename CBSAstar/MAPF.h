@@ -42,6 +42,9 @@ private:
 	void BottleNeck();
 	void Blocking();
 
+	//Method that solves the conflicts on the list using CBS
+	void solveConflicts();
+
 	//TODO: Keep adding more elements throught the development of this project.
 	FileReader* fr;
 	Map* map;

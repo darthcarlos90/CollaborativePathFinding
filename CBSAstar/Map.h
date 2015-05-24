@@ -9,7 +9,8 @@
 class Map{
 public:
 	Map(Matrix<int>* mat);
-	Map(const Map& m);// TODO: Left here, implement a copy constructor!!!!
+	Map();
+	Map(const Map& m);
 	~Map(void);
 	int getRows() { return data->get_x_size(); }
 	int getColumns() { return data->get_y_size(); }
@@ -34,6 +35,9 @@ public:
 
 	//Returns a submap made up of the specifications given on the parameters
 	Map getSubMap(int lowerX, int lowerY, int upperX, int upperY); 
+	
+	void setData(Matrix <int> val);
+	Matrix<int>* getData(){ return data; }
 
 
 private:
@@ -45,5 +49,7 @@ private:
 	ReservationTable reservationTable;
 
 	int t; // this represents the map at a certain time
+
+	bool has_data;  // Boolean for all those ugly pointer exceptions that may occur
 
 };

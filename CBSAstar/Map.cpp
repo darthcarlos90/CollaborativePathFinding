@@ -4,10 +4,22 @@ Map::Map(Matrix<int>* mat){
 	data = mat;
 	//findNodes(); //Only for use in spatial Astar, not this new method :D
 	cout << *data << endl;
+	has_data = true;
 }
 
+//Empty constructor for several purposes
 Map::Map(){
+	data = NULL; //Make the data pointer null
+	has_data = false;
+}
 
+//Copy cosntructor
+Map::Map(const Map& m){
+	data = NULL;
+	data = m.data;
+	reservationTable = m.reservationTable;
+	t = m.t;
+	has_data = m.has_data;
 }
 
 Map::~Map(void){
@@ -155,4 +167,10 @@ Map Map::getSubMap(int lowerX, int lowerY, int upperX, int upperY){
 	matrix = NULL; // clean up
 	return result;
 
+}
+
+void Map::setData(Matrix<int> val) { 
+	if (!has_data) data = new Matrix<int>();
+	*data = val;
+	has_data = true;
 }

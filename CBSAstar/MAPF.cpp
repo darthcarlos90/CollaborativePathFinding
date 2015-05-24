@@ -182,6 +182,8 @@ void MAPF::RevisePaths(){
 	//First, check for the Narrow Path conflict
 	NarrowPath();
 
+	//Now that the narrow path conflicts where found, lets solve them
+
 }
 
 void MAPF::NarrowPath(){
@@ -208,12 +210,22 @@ void MAPF::NarrowPath(){
 							c.type = NARROW_PATH;
 							c.agents.push_back(players[toCompare].getId());
 							c.agents.push_back(players[index].getId());
-							
+							c.m.setData(*map->getData()); 
+							agent_conflicts.push_back(c); // Add it to the conflicts that need to be solved
 						}
 					}
 
 				}
 			}
 		}
+	}
+}
+
+void MAPF::solveConflicts(){
+	// First traverse the list of conflicts
+	for (unsigned int i = 0; i < agent_conflicts.size(); i++){
+		//Now lets solve each conflict 1 by 1
+		Conflicted c = agent_conflicts[i];
+		//TODO: Left here
 	}
 }
