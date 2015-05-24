@@ -28,9 +28,7 @@ video at this link: https ://www.youtube.com/watch?v=KNXfSOx4eEE
 
 */
 void Agent::executeSpatialAstar(Node start, Node finish){
-	if (id == 4){
-		int lakjsdg = 1;
-	}
+
 	bool pathFound = false;
 	//Let A be the starting point
 	Node A = start;

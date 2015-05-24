@@ -226,6 +226,49 @@ void MAPF::solveConflicts(){
 	for (unsigned int i = 0; i < agent_conflicts.size(); i++){
 		//Now lets solve each conflict 1 by 1
 		Conflicted c = agent_conflicts[i];
-		//TODO: Left here
+		// Create the elements of the tree and assign them the necesary information
+		
+		// Add the agents and pre-calculated paths
+		for (unsigned int j = 0; j < c.agents.size(); i++){
+			root->addAgent(&players[c.agents[j]]); //TODO: Check for any errors in here with the id
+			root->AddPath(players[c.agents[j]].getPath());
+		}
+
+		// Add the constraints from the reservation table to the root node
+		vector<Constraint> cons = map->GetReservationTableConstraints();
+		for (unsigned int j = 0; j < cons.size(); j++){
+			root->addConstraint(cons[j]);
+		}
+
+		//Set the cost of the node
+		root->calculateCost();
+		
+		//Insert the root to the tree
+		tree->insertRoot(root);
+
+		// Now let's find a solution to the routes
+		bool solutionFound = false;
+		//While we can't find the solution
+		while (!solutionFound){
+			//Get the best node of the tree
+			CBTNode *P = tree->getSolution();
+
+			//Validate the paths until a conflict occurs
+			P->validatePaths();
+
+			//If it is a goal node, end this, we found the solution
+			if (P->isGoal()) {
+				solutionFound = true;
+				P->UpdateAgentsPaths();
+			}
+			else {
+				P->ExpandNode();
+			}
+		}
+
+		//Now we've got the updated paths, we add the paths to the corresponding agents
+		for (unsigned int j = 0; j < players.size(); j++){
+			//TODO: Left here
+		}
 	}
 }

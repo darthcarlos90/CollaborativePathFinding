@@ -19,6 +19,8 @@ void ReservationTable::Reserve(int t, Node n, int userId){
 		//found
 		reservations[t].push_back(c);
 	}
+
+	constraints.push_back(c);
 }
 
 void ReservationTable::addConstraint(Constraint c){
@@ -37,6 +39,8 @@ void ReservationTable::addConstraint(Constraint c){
 		//found
 		reservations[c.t].push_back(c);
 	}
+
+	constraints.push_back(c);
 }
 
 //Look for a node to see if it is reserved at time t by someone different to id

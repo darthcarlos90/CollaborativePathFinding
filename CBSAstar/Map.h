@@ -39,6 +39,8 @@ public:
 	void setData(Matrix <int> val);
 	Matrix<int>* getData(){ return data; }
 
+	std::vector<Constraint> GetReservationTableConstraints();
+
 
 private:
 

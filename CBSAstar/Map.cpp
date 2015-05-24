@@ -174,3 +174,7 @@ void Map::setData(Matrix<int> val) {
 	*data = val;
 	has_data = true;
 }
+
+std::vector<Constraint> Map::GetReservationTableConstraints(){
+	return reservationTable.getFullConstraints();
+}
