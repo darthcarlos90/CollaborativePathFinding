@@ -149,14 +149,14 @@ int Map::CalculateD(){
 	return ((data->get_x_size() * data->get_y_size()) / 4);
 }
 
-Matrix<int>* Map::getSubData(int lowerX, int lowerY, int upperX, int upperY){
-	Matrix<int>* matrix = new Matrix<int>(upperX - lowerX, upperY - lowerY);
+Matrix<int> Map::getSubData(int lowerX, int lowerY, int upperX, int upperY){
+	Matrix<int> matrix(upperX - lowerX, upperY - lowerY);
 	int x = 0;
 	int y = 0;
 	//Populate the matrix with the values from this matrix
 	for (int i = lowerX; i < upperX; i++){
 		for (int j = lowerY; j < upperY; j++){
-			matrix->set_element(x, y, data->get_element(i, j));
+			matrix.set_element(x, y, data->get_element(i, j));
 			y++;
 		}
 		x++;

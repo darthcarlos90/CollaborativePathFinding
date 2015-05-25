@@ -6,7 +6,6 @@
 
 #pragma once
 #include <vector>
-#include "Map.h"
 
 /*
 	This enum represents the types of conflicts that the Silvers algorithm
@@ -101,8 +100,15 @@ struct Conflict{
 */
 
 struct Conflicted{
-	vector<int> agents; //The ids of the agents involved in the conflict detected
+	std::vector<int> agents; //The ids of the agents involved in the conflict detected
 	int type; //The type of the conflict;
-	Map m; // A peace of the map where the conflict will be solved;
+	/*
+		Fix: The map is not needed
+		Date: 25/05/2015
+		Why?
+		Because there is no need to acces the map by the CBS Algorithm since the algorithm only makes th enetities wait, 
+		not reroute.
+	*/
+	//Map m; // A peace of the map where the conflict will be solved;
 
 };

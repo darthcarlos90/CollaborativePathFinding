@@ -40,6 +40,7 @@ private:
 	void NarrowPath();
 	void BottleNeck();
 	void Blocking();
+	void HeadToHead(); /// When to elements coming from oposite directions try to acces same square
 
 	//Method that solves the conflicts on the list using CBS
 	void solveConflicts();

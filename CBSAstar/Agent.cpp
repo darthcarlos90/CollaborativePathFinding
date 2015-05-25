@@ -200,6 +200,8 @@ void Agent::TimeSpaceAstarHelper(Node start, Node finish){
 		TODO: Alert! Here we have a conflict to be solved by CBS. 
 		what happens when an agent needs to use your space when you
 		are finished moving
+
+		UPDATE: This will be fized by CBS, so this code will dissappear soon.
 		*/
 		
 		//Set the cost of staying to 0
@@ -209,15 +211,24 @@ void Agent::TimeSpaceAstarHelper(Node start, Node finish){
 		//If finished, stay the next seven steps where you are, unless someone needs to pass
 		for (unsigned int i = 0; i < d; i++){
 			//if someone needs to use your space
-			if (map->isReserved(start, time, id)){
+			if (map->isReserved(start, time + i, id)){
 				//move out
 				//First, get the adjacents of that specific element
 				vector<Node> adjacents = getTimedAdjacents(A, time);
 
 				//Next, sort them to get the cheapest one
 				std::sort(adjacents.begin(), adjacents.end());
-
-				time_route.push_back(adjacents[0]);//set to the route the closest element
+				
+				//Lets see which element is not reserved and reserve it
+				for (unsigned int j = 0; j < adjacents.size(); j++){
+					if (!map->isReserved(adjacents[i], time, id)){
+						time_route.push_back(adjacents[i]);//set to the route the closest element
+						map->reserve(time, adjacents[i], id);
+						break;
+					}
+					
+				}
+				
 				/*
 				Step 6: Recalculate how much you are gonna move and move back to your position.
 				- Set active to true, so that the element starts using Astar to go back to its place.
@@ -535,42 +546,42 @@ void Agent::reserveRoute(int starting_time){
 		//Check if the node is reserved for this given time
 		if (map->isReserved(time_route[i], reservation_time, id)){
 			//If it is reserved
-
-			//Check if the node before that is reserved
-			if (map->isReserved(time_route[i - 1], reservation_time, id)){
-				//if your last step is reserved for the next time, replan your route
-				reserved = true;
-				reserved_index = i;
-				break;
-			}
-			else{
-				/*
-				If the last step is not reserved for this time, then modifly the route and wait
-				in the place until the other entity moves.
-				*/
-				vector<Node> temp_route;
-
-				//Get all the nodes before the incident
-				for (unsigned int index = 0; index < i; index++){
-					temp_route.push_back(time_route[index]);
+			if (i > 0){
+				//Check if the node before that is reserved
+				if (map->isReserved(time_route[i - 1], reservation_time, id)){
+					//if your last step is reserved for the next time, replan your route
+					reserved = true;
+					reserved_index = i;
+					break;
 				}
+				else{
+					/*
+					If the last step is not reserved for this time, then modifly the route and wait
+					in the place until the other entity moves.
+					*/
+					vector<Node> temp_route;
 
-				//repeat the node so that it can wait on the path, and continue
-				temp_route.push_back(time_route[i - 1]);
+					//Get all the nodes before the incident
+					for (unsigned int index = 0; index < i; index++){
+						temp_route.push_back(time_route[index]);
+					}
 
-				//now finish adding the rest of the elements
-				for (unsigned int index = i; index < time_route.size(); index++){
-					temp_route.push_back(time_route[index]);
+					//repeat the node so that it can wait on the path, and continue
+					temp_route.push_back(time_route[i - 1]);
+
+					//now finish adding the rest of the elements
+					for (unsigned int index = i; index < time_route.size(); index++){
+						temp_route.push_back(time_route[index]);
+					}
+
+					//finally, replace the old route with the new one
+					time_route = temp_route;
+
+					//Now, reserve the new element
+					map->reserve(reservation_time, time_route[i], id);
+					reservation_time++; // increase the time, dont forget this
 				}
-
-				//finally, replace the old route with the new one
-				time_route = temp_route;
-
-				//Now, reserve the new element
-				map->reserve(reservation_time, time_route[i], id);
-				reservation_time++; // increase the time, dont forget this
 			}
-
 		}
 		else {
 			//If it is not reserved, reserve it

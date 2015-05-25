@@ -188,6 +188,10 @@ void MAPF::RevisePaths(){
 	// Now that several routes have been changed, lets check for another conflict type, bottleneck
 	BottleNeck();
 
+	// We solve again the conflics (if there where any)
+	solveConflicts();
+
+	
 }
 
 void MAPF::NarrowPath(){
@@ -214,7 +218,7 @@ void MAPF::NarrowPath(){
 							c.type = NARROW_PATH;
 							c.agents.push_back(players[toCompare].getId());
 							c.agents.push_back(players[index].getId());
-							c.m.setData(*map->getData()); 
+							//c.m.setData(*map->getData()); 
 							agent_conflicts.push_back(c); // Add it to the conflicts that need to be solved
 						}
 					}
@@ -226,7 +230,6 @@ void MAPF::NarrowPath(){
 }
 
 void MAPF::solveConflicts(){
-	//TODO: How to solve the conflicts when a subdata element is given
 	// First traverse the list of conflicts
 	for (unsigned int i = 0; i < agent_conflicts.size(); i++){
 		//Now lets solve each conflict 1 by 1
@@ -318,24 +321,30 @@ void MAPF::BottleNeck(){
 
 					index++;
 				}
+				Conflicted ce;
+				ce.type = BOTTLENECK;
 
+				/*
+					See the fix done at the utils .h file. For now, no map adding.
+				*/
 				//Creating the submap
-				vector<int> result_id;
-				vector<int> result_time;
+				//vector<int> result_id;
+				//vector<int> result_time;
 				for (unsigned int i = 0; i < result.size(); i++){
 					// Look for element i in the time_span vector
 					for (unsigned int j = 0; j < time_span.size(); j++){
 						// When the element is found
 						if (result[i] == time_span[j]){
-							result_id.push_back(agents_toCompare[j]);
-							result_time.push_back(agents_toCompare[j]);
+							//result_id.push_back(agents_toCompare[j]);
+							ce.agents.push_back(agents_toCompare[j]);
+							//result_time.push_back(agents_toCompare[j]);
 							break;
 						}
 					}
 				}
 
 				// Now we have the participants on the constraint
-				Location lowerLocation = players[result_id[0]].getPath()[result_time[0] - 1].getLocation();
+				/*Location lowerLocation = players[result_id[0]].getPath()[result_time[0] - 1].getLocation();
 				Location upperLocation = players[result_id[0]].getPath()[result_time[0] - 1].getLocation();
 				for (unsigned int i = 1; i < result_id.size(); i++){
 					Location l = players[result_id[i]].getPath()[result_time[i] - 1].getLocation();
@@ -352,13 +361,19 @@ void MAPF::BottleNeck(){
 					else if (l.y > upperLocation.y){
 						upperLocation.y = l.y;
 					}
+				}*/
 
-					// TODO: Left here
+				// Create the submap in base of the locations given
+				//ce.m.setData(map->getSubData(lowerLocation.x, lowerLocation.y, upperLocation.x, upperLocation.y));
 
-				}
-
+				// Finally, add the conclicted class to the list
+				agent_conflicts.push_back(ce);
 			}
 
 		}
 	}
+}
+
+void MAPF::Blocking(){
+
 }
