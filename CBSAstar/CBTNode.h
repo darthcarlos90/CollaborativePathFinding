@@ -38,6 +38,7 @@ public:
 	bool operator > (const CBTNode& n);
 
 	void addAgent(Agent * a);
+	Agent* getAgent(int index){ return agents[index]; }
 	void AddPath(vector<Node> value) { paths.push_back(value); } // For precalculated paths
 	
 	void addConstraint(Constraint c);

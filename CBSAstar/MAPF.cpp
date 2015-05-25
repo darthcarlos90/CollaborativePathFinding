@@ -183,6 +183,10 @@ void MAPF::RevisePaths(){
 	NarrowPath();
 
 	//Now that the narrow path conflicts where found, lets solve them
+	solveConflicts();
+
+	// Now that several routes have been changed, lets check for another conflict type, bottleneck
+	BottleNeck();
 
 }
 
@@ -222,6 +226,7 @@ void MAPF::NarrowPath(){
 }
 
 void MAPF::solveConflicts(){
+	//TODO: How to solve the conflicts when a subdata element is given
 	// First traverse the list of conflicts
 	for (unsigned int i = 0; i < agent_conflicts.size(); i++){
 		//Now lets solve each conflict 1 by 1
@@ -248,11 +253,12 @@ void MAPF::solveConflicts(){
 
 		// Now let's find a solution to the routes
 		bool solutionFound = false;
+		
+		//Get the best node of the tree
+		CBTNode *P = tree->getSolution();
+		
 		//While we can't find the solution
 		while (!solutionFound){
-			//Get the best node of the tree
-			CBTNode *P = tree->getSolution();
-
 			//Validate the paths until a conflict occurs
 			P->validatePaths();
 
@@ -264,11 +270,95 @@ void MAPF::solveConflicts(){
 			else {
 				P->ExpandNode();
 			}
+
+			P = tree->getSolution(); // Set the best node in the tree to be P
 		}
 
 		//Now we've got the updated paths, we add the paths to the corresponding agents
 		for (unsigned int j = 0; j < players.size(); j++){
-			//TODO: Left here
+			players[j].setPath(P->getAgent(j)->getPath()); //TODO: As well check for any possible error with the position of the players
+		}
+	} 
+	// Finished solving conflicts, empty the list
+	agent_conflicts.clear();
+}
+
+void MAPF::BottleNeck(){
+	// 1 for loop to get the elements to compare
+	for (unsigned int toCompare = 0; toCompare < players.size(); toCompare++){
+		vector<int> agents_toCompare;
+		vector<int> time_span;
+		// for loop to get the elements in the path of the aget toCompare
+		for (unsigned int index = 0; index < players[toCompare].getPath().size(); index++){
+			// for loop to get the agent that is being compared
+			for (unsigned int i = toCompare + 1; i < players.size(); i++){
+				//for loop for the element of the path being compared
+				for (unsigned int j = 0; j < players[i].getPath().size(); j++){
+					// Look which elements have the same path time
+					if (players[toCompare].getPath()[index] == players[i].getPath()[j]){
+						agents_toCompare.push_back(i);
+						time_span.push_back(j);
+					}
+				}
+			}
+			// Now, we have all the elements that go to the same node as the one located on index
+			//If there are more than 3 elements going through that node ....
+			if (agents_toCompare.size() > 3){
+				vector<int> toSort = time_span;
+				std::sort(toSort.begin(), toSort.end()); // sort the elements
+				vector<int> result;
+				int index = 0;
+				// See which elements are on the bottleneck (s)
+				for (unsigned int i = 1; i < toSort.size(); i++){
+					int difference = abs(toSort[index] - toSort[i]);
+					if (difference >= 0 && difference <= 2){
+						result.push_back(toSort[index]);
+						result.push_back(toSort[i]);
+					}
+
+					index++;
+				}
+
+				//Creating the submap
+				vector<int> result_id;
+				vector<int> result_time;
+				for (unsigned int i = 0; i < result.size(); i++){
+					// Look for element i in the time_span vector
+					for (unsigned int j = 0; j < time_span.size(); j++){
+						// When the element is found
+						if (result[i] == time_span[j]){
+							result_id.push_back(agents_toCompare[j]);
+							result_time.push_back(agents_toCompare[j]);
+							break;
+						}
+					}
+				}
+
+				// Now we have the participants on the constraint
+				Location lowerLocation = players[result_id[0]].getPath()[result_time[0] - 1].getLocation();
+				Location upperLocation = players[result_id[0]].getPath()[result_time[0] - 1].getLocation();
+				for (unsigned int i = 1; i < result_id.size(); i++){
+					Location l = players[result_id[i]].getPath()[result_time[i] - 1].getLocation();
+					if (l.x < lowerLocation.x){
+						lowerLocation.x = l.x;
+					}
+					else if (l.x > upperLocation.x){
+						upperLocation.x = l.x;
+					}
+
+					if (l.y < lowerLocation.y){
+						lowerLocation.y = l.y;
+					}
+					else if (l.y > upperLocation.y){
+						upperLocation.y = l.y;
+					}
+
+					// TODO: Left here
+
+				}
+
+			}
+
 		}
 	}
 }

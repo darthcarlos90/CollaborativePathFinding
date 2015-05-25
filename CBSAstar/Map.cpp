@@ -149,7 +149,7 @@ int Map::CalculateD(){
 	return ((data->get_x_size() * data->get_y_size()) / 4);
 }
 
-Map Map::getSubMap(int lowerX, int lowerY, int upperX, int upperY){
+Matrix<int>* Map::getSubData(int lowerX, int lowerY, int upperX, int upperY){
 	Matrix<int>* matrix = new Matrix<int>(upperX - lowerX, upperY - lowerY);
 	int x = 0;
 	int y = 0;
@@ -163,9 +163,8 @@ Map Map::getSubMap(int lowerX, int lowerY, int upperX, int upperY){
 		y = 0;
 	}
 
-	Map result(matrix);
-	matrix = NULL; // clean up
-	return result;
+	
+	return matrix;
 
 }
 

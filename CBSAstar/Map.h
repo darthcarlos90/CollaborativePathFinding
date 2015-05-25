@@ -34,7 +34,7 @@ public:
 	int CalculateD(); 
 
 	//Returns a submap made up of the specifications given on the parameters
-	Map getSubMap(int lowerX, int lowerY, int upperX, int upperY); 
+	Matrix<int>* getSubData(int lowerX, int lowerY, int upperX, int upperY); 
 	
 	void setData(Matrix <int> val);
 	Matrix<int>* getData(){ return data; }

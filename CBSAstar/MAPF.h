@@ -38,7 +38,6 @@ private:
 
 	//Each method consists detects one type of conflict
 	void NarrowPath();
-	void HeadToHead();
 	void BottleNeck();
 	void Blocking();
 
