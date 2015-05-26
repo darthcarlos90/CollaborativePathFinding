@@ -110,7 +110,7 @@ void Agent::move(){
 			time_route.erase(time_route.begin());
 		}
 		stepsTaken++;
-		map->setElement(actualNode.getX(), actualNode.getY(), id);
+		map->setElement(actualNode.getX(), actualNode.getY(), id + 2);
 
 		cout << "Unit: " << id + 2 << " at location: " << actualNode.getX() << " , " << actualNode.getY();
 		if (!active) cout << " This element is finished.";
@@ -490,8 +490,13 @@ void Agent::ModifyRouteOnConstraints(vector<Constraint> constraints){
 					//Make the element wait for a t = 1 before moving to that spot
 					vector<Node> temp_path;
 					// push all the elements of the path from 0 till t -1 of the constraint
-					for (unsigned int i = 0; i < c.t; i++){
-						temp_path.push_back(time_route[i]);
+					if (c.t == 0){
+						temp_path.push_back(time_route[0]);
+					}
+					else {
+						for (unsigned int i = 0; i < c.t; i++){
+							temp_path.push_back(time_route[i]);
+						}
 					}
 					// Repeat the last step so the agent waits for some other element to use the other cell
 					temp_path.push_back(temp_path[temp_path.size() - 1]);

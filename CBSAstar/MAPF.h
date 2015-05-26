@@ -34,12 +34,13 @@ private:
 	void MoveBySilvers();
 	void MoveByCBS();
 
-	
+	bool existsInList(vector<int> list, int val);
+	int getIndexOfAgent(int id);
 
 	//Each method consists detects one type of conflict
 	void NarrowPath();
 	void BottleNeck();
-	void Blocking();
+	void Blocking(); // This will be checked when some entity is finished
 	void HeadToHead(); /// When to elements coming from oposite directions try to acces same square
 
 	//Method that solves the conflicts on the list using CBS

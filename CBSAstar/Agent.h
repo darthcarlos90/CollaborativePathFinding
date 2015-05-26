@@ -90,7 +90,8 @@ private:
 	bool FindNodeAtList(Node n, vector<Node> list); //Find a node at a given list
 	void calculateSIC();
 	void reserveRoute(int starting_time); // To be used in the Silver's Astar
-
+	
+	int id;
 
 	Node actualNode;
 	Node destination;
@@ -99,9 +100,7 @@ private:
 	
 	unsigned int d;
 
-	bool active;
-
-	int id;
+	bool active;	
 
 	unsigned int stepsTaken;
 	bool replan;

@@ -59,6 +59,7 @@ MAPF::~MAPF(void){
 }
 
 void MAPF::Start(int type){
+	cout << "Number of players: " << players.size() << endl;
 	if (!broken){
 		switch (type){
 		case 1:
@@ -167,6 +168,7 @@ void MAPF::MoveByCBS(){
 			finished = finished && players[i].finished(); 
 		}
 		map->printData();
+		
 		//TODO: Add the dynamic change of path either by d steps, or because of the dynamic change of obstacles
 		//TODO: Update the constraints at the node
 		
@@ -186,43 +188,44 @@ void MAPF::RevisePaths(){
 	solveConflicts();
 
 	// Now that several routes have been changed, lets check for another conflict type, bottleneck
-	BottleNeck();
+	//BottleNeck();
 
 	// We solve again the conflics (if there where any)
-	solveConflicts();
+	//solveConflicts();
 
 	
 }
 
 void MAPF::NarrowPath(){
+	//TODO: Add size resrictions
 	int toCompare = 0; // This represent the index of the element we are comparing
 	for (unsigned int index = 1; index < paths.size(); index++){ // this will traverse the second compared element
-		// Ugh, nested for loops, simply ugh
 		for (unsigned int i = 0; i < paths[toCompare].size() - 2; i++){ // this represents the element on the first agent
-			bool break_loop = false;
-			for (unsigned int j = 0; j < paths[index].size() - 2; i++){ // this represents the element on the second agent
+			for (unsigned int j = 0; j < paths[index].size() - 2; j++){ // this represents the element on the second agent
 				int progressiveAccumulator = 0; // To calculate how many progressive steps we can find
 				if (paths[toCompare][i] == paths[index][j]){ // if the elements are equal, lets see if the progress of the route is the same
 					/*
 						If the next element of toCompare, is the element before of the current element
 					*/
-					if (paths[toCompare][i + 1] == paths[index][j - 1]){
-						/* 
-							Means that the second element is also in each others route, we have a possible
-							bottleneck lets check the tird element.
-						*/
+					if (j >= 2){
 
-						if (paths[toCompare][i + 2] == paths[index][j - 2]){
-							// We have a narrow path conflict
-							Conflicted c;
-							c.type = NARROW_PATH;
-							c.agents.push_back(players[toCompare].getId());
-							c.agents.push_back(players[index].getId());
-							//c.m.setData(*map->getData()); 
-							agent_conflicts.push_back(c); // Add it to the conflicts that need to be solved
+						if (paths[toCompare][i + 1] == paths[index][j - 1]){
+							/*
+								Means that the second element is also in each others route, we have a possible
+								bottleneck lets check the tird element.
+								*/
+
+							if (paths[toCompare][i + 2] == paths[index][j - 2]){
+								// We have a narrow path conflict
+								Conflicted c;
+								c.type = NARROW_PATH;
+								c.agents.push_back(players[toCompare].getId());
+								c.agents.push_back(players[index].getId());
+								//c.m.setData(*map->getData()); 
+								agent_conflicts.push_back(c); // Add it to the conflicts that need to be solved
+							}
 						}
 					}
-
 				}
 			}
 		}
@@ -230,23 +233,35 @@ void MAPF::NarrowPath(){
 }
 
 void MAPF::solveConflicts(){
+	//Create the constraint tree
+	tree = new ConstraintTree();
+
+	//Create the root node
+	root = new CBTNode();
+
 	// First traverse the list of conflicts
 	for (unsigned int i = 0; i < agent_conflicts.size(); i++){
+		cout << "Conflicts found! Solving them!" << endl;
 		//Now lets solve each conflict 1 by 1
 		Conflicted c = agent_conflicts[i];
 		// Create the elements of the tree and assign them the necesary information
 		
 		// Add the agents and pre-calculated paths
-		for (unsigned int j = 0; j < c.agents.size(); i++){
-			root->addAgent(&players[c.agents[j]]); //TODO: Check for any errors in here with the id
-			root->AddPath(players[c.agents[j]].getPath());
+		for (unsigned int j = 0; j < c.agents.size(); j++){
+			int index = getIndexOfAgent(c.agents[j]);
+			root->addAgent(&players[index]); 
+			//root->AddPath(players[index].getPath());
 		}
 
+		
+
 		// Add the constraints from the reservation table to the root node
-		vector<Constraint> cons = map->GetReservationTableConstraints();
+		/*vector<Constraint> cons = map->GetReservationTableConstraints();
 		for (unsigned int j = 0; j < cons.size(); j++){
 			root->addConstraint(cons[j]);
-		}
+		}*/
+
+		root->CalculatePaths();
 
 		//Set the cost of the node
 		root->calculateCost();
@@ -276,14 +291,11 @@ void MAPF::solveConflicts(){
 
 			P = tree->getSolution(); // Set the best node in the tree to be P
 		}
-
-		//Now we've got the updated paths, we add the paths to the corresponding agents
-		for (unsigned int j = 0; j < players.size(); j++){
-			players[j].setPath(P->getAgent(j)->getPath()); //TODO: As well check for any possible error with the position of the players
-		}
 	} 
 	// Finished solving conflicts, empty the list
 	agent_conflicts.clear();
+	
+	
 }
 
 void MAPF::BottleNeck(){
@@ -299,8 +311,10 @@ void MAPF::BottleNeck(){
 				for (unsigned int j = 0; j < players[i].getPath().size(); j++){
 					// Look which elements have the same path time
 					if (players[toCompare].getPath()[index] == players[i].getPath()[j]){
-						agents_toCompare.push_back(i);
-						time_span.push_back(j);
+						if (!existsInList(agents_toCompare, i)) {
+							agents_toCompare.push_back(i);
+							time_span.push_back(j);
+						}
 					}
 				}
 			}
@@ -376,4 +390,23 @@ void MAPF::BottleNeck(){
 
 void MAPF::Blocking(){
 
+}
+
+bool MAPF::existsInList(vector<int> list, int val){
+	if (std::find(list.begin(), list.end(), val) != list.end()) return true;
+
+	return false;
+}
+
+//Returns -1 if not found
+int MAPF::getIndexOfAgent(int id){
+	int result = -1;
+	for (unsigned int i = 0; i < players.size(); i++){
+		if (players[i].getId() == id){
+			result = i;
+			break;
+		}
+	}
+
+	return result;
 }

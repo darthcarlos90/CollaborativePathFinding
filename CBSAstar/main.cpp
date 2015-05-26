@@ -7,10 +7,10 @@ int main(void){
 	cout << "Please write the name of the file to read from: " << endl;
 	getline(cin, filename);
 	MAPF m(filename);*/
-	MAPF m("file4.txt"); //Just for debugging Ill hardcode the filename
+	MAPF m("testcaseNarrow.txt"); //Just for debugging Ill hardcode the filename
 	//Load the routes for the entities
 	m.Start(1); //hardoced for now
-	//m.RevisePaths(); //Revise the paths for any conflict, and solve it
+	m.RevisePaths(); //Revise the paths for any conflict, and solve it
 	m.MoveEntities(1);
 	cout << "Finished" << endl;
 	system("pause");
