@@ -92,6 +92,7 @@ void CBTNode::validatePaths(){
 bool CBTNode::findConstraintsConflicts(unsigned int t){
 	bool foundConflict = false;
 	vector<int> participateOnConflict;
+	//TODO: Debug this
 	for (unsigned int toCompareId = 0; toCompareId < paths.size(); toCompareId++){
 		// if the current path that we are analizing has an element on time t
 		if (!foundConflict){
@@ -103,6 +104,7 @@ bool CBTNode::findConstraintsConflicts(unsigned int t){
 					//if the other element being analized, has an element on time t
 					if (!foundConflict){
 						if (paths[i].size() > t){
+							//State machine for detecting this conflict
 							if (toCompare == paths[i][t]){ // There is a conflict
 								conflict.v = toCompare.getLocation();
 								conflict.t = t;
@@ -117,7 +119,17 @@ bool CBTNode::findConstraintsConflicts(unsigned int t){
 									participateOnConflict.push_back(i);
 							} else if (toCompare == paths[i][t + 1] && toCompare1 == paths[i][t]){
 								// We have a conflict
-								//TODO: Solve this conflict
+								conflict.v = toCompare1.getLocation();
+								conflict.t = t + 1;
+								conflict.addUser(toCompareId);
+								conflict.addUser(i);
+								conflict.empty = false;
+								foundConflict = true;
+
+								if (!isAtList(toCompareId, participateOnConflict))
+									participateOnConflict.push_back(toCompareId);
+								if (!isAtList(i, participateOnConflict))
+									participateOnConflict.push_back(i);
 							}
 						}
 					}
