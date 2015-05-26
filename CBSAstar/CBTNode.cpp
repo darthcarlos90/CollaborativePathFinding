@@ -97,6 +97,7 @@ bool CBTNode::findConstraintsConflicts(unsigned int t){
 		if (!foundConflict){
 			if (paths[toCompareId].size() > t){
 				Node toCompare = paths[toCompareId][t];
+				Node toCompare1 = paths[toCompareId][t + 1];
 
 				for (unsigned int i = toCompareId + 1; i < paths.size(); i++){
 					//if the other element being analized, has an element on time t
@@ -114,6 +115,9 @@ bool CBTNode::findConstraintsConflicts(unsigned int t){
 									participateOnConflict.push_back(toCompareId);
 								if (!isAtList(i, participateOnConflict)) 
 									participateOnConflict.push_back(i);
+							} else if (toCompare == paths[i][t + 1] && toCompare1 == paths[i][t]){
+								// We have a conflict
+								//TODO: Solve this conflict
 							}
 						}
 					}
@@ -141,7 +145,9 @@ bool CBTNode::findConstraintsConflicts(unsigned int t){
 				//Create a constraint and push it back into the list
 				if (paths[i].size() > t){
 					Constraint c(i, paths[i][t].getLocation(), t);
+					Constraint c1(i, paths[i][t].getLocation(), t + 1); // Save that element for a time t + 1
 					addConstraint(c);
+					addConstraint(c1);
 				}
 			}
 		}
@@ -151,7 +157,9 @@ bool CBTNode::findConstraintsConflicts(unsigned int t){
 			if (paths[i].size() > t){ // If there is actually a move at time t
 				//save it
 				Constraint c(i, paths[i][t].getLocation(), t);
+				Constraint c1(i, paths[i][t].getLocation(), t + 1); // Save that element for a time t + 1
 				addConstraint(c);
+				addConstraint(c1);
 			}
 		}
 	}

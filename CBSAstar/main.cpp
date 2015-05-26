@@ -9,9 +9,9 @@ int main(void){
 	MAPF m(filename);*/
 	MAPF m("testcaseNarrow.txt"); //Just for debugging Ill hardcode the filename
 	//Load the routes for the entities
-	m.Start(1); //hardoced for now
-	m.RevisePaths(); //Revise the paths for any conflict, and solve it
-	m.MoveEntities(1);
+	m.Start(2); //hardoced for now
+	//m.RevisePaths(); //Revise the paths for any conflict, and solve it
+	m.MoveEntities(2);
 	cout << "Finished" << endl;
 	system("pause");
 	//TODO: When an agent is close to reach the end, it restarts it's search. Check the flags and the lists.

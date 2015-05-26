@@ -471,6 +471,10 @@ int Agent::getSic(){
 }
 
 void Agent::calculateRoute(){
+	time_route.clear();
+	spatial_route.clear();
+	spatial_openList.clear();
+	spatial_closedList.clear();
 	executeSpatialAstar(actualNode, destination);
 	time_route = spatial_route; // Because the route was saved on the spatial route
 	spatial_route.clear();
