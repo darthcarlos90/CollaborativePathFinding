@@ -13,7 +13,7 @@ MAPF::MAPF(string filename){
 	//Create the players using the data from the file
 	for (unsigned int i = 0; i < fr->startings.size(); i++){
 		int D = map->CalculateD();
-		if (i % 2 == 1) D = D / 2;
+		//if (i % 2 == 1) D = D / 2;
 		Location l = fr->startings[i];
 		Location d = fr->endings[i];
 
@@ -233,69 +233,86 @@ void MAPF::NarrowPath(){
 }
 
 void MAPF::solveConflicts(){
-	//Create the constraint tree
-	tree = new ConstraintTree();
-
-	//Create the root node
-	root = new CBTNode();
+	
 
 	// First traverse the list of conflicts
 	for (unsigned int i = 0; i < agent_conflicts.size(); i++){
 		cout << "Conflicts found! Solving them!" << endl;
 		//Now lets solve each conflict 1 by 1
 		Conflicted c = agent_conflicts[i];
-		// Create the elements of the tree and assign them the necesary information
-		
-		// Add the agents and pre-calculated paths
-		for (unsigned int j = 0; j < c.agents.size(); j++){
-			int index = getIndexOfAgent(c.agents[j]);
-			root->addAgent(&players[index]); 
-			//root->AddPath(players[index].getPath());
+
+		switch (c.type){
+		case NARROW_PATH:
+			SolveNarrowPath(c);
+			break;
+		default:
+			DefaultHelper(c);
+			break;
 		}
 
-		
 
-		// Add the constraints from the reservation table to the root node
-		/*vector<Constraint> cons = map->GetReservationTableConstraints();
-		for (unsigned int j = 0; j < cons.size(); j++){
-			root->addConstraint(cons[j]);
-		}*/
+	}
+	
+}
 
-		root->CalculatePaths();
+void MAPF::SolveNarrowPath(Conflicted c){
+	int index = getIndexOfAgent(c.agents[0]);
+	vector<Node> adjacents = players[index].getTimedAdjacents()
+}
 
-		//Set the cost of the node
-		root->calculateCost();
-		
-		//Insert the root to the tree
-		tree->insertRoot(root);
+void MAPF::DefaultHelper(Conflicted c){
+	//Create the constraint tree
+	tree = new ConstraintTree();
 
-		// Now let's find a solution to the routes
-		bool solutionFound = false;
-		
-		//Get the best node of the tree
-		CBTNode *P = tree->getSolution();
-		
-		//While we can't find the solution
-		while (!solutionFound){
-			//Validate the paths until a conflict occurs
-			P->validatePaths();
+	//Create the root node
+	root = new CBTNode();
+	// Create the elements of the tree and assign them the necesary information
 
-			//If it is a goal node, end this, we found the solution
-			if (P->isGoal()) {
-				solutionFound = true;
-				P->UpdateAgentsPaths();
-			}
-			else {
-				P->ExpandNode();
-			}
+	// Add the agents and pre-calculated paths
+	for (unsigned int j = 0; j < c.agents.size(); j++){
+		int index = getIndexOfAgent(c.agents[j]);
+		root->addAgent(&players[index]);
+		root->AddPath(players[index].getPath());
+	}
 
-			P = tree->getSolution(); // Set the best node in the tree to be P
+
+
+	// Add the constraints from the reservation table to the root node
+	vector<Constraint> cons = map->GetReservationTableConstraints();
+	for (unsigned int j = 0; j < cons.size(); j++){
+		root->addConstraint(cons[j]);
+	}
+
+	//Set the cost of the node
+	root->calculateCost();
+
+	//Insert the root to the tree
+	tree->insertRoot(root);
+
+	// Now let's find a solution to the routes
+	bool solutionFound = false;
+
+	//Get the best node of the tree
+	CBTNode *P = tree->getSolution();
+
+	//While we can't find the solution
+	while (!solutionFound){
+		//Validate the paths until a conflict occurs
+		P->validatePaths();
+
+		//If it is a goal node, end this, we found the solution
+		if (P->isGoal()) {
+			solutionFound = true;
+			P->UpdateAgentsPaths();
 		}
-	} 
+		else {
+			P->ExpandNode();
+		}
+
+		P = tree->getSolution(); // Set the best node in the tree to be P
+	}
 	// Finished solving conflicts, empty the list
 	agent_conflicts.clear();
-	
-	
 }
 
 void MAPF::BottleNeck(){

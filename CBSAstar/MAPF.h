@@ -39,9 +39,11 @@ private:
 
 	//Each method consists detects one type of conflict
 	void NarrowPath();
+	void SolveNarrowPath(Conflicted c);
 	void BottleNeck();
 	void Blocking(); // This will be checked when some entity is finished
-	void HeadToHead(); /// When to elements coming from oposite directions try to acces same square
+	void DefaultHelper(Conflicted c);
+	
 
 	//Method that solves the conflicts on the list using CBS
 	void solveConflicts();

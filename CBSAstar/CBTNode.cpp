@@ -98,7 +98,7 @@ bool CBTNode::findConstraintsConflicts(unsigned int t){
 		if (!foundConflict){
 			if (paths[toCompareId].size() > t){
 				Node toCompare = paths[toCompareId][t];
-				Node toCompare1 = paths[toCompareId][t + 1];
+			//	Node toCompare1 = paths[toCompareId][t + 1];
 
 				for (unsigned int i = toCompareId + 1; i < paths.size(); i++){
 					//if the other element being analized, has an element on time t
@@ -117,19 +117,19 @@ bool CBTNode::findConstraintsConflicts(unsigned int t){
 									participateOnConflict.push_back(toCompareId);
 								if (!isAtList(i, participateOnConflict)) 
 									participateOnConflict.push_back(i);
-							} else if (toCompare == paths[i][t + 1] && toCompare1 == paths[i][t]){
-								// We have a conflict
-								conflict.v = toCompare1.getLocation();
-								conflict.t = t + 1;
-								conflict.addUser(toCompareId);
-								conflict.addUser(i);
-								conflict.empty = false;
-								foundConflict = true;
+							//} else if (toCompare == paths[i][t + 1] && toCompare1 == paths[i][t]){
+							//	// We have a conflict
+							//	conflict.v = toCompare1.getLocation();
+							//	conflict.t = t + 1;
+							//	conflict.addUser(toCompareId);
+							//	conflict.addUser(i);
+							//	conflict.empty = false;
+							//	foundConflict = true;
 
-								if (!isAtList(toCompareId, participateOnConflict))
-									participateOnConflict.push_back(toCompareId);
-								if (!isAtList(i, participateOnConflict))
-									participateOnConflict.push_back(i);
+							//	if (!isAtList(toCompareId, participateOnConflict))
+							//		participateOnConflict.push_back(toCompareId);
+							//	if (!isAtList(i, participateOnConflict))
+							//		participateOnConflict.push_back(i);
 							}
 						}
 					}
