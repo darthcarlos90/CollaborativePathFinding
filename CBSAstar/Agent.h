@@ -82,6 +82,18 @@ public:
 	int getX() const { return actualNode.getX(); }
 	int getY() const { return actualNode.getY(); }
 
+	Node getActualLocation() { return actualNode; }
+	Node getDestination() { return destination; }
+
+	bool isOnMyRoute(Node n);
+	void AddNodeToPathAtTimeT(Node n, int t);
+	void ReroutePathUsingSpatialAstar(int time);
+	void modifyMap(vector <Node> otherPath);
+	void MoveToClosestEscapeElement();
+
+	void ReroutePathUsingCBS();
+
+
 	
 
 private:
@@ -90,6 +102,11 @@ private:
 	bool FindNodeAtList(Node n, vector<Node> list); //Find a node at a given list
 	void calculateSIC();
 	void reserveRoute(int starting_time); // To be used in the Silver's Astar
+	/*
+		This method runs a normal Astar algorithm, and stops until an element out
+		of the critical zone is located, and returns that element.
+	*/
+	Node EscapeAstar(); 
 	
 	int id;
 

@@ -37,7 +37,7 @@ public:
 	bool operator < (const CBTNode& n);
 	bool operator > (const CBTNode& n);
 
-	void addAgent(Agent * a);
+	int addAgent(Agent * a);
 	Agent* getAgent(int index){ return agents[index]; }
 	void AddPath(vector<Node> value) { paths.push_back(value); } // For precalculated paths
 	
@@ -46,6 +46,16 @@ public:
 	void RecalculateRoutesOnConstraints();
 
 	void UpdateAgentsPaths(); // This method updates the path of their agents
+
+	//TODO: Create necesary methods for the reroute of the elements
+	//Necesary methods for replanification of routes
+	/*
+		This method replans from the last element in the agents path, till
+		its destination, taking into account the other paths from the other
+		agents in the node.
+		Return an int, that int is the index of the path where it will start rerouting.
+	*/
+	int ReplanAgentFromLastIndex(int agentId);
 
 
 

@@ -481,6 +481,18 @@ void Agent::calculateRoute(){
 	calculateSIC();
 }
 
+void Agent::ReroutePathUsingCBS(){
+	spatial_route.clear();
+	spatial_openList.clear();
+	spatial_closedList.clear();
+	executeSpatialAstar(time_route[time_route.size() - 1], destination);
+	for (unsigned int i = 0; i < spatial_route.size(); i++){
+		time_route.push_back(spatial_route[i]);
+	}
+	spatial_route.clear();
+	calculateSIC();
+}
+
 void Agent::ModifyRouteOnConstraints(vector<Constraint> constraints){
 	
 	for (unsigned int i = 0; i < constraints.size(); i++){
@@ -628,4 +640,110 @@ bool Agent::FindNodeAtList(Node n, vector<Node> list){
 		return true;
 	}
 	return false;
+}
+
+bool Agent::isOnMyRoute(Node n){
+	return FindNodeAtList(n, time_route);
+}
+
+void Agent::AddNodeToPathAtTimeT(Node n, int t){
+	if (time_route.empty()){ // if the route is empty
+		time_route.push_back(n);
+	} else if (t < time_route.size()){
+		vector<Node> result;
+		for (unsigned int i = 0; i < t; i++){
+			result.push_back(time_route[i]);
+		}
+
+		result.push_back(n);
+
+		for (unsigned int i = t; i < time_route.size(); i++){
+			result.push_back(time_route[i]);
+		}
+
+		time_route = result;
+	}
+	else 
+		cout << "Insertion into the route unsuccesfull, stopping" << endl;
+}
+
+void Agent::ReroutePathUsingSpatialAstar(int time){
+	//Erase all the elements after the time stated
+	time_route.erase(time_route.begin() + time, time_route.end());
+	//Run astar until the destination from the new spot
+	TimeSpaceAstarHelper(time_route[time], destination);
+}
+
+// This method modifies the path so that an element outside of the others path is found
+void Agent::modifyMap(vector <Node> otherPath){
+	map->cleanMap();
+	for (unsigned int i = 0; i < otherPath.size(); i++){
+		map->setElement(otherPath[i].getX(), otherPath[i].getY(), 99); // Just a value
+	}
+}
+
+Node Agent::EscapeAstar(){
+	bool pathFound = false;
+	//Let A be the starting point
+	Node A = actualNode;
+	// Assign f, g and h values to A
+	A.setG(0);
+	A.calculateManhattanHeuristic(destination);
+	A.calculateF();
+
+	//Add A to the open list, At this point, A shoul be the only node on the open list
+	spatial_openList.push_back(A);
+
+	Node P;
+	//If the goal was found, break
+	while (!pathFound){
+
+		// If the open list is empty, no path was found, break
+		if (spatial_openList.size() == 0) break;
+
+		//let p be the best node in the open list
+		/*	Since the openList is sorted every time an item is added, then the best
+		option to select is the first item
+		*/
+		P = spatial_openList[0];
+		spatial_closedList.push_back(P);
+		spatial_openList.erase(spatial_openList.begin());
+
+
+		vector<Node> adjacents = getAdjacents(P, destination);
+		for (unsigned int i = 0; i < adjacents.size(); i++){
+			if (adjacents[i].getType() == 0){ // If we found an empty element
+				P = adjacents[i]; // Set it to P
+				pathFound = true; // And break the loop
+				break;
+			}
+			else {// Else, proceed with the normal Astar
+				if (!FindNodeAtList(adjacents[i], spatial_closedList)){
+					if (!FindNodeAtList(adjacents[i], spatial_openList))
+						spatial_openList.push_back(adjacents[i]);
+				}
+			}
+			std::sort(spatial_openList.begin(), spatial_openList.end());
+		}
+	}
+
+	//Once the element has been found, return it
+	return P;
+}
+
+void Agent::MoveToClosestEscapeElement(){
+	//First, lets get the closest excape Element
+	Node escapeNode = EscapeAstar();
+
+	//Now, lets clear the old route that we are no longer using
+	time_route.clear();
+
+	// Now that the route is cleared, we set time t to 0, since we are starting again
+	t = 0;
+
+	// now we restart the search, but we look for the escape Node
+	TimeSpaceAstarHelper(actualNode, escapeNode);
+
+	// Now we have the route to the escape route 
+	
 }

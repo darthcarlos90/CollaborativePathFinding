@@ -220,8 +220,10 @@ void MAPF::NarrowPath(){
 								Conflicted c;
 								c.type = NARROW_PATH;
 								c.agents.push_back(players[toCompare].getId());
+								c.locations.push_back(paths[toCompare][i]);
 								c.agents.push_back(players[index].getId());
-								//c.m.setData(*map->getData()); 
+								c.locations.push_back(paths[index][j]);
+								c.time = i;
 								agent_conflicts.push_back(c); // Add it to the conflicts that need to be solved
 							}
 						}
@@ -256,8 +258,65 @@ void MAPF::solveConflicts(){
 }
 
 void MAPF::SolveNarrowPath(Conflicted c){
+	// Select an element to modify on the conflicted list
 	int index = getIndexOfAgent(c.agents[0]);
-	vector<Node> adjacents = players[index].getTimedAdjacents()
+	vector<Node> adjacents = players[index].getAdjacents(c.locations[0], players[index].getDestination());
+	if (adjacents.size() > 2){ // If the amount of adjacents are bigger than 2, we are on a head to head collision
+		// First, order the adjacents
+		std::sort(adjacents.begin(), adjacents.end());
+		
+		// Now, select the cheaper element that is NOT part of the route
+		for (unsigned int i = 0; i < adjacents.size(); i++){
+			if (!players[c.agents[i]].isOnMyRoute(adjacents[i])){
+				// If that node is not part of the route of the other element
+				players[index].AddNodeToPathAtTimeT(adjacents[i], c.time);
+				// Reroute the path startng from the new position
+				players[index].ReroutePathUsingSpatialAstar(i);
+				break;
+			}	
+		}
+	}
+	else if (adjacents.size() <= 2){ // The elements are bigger than 3, this must be a NARROW PATH
+		// Modify the elements of the players map so a new path could be found
+		players[index].modifyMap(players[c.agents[1]].getPath());
+
+		//See if you are in the other players route
+		if (players[c.agents[1]].isOnMyRoute(players[index].getActualLocation())){
+			//Now, look for the closest element that is not on the route, and move there
+			players[index].MoveToClosestEscapeElement();
+		}
+		else{
+			//Otherwise, the first element of the route is your actual Location
+			players[index].AddNodeToPathAtTimeT(players[index].getActualLocation(), 0);
+		}
+
+		
+
+		//Now we reroute from the actual element to the destination using CBS
+		//First we create the root and the tree
+		//Create the constraint tree
+		tree = new ConstraintTree();
+
+		//Create the root node
+		root = new CBTNode();
+		// Create the elements of the tree and assign them the necesary information
+		// Add the agents and pre-calculated paths
+		int id = root->addAgent(&players[index]); // For later use
+		root->AddPath(players[index].getPath());
+		root->addAgent(&players[c.agents[1]]);
+		root->AddPath(players[c.agents[1]].getPath());
+
+		//Now we can actually recalculate the path
+		int replanIndex = root->ReplanAgentFromLastIndex(id); // and store the index when the replanning started
+
+		/*
+			The critical zone will be called to that zone, where both the agents need to use, in other words,
+			the zone in the map where the deadlock occurs.
+		*/
+		//TODO: Left here
+
+
+	}
 }
 
 void MAPF::DefaultHelper(Conflicted c){

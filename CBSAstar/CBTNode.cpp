@@ -200,12 +200,15 @@ void CBTNode::calculateCost(){
 	}
 }
 
-void CBTNode::addAgent(Agent* a){
+// Adds and returns the id of the element that was recently added
+int CBTNode::addAgent(Agent* a){
 	//Set the id of the agent to its index on the list
 	a->setId(agents.size());
 
 	//Push the agent into the list
 	agents.push_back(a);
+
+	return a->getId();
 }
 
 void CBTNode::RecalculateRoutesOnConstraints(){
@@ -235,4 +238,11 @@ void CBTNode::UpdateAgentsPaths(){
 	for (unsigned int i = 0; i < agents.size(); i++){
 		agents[i]->setPath(paths[i]);
 	}
+}
+
+int CBTNode::ReplanAgentFromLastIndex(int agentId){
+	int result = agents[agentId]->getPath().size() - 1;
+	agents[agentId]->ReroutePathUsingCBS();
+	return result;
+
 }
