@@ -35,6 +35,7 @@ private:
 	void MoveByCBS();
 
 	bool existsInList(vector<int> list, int val);
+	bool NodeExistsOnList(vector<Node> list, Node val);
 	int getIndexOfAgent(int id);
 
 	//Each method consists detects one type of conflict

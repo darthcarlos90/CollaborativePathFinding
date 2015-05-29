@@ -236,31 +236,42 @@ void MAPF::NarrowPath(){
 }
 
 int MAPF::countCriticalZone(Conflicted c, vector<Node>* criticalZoneNodes){
-	vector<Node> path0 = paths[getIndexOfAgent(c.agents[0])];
-	vector<Node> path1 = paths[getIndexOfAgent(c.agents[1])];
+	// Get the indexes of the agents involved on the conflict
+	int index0 = getIndexOfAgent(c.agents[0]);
+	int index1 = getIndexOfAgent(c.agents[1]);
 	
+	//Get the 2 paths of the agents involved
+	vector<Node> path0 = paths[index0];
+	vector<Node> path1 = paths[index1];
+	int result = 0;
+	
+
+	// Traverse through the two paths of the elements
 	for (unsigned int i = 0; i < path0.size(); i++){
 		for (unsigned int j = 0; j < path1.size(); j++){
-			int difference = 1;
-			// TODO: Left here
-			bool equal = true;
+			int difference = 0;
+			bool equal = (path0[i] == path1[j]) && (path0[i] == path1[j]);
 			while (equal){
-				equal = (path0[i + difference] == path1[index][j - difference]);
-				if (difference == 2){
-					// We have a narrow path conflict
-					Conflicted c;
-					c.type = NARROW_PATH;
-					c.agents.push_back(players[toCompare].getId());
-					c.locations.push_back(paths[toCompare][i]);
-					c.agents.push_back(players[index].getId());
-					c.locations.push_back(paths[index][j]);
-					c.time = i;
-					agent_conflicts.push_back(c); // Add it to the conflicts that need to be solved
+				if (criticalZoneNodes) {
+					if (!NodeExistsOnList(*criticalZoneNodes, path0[i + difference])){
+						criticalZoneNodes->push_back(path0[i + difference]);
+					}
+
+					if (!NodeExistsOnList(*criticalZoneNodes, path0[i - difference])){
+						criticalZoneNodes->push_back(path0[i - difference]);
+					}
 				}
-				difference++;
+				difference++; // TODO:: Left here
+				if (j >= difference && i >= difference) 
+					equal = (path0[i + difference] == path1[j - difference]) && (path0[i - difference] == path1[j + difference]);
+				else equal = false;
+				
+				
 			}
 		}
 	}
+
+	return result;
 	
 }
 
@@ -506,6 +517,12 @@ void MAPF::Blocking(){
 }
 
 bool MAPF::existsInList(vector<int> list, int val){
+	if (std::find(list.begin(), list.end(), val) != list.end()) return true;
+
+	return false;
+}
+
+bool MAPF::NodeExistsOnList(vector<Node> list, Node val){
 	if (std::find(list.begin(), list.end(), val) != list.end()) return true;
 
 	return false;
