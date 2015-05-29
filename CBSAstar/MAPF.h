@@ -50,6 +50,9 @@ private:
 	//Method that solves the conflicts on the list using CBS
 	void solveConflicts();
 
+	//CBS helper method so that I don't have to repeat this code over and over again
+	void CBSHelper();
+
 	//TODO: Keep adding more elements throught the development of this project.
 	FileReader* fr;
 	Map* map;

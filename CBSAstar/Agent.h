@@ -93,6 +93,8 @@ public:
 
 	void ReroutePathUsingCBS();
 
+	// Repeats the value at the index, the number of times indicated in the parameter
+	void RepeatStepAtIndex(int index, int times);
 
 	
 

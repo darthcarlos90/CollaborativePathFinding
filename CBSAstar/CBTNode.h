@@ -57,6 +57,12 @@ public:
 	*/
 	int ReplanAgentFromLastIndex(int agentId);
 
+	/*
+		This method will repeat the element at the index right after the one
+		stated on the parameters.
+	*/
+	void WaitAtIndex(int id, int index, int times);
+
 
 
 private:

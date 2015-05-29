@@ -105,6 +105,10 @@ void MAPF::StartCBSPathFinding(){
 	//insert the root into the tree
 	tree->insertRoot(root);
 
+	CBSHelper();
+}
+
+void MAPF::CBSHelper(){
 	bool solutionFound = false;
 	//While we can't find the solution
 	while (!solutionFound){
@@ -235,6 +239,10 @@ void MAPF::NarrowPath(){
 	}
 }
 
+/*
+	This method counts the elements on the critical zone of a conflict, and if a vector is added to
+	it's parameters, the method will add those elements to the vector.
+*/
 int MAPF::countCriticalZone(Conflicted c, vector<Node>* criticalZoneNodes){
 	// Get the indexes of the agents involved on the conflict
 	int index0 = getIndexOfAgent(c.agents[0]);
@@ -250,8 +258,10 @@ int MAPF::countCriticalZone(Conflicted c, vector<Node>* criticalZoneNodes){
 	for (unsigned int i = 0; i < path0.size(); i++){
 		for (unsigned int j = 0; j < path1.size(); j++){
 			int difference = 0;
-			bool equal = (path0[i] == path1[j]) && (path0[i] == path1[j]);
+			bool equal = (path0[i] == path1[j]);
+			if (equal) result++; // If the first element is the same, we have our first node on the list
 			while (equal){
+				// If there is a vector in the parameters, add to it the elements in the critical zone
 				if (criticalZoneNodes) {
 					if (!NodeExistsOnList(*criticalZoneNodes, path0[i + difference])){
 						criticalZoneNodes->push_back(path0[i + difference]);
@@ -261,12 +271,10 @@ int MAPF::countCriticalZone(Conflicted c, vector<Node>* criticalZoneNodes){
 						criticalZoneNodes->push_back(path0[i - difference]);
 					}
 				}
-				difference++; // TODO:: Left here
+				difference++;
 				if (j >= difference && i >= difference) 
 					equal = (path0[i + difference] == path1[j - difference]) && (path0[i - difference] == path1[j + difference]);
 				else equal = false;
-				
-				
 			}
 		}
 	}
@@ -354,12 +362,17 @@ void MAPF::SolveNarrowPath(Conflicted c){
 			The critical zone will be called to that zone, where both the agents need to use, in other words,
 			the zone in the map where the deadlock occurs.
 		*/
-		int criticalZoneLength = NarrowPath(); // get the critical path length
+		int criticalZoneLength = countCriticalZone(c); // get the critical path length
 		// The int obtained above will help us know how many steps to wait until the element is done advancing through the critical path
 
-		for (int x = 0; x < criticalZoneLength; x++){
+		//Now we make the path wait that amount of steps
+		root->WaitAtIndex(id, replanIndex, criticalZoneLength);
 
-		}
+		//Finally, follow the process of CBS to validate the rest of the path
+		tree->insertRoot(root);
+
+		//Now, execute CBS and finish!
+		CBSHelper();
 
 		
 
@@ -396,28 +409,31 @@ void MAPF::DefaultHelper(Conflicted c){
 	//Insert the root to the tree
 	tree->insertRoot(root);
 
-	// Now let's find a solution to the routes
-	bool solutionFound = false;
 
-	//Get the best node of the tree
-	CBTNode *P = tree->getSolution();
+	CBSHelper();
+	//Comented for now, but I believe this does the same as the method above
+	//// Now let's find a solution to the routes
+	//bool solutionFound = false;
 
-	//While we can't find the solution
-	while (!solutionFound){
-		//Validate the paths until a conflict occurs
-		P->validatePaths();
+	////Get the best node of the tree
+	//CBTNode *P = tree->getSolution();
 
-		//If it is a goal node, end this, we found the solution
-		if (P->isGoal()) {
-			solutionFound = true;
-			P->UpdateAgentsPaths();
-		}
-		else {
-			P->ExpandNode();
-		}
+	////While we can't find the solution
+	//while (!solutionFound){
+	//	//Validate the paths until a conflict occurs
+	//	P->validatePaths();
 
-		P = tree->getSolution(); // Set the best node in the tree to be P
-	}
+	//	//If it is a goal node, end this, we found the solution
+	//	if (P->isGoal()) {
+	//		solutionFound = true;
+	//		P->UpdateAgentsPaths();
+	//	}
+	//	else {
+	//		P->ExpandNode();
+	//	}
+
+	//	P = tree->getSolution(); // Set the best node in the tree to be P
+	//}
 	// Finished solving conflicts, empty the list
 	agent_conflicts.clear();
 }

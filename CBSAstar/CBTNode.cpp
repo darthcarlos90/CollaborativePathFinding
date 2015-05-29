@@ -243,6 +243,12 @@ void CBTNode::UpdateAgentsPaths(){
 int CBTNode::ReplanAgentFromLastIndex(int agentId){
 	int result = agents[agentId]->getPath().size() - 1;
 	agents[agentId]->ReroutePathUsingCBS();
+	paths[agentId] = agents[agentId]->getPath(); // Update the path in the tree
 	return result;
 
+}
+
+void CBTNode::WaitAtIndex(int id, int index, int times){
+	agents[id]->RepeatStepAtIndex(index, times);
+	paths[id] = agents[id]->getPath(); // Update the paths otherwise they will get overriden
 }

@@ -747,3 +747,28 @@ void Agent::MoveToClosestEscapeElement(){
 	// Now we have the route to the escape route 
 	
 }
+
+void Agent::RepeatStepAtIndex(int index, int times){
+	//If the index is in the correct ranfge
+	if (index < time_route.size()){
+		vector<Node> temp;
+		// Add all the elements before the index
+		for (unsigned int i = 0; i < index; i++){
+			temp.push_back(time_route[i]);
+		}
+
+		// Add the index element the number of times necesary
+		for (int i = 0; i < times; i++){
+			temp.push_back(time_route[index]);
+		}
+
+		// Add the index element and the rest of the elements
+		for (unsigned int i = index; i < time_route.size(); i++){
+			temp.push_back(time_route[i]);
+		}
+
+		time_route = temp; // reasign the value
+
+	}
+	else cout << "There is an error on the method RepeatStepAtIndex, invalid value" << endl;
+}
