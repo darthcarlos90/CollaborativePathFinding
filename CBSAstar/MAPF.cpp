@@ -203,35 +203,37 @@ void MAPF::RevisePaths(){
 void MAPF::NarrowPath(){
 	//TODO: Add size resrictions
 	
-	int toCompare = 0; // This represent the index of the element we are comparing
-	for (unsigned int index = 1; index < paths.size(); index++){ // this will traverse the second compared element
-		for (unsigned int i = 0; i < paths[toCompare].size() - 2; i++){ // this represents the element on the first agent
-			for (unsigned int j = 0; j < paths[index].size() - 2; j++){ // this represents the element on the second agent
-				int progressiveAccumulator = 0; // To calculate how many progressive steps we can find
-				if (paths[toCompare][i] == paths[index][j]){ // if the elements are equal, lets see if the progress of the route is the same
-					/*
-						If the next element of toCompare, is the element before of the current element
-					*/
-					if (j >= 2){
+	for (unsigned int toCompare = 0; toCompare < paths.size(); toCompare++){ // This represent the index of the element we are comparing
+		for (unsigned int index = toCompare + 1; index < paths.size(); index++){ // this will traverse the second compared element
+			for (int i = 0; i < paths[toCompare].size() - 2; i++){ // this represents the element on the first agent
+				for (int j = 0; j < paths[index].size() - 2; j++){ // this represents the element on the second agent
+					if ((paths[toCompare][i] == paths[index][j]) && (abs(i - j) <= 2)){ // if the elements are equal, lets see if the progress of the route is the same
 						
-						if (paths[toCompare][i + 1] == paths[index][j - 1]){
-							/*
-								Means that the second element is also in each others route, we have a possible
-								bottleneck lets check the tird element.
-								*/
+						/*
+							If the next element of toCompare, is the element before of the current element
+							*/
+						//if (j >= 2){
 
-							if (paths[toCompare][i + 2] == paths[index][j - 2]){
-								// We have a narrow path conflict
-								Conflicted c;
-								c.type = NARROW_PATH;
-								c.agents.push_back(players[toCompare].getId());
-								c.locations.push_back(paths[toCompare][i]);
-								c.agents.push_back(players[index].getId());
-								c.locations.push_back(paths[index][j]);
-								c.time = i;
-								agent_conflicts.push_back(c); // Add it to the conflicts that need to be solved
+							if (paths[toCompare][i + 1] == paths[index][j - 1]){
+								/*
+									Means that the second element is also in each others route, we have a possible
+									bottleneck lets check the tird element.
+									*/
+
+								if (paths[toCompare][i + 2] == paths[index][j - 2]){
+									// We have a narrow path conflict
+									Conflicted c;
+									c.type = NARROW_PATH;
+									c.agents.push_back(players[toCompare].getId());
+									c.locations.push_back(paths[toCompare][i].getLocation());
+									c.agents.push_back(players[index].getId());
+									c.locations.push_back(paths[index][j].getLocation());
+									c.times.push_back(i - 2);
+									c.times.push_back(j + 2);
+									agent_conflicts.push_back(c); // Add it to the conflicts that need to be solved
+								}
 							}
-						}
+						//}
 					}
 				}
 			}
@@ -284,8 +286,6 @@ int MAPF::countCriticalZone(Conflicted c, vector<Node>* criticalZoneNodes){
 }
 
 void MAPF::solveConflicts(){
-	
-
 	// First traverse the list of conflicts
 	for (unsigned int i = 0; i < agent_conflicts.size(); i++){
 		cout << "Conflicts found! Solving them!" << endl;
@@ -309,18 +309,19 @@ void MAPF::solveConflicts(){
 void MAPF::SolveNarrowPath(Conflicted c){
 	// Select an element to modify on the conflicted list
 	int index = getIndexOfAgent(c.agents[0]);
-	vector<Node> adjacents = players[index].getAdjacents(c.locations[0], players[index].getDestination());
+	int otherIndex = getIndexOfAgent(c.agents[1]);
+	vector<Node> adjacents = players[index].getAdjacents2(c.locations[0], c.times[0]);
 	if (adjacents.size() > 2){ // If the amount of adjacents are bigger than 2, we are on a head to head collision
 		// First, order the adjacents
 		std::sort(adjacents.begin(), adjacents.end());
 		
 		// Now, select the cheaper element that is NOT part of the route
 		for (unsigned int i = 0; i < adjacents.size(); i++){
-			if (!players[c.agents[i]].isOnMyRoute(adjacents[i])){
+			if (!players[otherIndex].isOnMyRoute(adjacents[i]) && !players[index].isOnMyRoute(adjacents[i])){
 				// If that node is not part of the route of the other element
-				players[index].AddNodeToPathAtTimeT(adjacents[i], c.time);
+				players[index].AddNodeToPathAtTimeT(adjacents[i], c.times[0]);
 				// Reroute the path startng from the new position
-				players[index].ReroutePathUsingSpatialAstar(i);
+				players[index].ReroutePathUsingSpatialAstar(c.times[0]);
 				break;
 			}	
 		}

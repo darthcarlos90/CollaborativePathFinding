@@ -75,6 +75,7 @@ public:
 		to private.
 	*/
 	std::vector<Node> getAdjacents(Node element, Node ending);
+	std::vector<Node> getAdjacents2(Location location, int time);
 	std::vector<Node> getTimedAdjacents(Node element, int res_time);
 
 	bool finished() { return !active; }

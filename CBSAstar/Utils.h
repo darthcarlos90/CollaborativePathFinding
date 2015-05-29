@@ -102,8 +102,8 @@ struct Conflict{
 struct Conflicted{
 	std::vector<int> agents; //The ids of the agents involved in the conflict detected
 	int type; //The type of the conflict;
-	std::vector<Node> locations; // At what position where the elements when they found the conflict
-	int time; // At what time did the conflict ocurred
+	std::vector<Location> locations; // At what position where the elements when they found the conflict
+	std::vector<int> times; // At what time in each of the elements the incident occured
 	
 	/*
 		Fix: The map is not needed

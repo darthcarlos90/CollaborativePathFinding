@@ -407,6 +407,12 @@ vector<Node> Agent::getAdjacents(Node element, Node ending){
 	return result;
 }
 
+
+vector<Node> Agent::getAdjacents2(Location location,int time){
+	Node n(0,0, location.x, location.y);
+	return getTimedAdjacents(n, time);
+}
+
 //Basically remove all the reserved adjacent nodes
 std::vector<Node> Agent::getTimedAdjacents(Node element, int res_time){
 	//First, get the adjacents of the node
@@ -651,13 +657,13 @@ void Agent::AddNodeToPathAtTimeT(Node n, int t){
 		time_route.push_back(n);
 	} else if (t < time_route.size()){
 		vector<Node> result;
-		for (unsigned int i = 0; i < t; i++){
+		for (unsigned int i = 0; i <= t; i++){
 			result.push_back(time_route[i]);
 		}
 
 		result.push_back(n);
 
-		for (unsigned int i = t; i < time_route.size(); i++){
+		for (unsigned int i = t + 1; i < time_route.size(); i++){
 			result.push_back(time_route[i]);
 		}
 
@@ -669,9 +675,15 @@ void Agent::AddNodeToPathAtTimeT(Node n, int t){
 
 void Agent::ReroutePathUsingSpatialAstar(int time){
 	//Erase all the elements after the time stated
-	time_route.erase(time_route.begin() + time, time_route.end());
+	time_route.erase(time_route.begin() + (time + 2), time_route.end());
 	//Run astar until the destination from the new spot
-	TimeSpaceAstarHelper(time_route[time], destination);
+	time_closedList.clear();
+	time_openList.clear();
+	spatial_closedList.clear();
+	spatial_openList.clear();
+	spatial_route.clear();
+	time_route[time - 1].clearParent(); // Because we are starting from this point
+	TimeSpaceAstarHelper(time_route[time - 1], destination);
 }
 
 // This method modifies the path so that an element outside of the others path is found
