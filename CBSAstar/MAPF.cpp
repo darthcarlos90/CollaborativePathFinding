@@ -198,6 +198,7 @@ void MAPF::RevisePaths(){
 
 void MAPF::NarrowPath(){
 	//TODO: Add size resrictions
+	
 	int toCompare = 0; // This represent the index of the element we are comparing
 	for (unsigned int index = 1; index < paths.size(); index++){ // this will traverse the second compared element
 		for (unsigned int i = 0; i < paths[toCompare].size() - 2; i++){ // this represents the element on the first agent
@@ -208,7 +209,7 @@ void MAPF::NarrowPath(){
 						If the next element of toCompare, is the element before of the current element
 					*/
 					if (j >= 2){
-
+						
 						if (paths[toCompare][i + 1] == paths[index][j - 1]){
 							/*
 								Means that the second element is also in each others route, we have a possible
@@ -232,6 +233,35 @@ void MAPF::NarrowPath(){
 			}
 		}
 	}
+}
+
+int MAPF::countCriticalZone(Conflicted c, vector<Node>* criticalZoneNodes){
+	vector<Node> path0 = paths[getIndexOfAgent(c.agents[0])];
+	vector<Node> path1 = paths[getIndexOfAgent(c.agents[1])];
+	
+	for (unsigned int i = 0; i < path0.size(); i++){
+		for (unsigned int j = 0; j < path1.size(); j++){
+			int difference = 1;
+			// TODO: Left here
+			bool equal = true;
+			while (equal){
+				equal = (path0[i + difference] == path1[index][j - difference]);
+				if (difference == 2){
+					// We have a narrow path conflict
+					Conflicted c;
+					c.type = NARROW_PATH;
+					c.agents.push_back(players[toCompare].getId());
+					c.locations.push_back(paths[toCompare][i]);
+					c.agents.push_back(players[index].getId());
+					c.locations.push_back(paths[index][j]);
+					c.time = i;
+					agent_conflicts.push_back(c); // Add it to the conflicts that need to be solved
+				}
+				difference++;
+			}
+		}
+	}
+	
 }
 
 void MAPF::solveConflicts(){
@@ -313,7 +343,14 @@ void MAPF::SolveNarrowPath(Conflicted c){
 			The critical zone will be called to that zone, where both the agents need to use, in other words,
 			the zone in the map where the deadlock occurs.
 		*/
-		//TODO: Left here
+		int criticalZoneLength = NarrowPath(); // get the critical path length
+		// The int obtained above will help us know how many steps to wait until the element is done advancing through the critical path
+
+		for (int x = 0; x < criticalZoneLength; x++){
+
+		}
+
+		
 
 
 	}

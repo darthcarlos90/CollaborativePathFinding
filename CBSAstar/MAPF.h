@@ -38,12 +38,13 @@ private:
 	int getIndexOfAgent(int id);
 
 	//Each method consists detects one type of conflict
-	void NarrowPath();
+	void NarrowPath(); // returns the length of the critical path
 	void SolveNarrowPath(Conflicted c);
 	void BottleNeck();
 	void Blocking(); // This will be checked when some entity is finished
 	void DefaultHelper(Conflicted c);
 	
+	int countCriticalZone(Conflicted c, vector <Node>* criticalZoneNodes = NULL);
 
 	//Method that solves the conflicts on the list using CBS
 	void solveConflicts();
