@@ -14,8 +14,8 @@ public:
 	void SetDestination(Node n) { destination = n; }
 
 
-	void setD(int val) { d = val; }
-	int getD() { return d; }
+	void setD(int val) { steps_limit = val; }
+	int getD() { return steps_limit; }
 
 	int getId() { return id; }
 	void setId(int new_id) { id = new_id; }
@@ -118,7 +118,7 @@ private:
 
 	Map* map;
 	
-	unsigned int d;
+	unsigned int steps_limit;
 
 	bool active;	
 

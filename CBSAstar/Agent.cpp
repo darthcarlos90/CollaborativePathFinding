@@ -7,7 +7,7 @@ actualNode(location)
 	map = m;
 	active = true;
 	this->id = id;
-	this->d = D;
+	this->steps_limit = D;
 	this->destination = destination;
 	replan = false;
 	tempD = 0;
@@ -100,7 +100,7 @@ void Agent::move(){
 	otherwise, continue advancing.
 	*/
 	
-	if (stepsTaken < d){
+	if (stepsTaken < steps_limit){
 		t++;
 		if (actualNode == destination) {
 			active = false; //we reached the end of the route 
@@ -116,7 +116,7 @@ void Agent::move(){
 		if (!active) cout << " This element is finished.";
 		cout << endl;
 	}
-	else if(stepsTaken == d){
+	else if(stepsTaken == steps_limit){
 		if (id == 4){
 			int something = 1;
 		}
@@ -128,7 +128,7 @@ void Agent::move(){
 		- Now use Heuristic distances (I still can't understand why, but thats what the paper says :S)
 		*/
 		if (replan){
-			d = tempD;
+			steps_limit = tempD;
 			tempD = 0;
 			replan = false;
 			active = true;
@@ -172,6 +172,7 @@ void Agent::executeTimeSpaceAstar(){
 
 void Agent::TimeSpaceAstarHelper(Node start, Node finish){	
 	int time = t + 1;
+	int initialTime = t + 1; // To keep track of the starting point
 	/*
 	Step 1: Calculate the route.
 	- Calculate the route using regular Astar, BUT the H used on every node will be
@@ -209,7 +210,7 @@ void Agent::TimeSpaceAstarHelper(Node start, Node finish){
 		A.setH(0);
 		A.calculateF();
 		//If finished, stay the next seven steps where you are, unless someone needs to pass
-		for (unsigned int i = 0; i < d; i++){
+		for (unsigned int i = 0; i < steps_limit; i++){
 			//if someone needs to use your space
 			if (map->isReserved(start, time + i, id)){
 				//move out
@@ -234,9 +235,10 @@ void Agent::TimeSpaceAstarHelper(Node start, Node finish){
 				- Set active to true, so that the element starts using Astar to go back to its place.
 				*/
 				active = true; //set to active, so the element can come back to its position after its finished
-				tempD = d;
-				d = time_route.size(); // so you can progress the next time
+				tempD = steps_limit;
+				steps_limit = time_route.size(); // so you can progress the next time
 				replan = true;// so you can start pathfinding from that point
+				t = time;
 				break;// exit method;
 			}
 
@@ -247,11 +249,13 @@ void Agent::TimeSpaceAstarHelper(Node start, Node finish){
 				time++;
 			}
 		}
+
+		t = time; // update the value of t for future references
 	}
 	// If not finished, proceed to do the other normal stuff.
 	else {
 
-		int counter = d; //Thsi counter will help us find a partial path
+		int counter = steps_limit; //Thsi counter will help us find a partial path
 		//if the open list is empty, or the goal was found, quit
 		while (!pathFound){
 			if (time_openList.empty()) break; // If the open list is empty, no path found
@@ -289,7 +293,7 @@ void Agent::TimeSpaceAstarHelper(Node start, Node finish){
 			if (counter == 0){ //If the counter reached 0
 				//Check for any partial path
 				for (unsigned int i = 0; i < time_closedList.size(); i++){
-					if (time_closedList[i].getDepth() >= d){
+					if (time_closedList[i].getDepth() >= steps_limit){
 						// A partial path was found
 						partial_path_nodes.push_back(time_closedList[i]);
 					}
@@ -300,7 +304,7 @@ void Agent::TimeSpaceAstarHelper(Node start, Node finish){
 					break;
 				}
 				//Reset the counter in case no partial paths where found
-				counter = d/2; //but make it smaller
+				//counter = d/2; //but make it smaller
 			}
 		}
 
@@ -308,7 +312,7 @@ void Agent::TimeSpaceAstarHelper(Node start, Node finish){
 		Step 2: Once the route has been found, reserve your path.
 		- Only reserve the blocks of your path where nPath <= steps
 		*/
-
+		
 		//If we have a partial path, populate the route with the path
 		if (partial_path_nodes.size() > 0){
 			//If we have more than 1 partial path, lets decide
@@ -363,10 +367,11 @@ void Agent::TimeSpaceAstarHelper(Node start, Node finish){
 		for (int i = temp.size() - 1; i >= 0; i--){
 			time_route.push_back(temp[i]);
 		}
-
+		t = time; //update the value of t
 		
 		// Now that we have a route, reserve it
-		reserveRoute(t + 1);
+		reserveRoute(initialTime);
+		
 	}
 
 	
@@ -436,12 +441,14 @@ std::vector<Node> Agent::getTimedAdjacents(Node element, int res_time){
 		result[i].calculateG();
 		result[i].calculateF();
 	}
-	//If a reserved element was found, give the option of stay on your place
+	//If a reserved element was found, give the option of stay on your place (Only if it is available)
 	if (reservedElement){
-		element.setG(10);
-		calculateRealHeuristic(&element, destination);
-		element.calculateF();
-		result.push_back(element);
+		if (!map->isReserved(element, res_time, id)){
+			element.setG(10);
+			calculateRealHeuristic(&element, destination);
+			element.calculateF();
+			result.push_back(element);
+		}
 	}
 
 	return result;
@@ -560,15 +567,15 @@ void Agent::reserveRoute(int starting_time){
 	unsigned int reserved_index = 0;
 
 	//If the route is smaller than d, just fill up the rest of the steps with your destination
-	if (time_route.size() < d){
+	if (time_route.size() < steps_limit){
 		Node n = time_route[time_route.size() - 1];
-		while (time_route.size() < d){
+		while (time_route.size() < steps_limit){
 			time_route.push_back(n);
 		}
 	}
 
 	//Traverse the route untill d steps
-	for (unsigned int i = 0; i < d; i++){
+	for (unsigned int i = 0; i < steps_limit; i++){
 
 		//Check if the node is reserved for this given time
 		if (map->isReserved(time_route[i], reservation_time, id)){
@@ -624,16 +631,25 @@ void Agent::reserveRoute(int starting_time){
 		}
 
 		//Set the replan flag on
-		replan = true;
-		tempD = d;
-		d = time_route.size();
+		/*replan = true;
+		tempD = steps_limit;
+		steps_limit = time_route.size();*/
+
+		/*
+			Fix: We are now going to replan the route from this point.
+			Date: 31/05/2015
+			Why?
+			Because it is necesary for a more efficient detection of deadlocks.
+		*/
+		t = reservation_time; // decrease the time to the time where we left
+		TimeSpaceAstarHelper(time_route[time_route.size() - 1], destination);
 
 	}
 	else{
 		/*
 			Now that the route has been replaned, we can now remove all the elements after d
 		*/
-		while (time_route.size() > d){
+		while (time_route.size() > steps_limit){
 			time_route.pop_back();
 		}
 	}
