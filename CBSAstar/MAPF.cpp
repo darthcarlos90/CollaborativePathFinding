@@ -201,14 +201,12 @@ void MAPF::RevisePaths(){
 }
 
 void MAPF::NarrowPath(){
-	//TODO: Add size resrictions
 	
 	for (unsigned int toCompare = 0; toCompare < paths.size(); toCompare++){ // This represent the index of the element we are comparing
 		for (unsigned int index = toCompare + 1; index < paths.size(); index++){ // this will traverse the second compared element
 			for (int i = 0; i < paths[toCompare].size() - 2; i++){ // this represents the element on the first agent
 				for (int j = 0; j < paths[index].size() - 2; j++){ // this represents the element on the second agent
-					if ((paths[toCompare][i] == paths[index][j]) && (abs(i - j) <= 2)){ // if the elements are equal, lets see if the progress of the route is the same
-						
+					if ((paths[toCompare][i] == paths[index][j]) && (abs(i - j) <= 2)){ // if the elements are equal, lets see if the progress of the route is the same	
 						/*
 							If the next element of toCompare, is the element before of the current element
 							*/
