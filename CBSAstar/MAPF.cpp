@@ -186,7 +186,7 @@ void MAPF::RevisePaths(){
 	cout << "Checking the path for any conflict" << endl;
 	
 	//First, check for the Narrow Path conflict
-	NarrowPath();
+	HeadToHead();
 
 	//Now that the narrow path conflicts where found, lets solve them
 	solveConflicts();
@@ -200,7 +200,7 @@ void MAPF::RevisePaths(){
 	
 }
 
-void MAPF::NarrowPath(){
+void MAPF::HeadToHead(){
 	
 	for (unsigned int toCompare = 0; toCompare < paths.size(); toCompare++){ // This represent the index of the element we are comparing
 		for (unsigned int index = toCompare + 1; index < paths.size(); index++){ // this will traverse the second compared element
@@ -221,7 +221,7 @@ void MAPF::NarrowPath(){
 								if (paths[toCompare][i + 2] == paths[index][j - 2]){
 									// We have a narrow path conflict
 									Conflicted c;
-									c.type = NARROW_PATH;
+									c.type = HEAD_TO_HEAD;
 									c.agents.push_back(players[toCompare].getId());
 									c.locations.push_back(paths[toCompare][i].getLocation());
 									c.agents.push_back(players[index].getId());
@@ -291,8 +291,8 @@ void MAPF::solveConflicts(){
 		Conflicted c = agent_conflicts[i];
 
 		switch (c.type){
-		case NARROW_PATH:
-			SolveNarrowPath(c);
+		case HEAD_TO_HEAD:
+			SolveHeadToHead(c);
 			break;
 		default:
 			DefaultHelper(c);
@@ -304,7 +304,7 @@ void MAPF::solveConflicts(){
 	
 }
 
-void MAPF::SolveNarrowPath(Conflicted c){
+void MAPF::SolveHeadToHead(Conflicted c){
 	// Select an element to modify on the conflicted list
 	int index = getIndexOfAgent(c.agents[0]);
 	int otherIndex = getIndexOfAgent(c.agents[1]);
