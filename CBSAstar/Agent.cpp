@@ -186,6 +186,15 @@ void Agent::TimeSpaceAstarHelper(Node start, Node finish){
 	A.setG(10);
 	calculateRealHeuristic(&A, finish);
 	A.calculateF();
+	/*
+		Fix: We need to also reserve the starting node of each of the agents.
+		Date: 01/06/2015
+		Why?
+		Because this could lead to other elements illegally moving to the starting point
+		in a given time.
+	*/
+	map->reserve(t, start, id);
+	map->reserve(time, start, id);
 	time_openList.push_back(A); //We put it on the open list
 	Node P;
 	

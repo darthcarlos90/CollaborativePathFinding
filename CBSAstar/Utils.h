@@ -13,7 +13,7 @@
 */
 
 enum conflict_type{
-	HEAD_TO_HEAD, BOTTLENECK, BLOCKING
+	DEADLOCK, BLOCKING
 };
 
 /*

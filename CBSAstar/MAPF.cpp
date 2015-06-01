@@ -186,21 +186,14 @@ void MAPF::RevisePaths(){
 	cout << "Checking the path for any conflict" << endl;
 	
 	//First, check for the Narrow Path conflict
-	HeadToHead();
+	Deadlock();
 
 	//Now that the narrow path conflicts where found, lets solve them
 	solveConflicts();
-
-	// Now that several routes have been changed, lets check for another conflict type, bottleneck
-	//BottleNeck();
-
-	// We solve again the conflics (if there where any)
-	//solveConflicts();
-
 	
 }
 
-void MAPF::HeadToHead(){
+void MAPF::Deadlock(){
 	
 	for (unsigned int toCompare = 0; toCompare < paths.size(); toCompare++){ // This represent the index of the element we are comparing
 		for (unsigned int index = toCompare + 1; index < paths.size(); index++){ // this will traverse the second compared element
@@ -210,7 +203,7 @@ void MAPF::HeadToHead(){
 						/*
 							If the next element of toCompare, is the element before of the current element
 							*/
-						//if (j >= 2){
+						if (j >= 2){ // This is needed in order to ensure the correct index is compared
 
 							if (paths[toCompare][i + 1] == paths[index][j - 1]){
 								/*
@@ -221,7 +214,7 @@ void MAPF::HeadToHead(){
 								if (paths[toCompare][i + 2] == paths[index][j - 2]){
 									// We have a narrow path conflict
 									Conflicted c;
-									c.type = HEAD_TO_HEAD;
+									c.type = DEADLOCK;
 									c.agents.push_back(players[toCompare].getId());
 									c.locations.push_back(paths[toCompare][i].getLocation());
 									c.agents.push_back(players[index].getId());
@@ -231,7 +224,7 @@ void MAPF::HeadToHead(){
 									agent_conflicts.push_back(c); // Add it to the conflicts that need to be solved
 								}
 							}
-						//}
+						}
 					}
 				}
 			}
@@ -291,8 +284,8 @@ void MAPF::solveConflicts(){
 		Conflicted c = agent_conflicts[i];
 
 		switch (c.type){
-		case HEAD_TO_HEAD:
-			SolveHeadToHead(c);
+		case DEADLOCK:
+			SolveDeadLock(c);
 			break;
 		default:
 			DefaultHelper(c);
@@ -304,7 +297,7 @@ void MAPF::solveConflicts(){
 	
 }
 
-void MAPF::SolveHeadToHead(Conflicted c){
+void MAPF::SolveDeadLock(Conflicted c){
 	// Select an element to modify on the conflicted list
 	int index = getIndexOfAgent(c.agents[0]);
 	int otherIndex = getIndexOfAgent(c.agents[1]);
@@ -437,95 +430,6 @@ void MAPF::DefaultHelper(Conflicted c){
 	agent_conflicts.clear();
 }
 
-void MAPF::BottleNeck(){
-	// 1 for loop to get the elements to compare
-	for (unsigned int toCompare = 0; toCompare < players.size(); toCompare++){
-		vector<int> agents_toCompare;
-		vector<int> time_span;
-		// for loop to get the elements in the path of the aget toCompare
-		for (unsigned int index = 0; index < players[toCompare].getPath().size(); index++){
-			// for loop to get the agent that is being compared
-			for (unsigned int i = toCompare + 1; i < players.size(); i++){
-				//for loop for the element of the path being compared
-				for (unsigned int j = 0; j < players[i].getPath().size(); j++){
-					// Look which elements have the same path time
-					if (players[toCompare].getPath()[index] == players[i].getPath()[j]){
-						if (!existsInList(agents_toCompare, i)) {
-							agents_toCompare.push_back(i);
-							time_span.push_back(j);
-						}
-					}
-				}
-			}
-			// Now, we have all the elements that go to the same node as the one located on index
-			//If there are more than 3 elements going through that node ....
-			if (agents_toCompare.size() > 3){
-				vector<int> toSort = time_span;
-				std::sort(toSort.begin(), toSort.end()); // sort the elements
-				vector<int> result;
-				int index = 0;
-				// See which elements are on the bottleneck (s)
-				for (unsigned int i = 1; i < toSort.size(); i++){
-					int difference = abs(toSort[index] - toSort[i]);
-					if (difference >= 0 && difference <= 2){
-						result.push_back(toSort[index]);
-						result.push_back(toSort[i]);
-					}
-
-					index++;
-				}
-				Conflicted ce;
-				ce.type = BOTTLENECK;
-
-				/*
-					See the fix done at the utils .h file. For now, no map adding.
-				*/
-				//Creating the submap
-				//vector<int> result_id;
-				//vector<int> result_time;
-				for (unsigned int i = 0; i < result.size(); i++){
-					// Look for element i in the time_span vector
-					for (unsigned int j = 0; j < time_span.size(); j++){
-						// When the element is found
-						if (result[i] == time_span[j]){
-							//result_id.push_back(agents_toCompare[j]);
-							ce.agents.push_back(agents_toCompare[j]);
-							//result_time.push_back(agents_toCompare[j]);
-							break;
-						}
-					}
-				}
-
-				// Now we have the participants on the constraint
-				/*Location lowerLocation = players[result_id[0]].getPath()[result_time[0] - 1].getLocation();
-				Location upperLocation = players[result_id[0]].getPath()[result_time[0] - 1].getLocation();
-				for (unsigned int i = 1; i < result_id.size(); i++){
-					Location l = players[result_id[i]].getPath()[result_time[i] - 1].getLocation();
-					if (l.x < lowerLocation.x){
-						lowerLocation.x = l.x;
-					}
-					else if (l.x > upperLocation.x){
-						upperLocation.x = l.x;
-					}
-
-					if (l.y < lowerLocation.y){
-						lowerLocation.y = l.y;
-					}
-					else if (l.y > upperLocation.y){
-						upperLocation.y = l.y;
-					}
-				}*/
-
-				// Create the submap in base of the locations given
-				//ce.m.setData(map->getSubData(lowerLocation.x, lowerLocation.y, upperLocation.x, upperLocation.y));
-
-				// Finally, add the conclicted class to the list
-				agent_conflicts.push_back(ce);
-			}
-
-		}
-	}
-}
 
 void MAPF::Blocking(){
 

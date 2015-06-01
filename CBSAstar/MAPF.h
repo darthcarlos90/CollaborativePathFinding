@@ -39,9 +39,8 @@ private:
 	int getIndexOfAgent(int id);
 
 	//Each method consists detects one type of conflict
-	void HeadToHead(); // returns the length of the critical path
-	void SolveHeadToHead(Conflicted c);
-	void BottleNeck();
+	void Deadlock(); // returns the length of the critical path
+	void SolveDeadLock(Conflicted c);
 	void Blocking(); // This will be checked when some entity is finished
 	void DefaultHelper(Conflicted c);
 	
