@@ -457,8 +457,6 @@ std::vector<Node> Agent::getTimedAdjacents(Node element, int res_time){
 
 
 
-
-
 void Agent::setTime(int time_to_set){
 	t = time_to_set;
 
