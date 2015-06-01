@@ -117,9 +117,6 @@ void Agent::move(){
 		cout << endl;
 	}
 	else if(stepsTaken == steps_limit){
-		if (id == 4){
-			int something = 1;
-		}
 		/*
 		Step 4: If the d has been reached:
 		- If the destination has been reached:
@@ -194,7 +191,6 @@ void Agent::TimeSpaceAstarHelper(Node start, Node finish){
 		in a given time.
 	*/
 	map->reserve(t, start, id);
-	map->reserve(time, start, id);
 	time_openList.push_back(A); //We put it on the open list
 	Node P;
 	
@@ -231,9 +227,9 @@ void Agent::TimeSpaceAstarHelper(Node start, Node finish){
 				
 				//Lets see which element is not reserved and reserve it
 				for (unsigned int j = 0; j < adjacents.size(); j++){
-					if (!map->isReserved(adjacents[i], time, id)){
-						time_route.push_back(adjacents[i]);//set to the route the closest element
-						map->reserve(time, adjacents[i], id);
+					if (!map->isReserved(adjacents[j], time, id)){
+						time_route.push_back(adjacents[j]);//set to the route the closest element
+						map->reserve(time, adjacents[j], id);
 						break;
 					}
 					
@@ -247,7 +243,8 @@ void Agent::TimeSpaceAstarHelper(Node start, Node finish){
 				tempD = steps_limit;
 				steps_limit = time_route.size(); // so you can progress the next time
 				replan = true;// so you can start pathfinding from that point
-				t = time;
+				//TODO: Fixed for now
+				//t = time;
 				break;// exit method;
 			}
 
@@ -259,7 +256,8 @@ void Agent::TimeSpaceAstarHelper(Node start, Node finish){
 			}
 		}
 
-		t = time; // update the value of t for future references
+		//TODO: FIxed for now ..
+		//t = time; // update the value of t for future references
 	}
 	// If not finished, proceed to do the other normal stuff.
 	else {
@@ -376,7 +374,8 @@ void Agent::TimeSpaceAstarHelper(Node start, Node finish){
 		for (int i = temp.size() - 1; i >= 0; i--){
 			time_route.push_back(temp[i]);
 		}
-		t = time; //update the value of t
+		// TODO: Updated for now
+		//t = time; //update the value of t
 		
 		// Now that we have a route, reserve it
 		reserveRoute(initialTime);
@@ -470,6 +469,10 @@ void Agent::setTime(int time_to_set){
 	t = time_to_set;
 
 	//Why dis??
+	/*
+		This was executed so that after the time that was passed, the element
+		stayed in the same place in the route.
+	*/
 	for (int i = 0; i < t; i++){
 		time_route.push_back(actualNode);
 	}
@@ -562,6 +565,8 @@ void Agent::moveEntity(unsigned int t){
 			active = false;
 		}
 	}
+
+	this->t = t;
 }
 
 // The starting time means the time t where the agent will start moving
@@ -648,7 +653,9 @@ void Agent::reserveRoute(int starting_time){
 			Why?
 			Because it is necesary for a more efficient detection of deadlocks.
 		*/
-		t = reservation_time; // decrease the time to the time where we left
+		//TODO: Fixed for later
+		//TODO: Left here, fix the damn thing that makes the blocking the other thing
+		//t = reservation_time; // decrease the time to the time where we left
 		TimeSpaceAstarHelper(time_route[time_route.size() - 1], destination);
 
 	}
@@ -767,7 +774,7 @@ Node Agent::EscapeAstar(){
 }
 
 void Agent::MoveToClosestEscapeElement(){
-	//First, lets get the closest excape Element
+	//First, lets get the closest escape Element
 	Node escapeNode = EscapeAstar();
 
 	//Now, lets clear the old route that we are no longer using
