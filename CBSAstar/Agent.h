@@ -90,14 +90,16 @@ public:
 	void AddNodeToPathAtTimeT(Node n, int t);
 	void ReroutePathUsingSpatialAstar(int time);
 	void modifyMap(vector <Node> otherPath);
-	void MoveToClosestEscapeElement();
+	void MoveToClosestEscapeElement(bool keepRoute);
 
 	void ReroutePathUsingCBS();
 
 	// Repeats the value at the index, the number of times indicated in the parameter
 	void RepeatStepAtIndex(int index, int times);
 
-	
+	void PushElementAtTheBackOfRoute(Node val);
+	unsigned int pathSize() { return time_route.size(); }
+
 
 private:
 	//Helper functions

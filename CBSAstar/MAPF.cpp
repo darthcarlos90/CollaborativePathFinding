@@ -184,12 +184,13 @@ void MAPF::MoveByCBS(){
 //This method will check for any conflicts with the paths of the agents
 void MAPF::RevisePaths(){
 	cout << "Checking the path for any conflict" << endl;
-	
-	//First, check for the Narrow Path conflict
-	Deadlock();
-
-	//Now that the narrow path conflicts where found, lets solve them
-	solveConflicts();
+	/*
+		Fix: Also remove the part where the dead lock is solved by some other element.
+		Date:02/06/2015
+		Why?
+		Because turns out, silvers algorithm already solves the deadlock issue, so there is no point
+		of redoing the stuff.
+	*/
 	
 }
 
@@ -287,6 +288,12 @@ void MAPF::solveConflicts(){
 		case DEADLOCK:
 			SolveDeadLock(c);
 			break;
+		case BLOCKING_COMPLEX:
+			SolveBlockingComplex(c);
+			break;
+		case BLOCKING_SIMPLE:
+			SolveBlockingSimple(c);
+			break;
 		default:
 			DefaultHelper(c);
 			break;
@@ -324,7 +331,7 @@ void MAPF::SolveDeadLock(Conflicted c){
 		//See if you are in the other players route
 		if (players[c.agents[1]].isOnMyRoute(players[index].getActualLocation())){
 			//Now, look for the closest element that is not on the route, and move there
-			players[index].MoveToClosestEscapeElement();
+			players[index].MoveToClosestEscapeElement(false);
 		}
 		else{
 			//Otherwise, the first element of the route is your actual Location
@@ -365,9 +372,6 @@ void MAPF::SolveDeadLock(Conflicted c){
 
 		//Now, execute CBS and finish!
 		CBSHelper();
-
-		
-
 
 	}
 }
@@ -432,6 +436,55 @@ void MAPF::DefaultHelper(Conflicted c){
 
 
 void MAPF::Blocking(){
+	for (unsigned int i = 0; i < players.size(); i++){ // This is to traverse through the players
+		Node destination = players[i].getDestination();
+		for (unsigned int j = i + 1; j < paths.size(); j++){ // This is to traverse the paths
+			if (NodeExistsOnList(paths[j], destination)){
+				// If the element is on the list, check if player i will arrive to its destination before player j
+				int timeOcurrance = GetIndexAtArray(paths[j], destination);
+				if ( timeOcurrance > paths[i].size()){
+					/*
+						If the player j needs to acces players i destination point after player i is finished,
+						then we have a conflict. Now we need to check if it is a simple conflict or a complex conflict.
+					*/
+					Conflicted c;
+					//The first player to be added is the player that needs to move
+					c.agents.push_back(players[i].getId());
+					c.locations.push_back(destination.getLocation());
+					c.times.push_back(timeOcurrance);
+					
+					if (map->adjacentHelper(destination).size() > 2){
+						// If there are more than 2 adjacents to this node, we have a simple blocking state
+						c.type = BLOCKING_SIMPLE;
+					} else{
+						// Else, we have a narrowpath blocking
+						c.type = BLOCKING_COMPLEX;
+					}
+
+					agent_conflicts.push_back(c); // Add it to the conflicts that need to be solved
+				}
+			}
+		}
+
+	}
+}
+
+void MAPF::SolveBlockingSimple(Conflicted c){
+	int index = getIndexOfAgent(c.agents[0]); // Get the index of the agent we are going to use
+	if (paths[index].size() < c.times[0]){ // If at the time stated, the element is just waiting there
+		// Fill the path with the destination until the time t is reached
+		while (players[index].pathSize() < c.times[0]){
+			players[index].PushElementAtTheBackOfRoute(players[index].getDestination());
+		}
+	}
+
+	// TODO: Left here by solving the blocking problem with the algorithm that is on my notebook
+
+
+
+}
+
+void MAPF::SolveBlockingComplex(Conflicted c){
 
 }
 
@@ -445,6 +498,18 @@ bool MAPF::NodeExistsOnList(vector<Node> list, Node val){
 	if (std::find(list.begin(), list.end(), val) != list.end()) return true;
 
 	return false;
+}
+
+int MAPF::GetIndexAtArray(vector<Node> list, Node val){
+	int result = -1;
+	for (int i = 0; i < list.size(); i++){
+		if (val == list[i]){
+			result = i;
+			break;
+		}
+	}
+
+	return result;
 }
 
 //Returns -1 if not found

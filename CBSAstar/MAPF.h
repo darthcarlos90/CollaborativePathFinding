@@ -41,10 +41,13 @@ private:
 	//Each method consists detects one type of conflict
 	void Deadlock(); // returns the length of the critical path
 	void SolveDeadLock(Conflicted c);
-	void Blocking(); // This will be checked when some entity is finished
+	void Blocking(); // Detects if a finished element blocks the path of another element
+	void SolveBlockingSimple( Conflicted c); // Solves the blocking 
+	void SolveBlockingComplex(Conflicted c);
 	void DefaultHelper(Conflicted c);
 	
 	int countCriticalZone(Conflicted c, vector <Node>* criticalZoneNodes = NULL);
+	int GetIndexAtArray(vector<Node> list, Node val); //This searches element by element, so first make sure the element is there
 
 	//Method that solves the conflicts on the list using CBS
 	void solveConflicts();

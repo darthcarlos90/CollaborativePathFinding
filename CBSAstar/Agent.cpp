@@ -579,15 +579,19 @@ void Agent::reserveRoute(int starting_time){
 	unsigned int reserved_index = 0;
 
 	//If the route is smaller than d, just fill up the rest of the steps with your destination
-	if (time_route.size() < steps_limit){
+	//TODO: CHeck if this change will be permanent
+	/*if (time_route.size() < steps_limit){
 		Node n = time_route[time_route.size() - 1];
 		while (time_route.size() < steps_limit){
 			time_route.push_back(n);
 		}
-	}
+	}*/
 
 	//Traverse the route untill d steps
-	for (unsigned int i = 0; i < steps_limit; i++){
+	int limit = 0;
+	if (steps_limit > time_route.size()) limit = time_route.size();
+	else limit = steps_limit;
+	for (unsigned int i = 0; i < limit; i++){
 
 		//Check if the node is reserved for this given time
 		if (map->isReserved(time_route[i], reservation_time, id)){
@@ -773,12 +777,12 @@ Node Agent::EscapeAstar(){
 	return P;
 }
 
-void Agent::MoveToClosestEscapeElement(){
+void Agent::MoveToClosestEscapeElement(bool KeepRoute){
 	//First, lets get the closest escape Element
 	Node escapeNode = EscapeAstar();
 
-	//Now, lets clear the old route that we are no longer using
-	time_route.clear();
+	//Now, if you dont want to keep the route, clear it
+	if (!KeepRoute)	time_route.clear();
 
 	// Now that the route is cleared, we set time t to 0, since we are starting again
 	t = 0;
@@ -813,4 +817,9 @@ void Agent::RepeatStepAtIndex(int index, int times){
 
 	}
 	else cout << "There is an error on the method RepeatStepAtIndex, invalid value" << endl;
+}
+
+
+void Agent::PushElementAtTheBackOfRoute(Node val){
+	time_route.push_back(val);
 }

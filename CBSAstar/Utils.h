@@ -13,7 +13,7 @@
 */
 
 enum conflict_type{
-	DEADLOCK, BLOCKING
+	DEADLOCK, BLOCKING_SIMPLE, BLOCKING_COMPLEX
 };
 
 /*
