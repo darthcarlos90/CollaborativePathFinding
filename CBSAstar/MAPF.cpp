@@ -192,6 +192,9 @@ void MAPF::RevisePaths(){
 		of redoing the stuff.
 	*/
 	
+	Blocking();
+	solveConflicts();
+	
 }
 
 void MAPF::Deadlock(){
@@ -331,7 +334,7 @@ void MAPF::SolveDeadLock(Conflicted c){
 		//See if you are in the other players route
 		if (players[c.agents[1]].isOnMyRoute(players[index].getActualLocation())){
 			//Now, look for the closest element that is not on the route, and move there
-			players[index].MoveToClosestEscapeElement(false);
+			players[index].MoveToClosestEscapeElement(false, players[index].getActualLocation());
 		}
 		else{
 			//Otherwise, the first element of the route is your actual Location
@@ -438,30 +441,33 @@ void MAPF::DefaultHelper(Conflicted c){
 void MAPF::Blocking(){
 	for (unsigned int i = 0; i < players.size(); i++){ // This is to traverse through the players
 		Node destination = players[i].getDestination();
-		for (unsigned int j = i + 1; j < paths.size(); j++){ // This is to traverse the paths
-			if (NodeExistsOnList(paths[j], destination)){
-				// If the element is on the list, check if player i will arrive to its destination before player j
-				int timeOcurrance = GetIndexAtArray(paths[j], destination);
-				if ( timeOcurrance > paths[i].size()){
-					/*
-						If the player j needs to acces players i destination point after player i is finished,
-						then we have a conflict. Now we need to check if it is a simple conflict or a complex conflict.
-					*/
-					Conflicted c;
-					//The first player to be added is the player that needs to move
-					c.agents.push_back(players[i].getId());
-					c.locations.push_back(destination.getLocation());
-					c.times.push_back(timeOcurrance);
-					
-					if (map->adjacentHelper(destination).size() > 2){
-						// If there are more than 2 adjacents to this node, we have a simple blocking state
-						c.type = BLOCKING_SIMPLE;
-					} else{
-						// Else, we have a narrowpath blocking
-						c.type = BLOCKING_COMPLEX;
-					}
+		for (unsigned int j = 0; j < paths.size(); j++){ // This is to traverse the paths
+			if (i != j){
+				if (NodeExistsOnList(paths[j], destination)){
+					// If the element is on the list, check if player i will arrive to its destination before player j
+					int timeOcurrance = GetIndexAtArray(paths[j], destination);
+					if (timeOcurrance > paths[i].size()){
+						/*
+							If the player j needs to acces players i destination point after player i is finished,
+							then we have a conflict. Now we need to check if it is a simple conflict or a complex conflict.
+							*/
+						Conflicted c;
+						//The first player to be added is the player that needs to move
+						c.agents.push_back(players[i].getId());
+						c.locations.push_back(destination.getLocation());
+						c.times.push_back(timeOcurrance + 1);
 
-					agent_conflicts.push_back(c); // Add it to the conflicts that need to be solved
+						if (map->adjacentHelper(destination).size() > 2){
+							// If there are more than 2 adjacents to this node, we have a simple blocking state
+							c.type = BLOCKING_SIMPLE;
+						}
+						else{
+							// Else, we have a narrowpath blocking
+							c.type = BLOCKING_COMPLEX;
+						}
+
+						agent_conflicts.push_back(c); // Add it to the conflicts that need to be solved
+					}
 				}
 			}
 		}
@@ -478,9 +484,15 @@ void MAPF::SolveBlockingSimple(Conflicted c){
 		}
 	}
 
-	// TODO: Left here by solving the blocking problem with the algorithm that is on my notebook
+	// Now, get an escape route and update the path with that
+	players[index].MoveToClosestEscapeElement(false, paths[index][paths[index].size() -1]);
+	//TODO: Fix the pathplanning here
 
+	//Now that we've got an escape route, go back to my own destination
+	players[index].executeTimeSpaceAstar();
 
+	//Update the paths
+	paths[index] = players[index].getPath();
 
 }
 

@@ -728,10 +728,10 @@ void Agent::modifyMap(vector <Node> otherPath){
 	}
 }
 
-Node Agent::EscapeAstar(){
+Node Agent::EscapeAstar(Node start){
 	bool pathFound = false;
 	//Let A be the starting point
-	Node A = actualNode;
+	Node A = start;
 	// Assign f, g and h values to A
 	A.setG(0);
 	A.calculateManhattanHeuristic(destination);
@@ -777,9 +777,12 @@ Node Agent::EscapeAstar(){
 	return P;
 }
 
-void Agent::MoveToClosestEscapeElement(bool KeepRoute){
+void Agent::MoveToClosestEscapeElement(bool KeepRoute, Node start){
+	//Clear the lists first
+	spatial_openList.clear();
+	spatial_closedList.clear();
 	//First, lets get the closest escape Element
-	Node escapeNode = EscapeAstar();
+	Node escapeNode = EscapeAstar(start);
 
 	//Now, if you dont want to keep the route, clear it
 	if (!KeepRoute)	time_route.clear();

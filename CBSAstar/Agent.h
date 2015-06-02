@@ -90,7 +90,13 @@ public:
 	void AddNodeToPathAtTimeT(Node n, int t);
 	void ReroutePathUsingSpatialAstar(int time);
 	void modifyMap(vector <Node> otherPath);
-	void MoveToClosestEscapeElement(bool keepRoute);
+	/*
+		The parameters:
+		keepRoute: True if you want a completely new route, false if you only want to update
+		the route you already have.
+		time: the current time t to search for adjacents
+	*/
+	void MoveToClosestEscapeElement(bool keepRoute, Node start);
 
 	void ReroutePathUsingCBS();
 
@@ -111,7 +117,7 @@ private:
 		This method runs a normal Astar algorithm, and stops until an element out
 		of the critical zone is located, and returns that element.
 	*/
-	Node EscapeAstar(); 
+	Node EscapeAstar(Node start); // The time at which a set of adjacent elements will be found
 	
 	int id;
 
