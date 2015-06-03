@@ -20,19 +20,15 @@ public:
 	int getId() { return id; }
 	void setId(int new_id) { id = new_id; }
 
-	void move();
+	// Moves to the element on the time t
+	void move(int t);
 
 	/*
 		This function moves the entity to the spot their suposed to be on the time t
 	*/
 	void moveEntity(unsigned int t);
 
-	/*
-		This function will reroute using spatial astar 
-	*/
-	void Reroute(int t);
-
-	void setTime(int time_to_set);
+	//void setTime(int time_to_set);
 
 	/*
 		Fix: All the Astar elements where moved here.
@@ -49,7 +45,9 @@ public:
 	//Execute spatial Astar until you find certain node
 	void executeSpatialAstarUntilFound(Node start, Node toFind);
 
-	void executeTimeSpaceAstar();
+	void executeTimeSpaceAstar(int starting_time);
+
+	void executeTimeSpaceAstarFromLastIndex();
 
 	void calculateRealHeuristic(Node* toCalculate, Node finish);
 
@@ -109,10 +107,11 @@ public:
 
 private:
 	//Helper functions
-	void TimeSpaceAstarHelper(Node start, Node finish);
+	void TimeSpaceAstarHelper(Node start, Node finish, int time);
 	bool FindNodeAtList(Node n, vector<Node> list); //Find a node at a given list
 	void calculateSIC();
 	void reserveRoute(int starting_time); // To be used in the Silver's Astar
+	void reserveRouteFromIndex(unsigned int index);
 	/*
 		This method runs a normal Astar algorithm, and stops until an element out
 		of the critical zone is located, and returns that element.
@@ -131,13 +130,8 @@ private:
 	bool active;	
 
 	unsigned int stepsTaken;
-	bool replan;
-	int tempD;
 
 	int SIC; //Sum of Individual Costs
-
-
-	int t;// as said, I will add t to every element to see who needs it and who doesnt
 
 	std::vector<Node> spatial_openList;
 	std::vector<Node> spatial_closedList;

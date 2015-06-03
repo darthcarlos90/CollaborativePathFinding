@@ -78,8 +78,7 @@ void MAPF::Start(int type){
 void MAPF::StartSilversPathFinding(){
 	cout << "Calculating Routes" << endl;
 	for (unsigned int i = 0; i < players.size(); i++){
-		players[i].setTime(time);
-		players[i].executeTimeSpaceAstar();
+		players[i].executeTimeSpaceAstar(time);
 		paths.push_back(players[i].getPath());
 	}
 }
@@ -141,12 +140,15 @@ void MAPF::MoveEntities(int type){
 }
 
 void MAPF::MoveBySilvers(){
+	time++;
 	bool finished = false;
 	while (!finished){
 		system("cls");
+		//TODO: One element is not moving
 		finished = players[0].finished();
 		for (unsigned int i = 0; i < players.size(); i++){
-			players[i].move();
+			players[i].move(i + 1); // The element at i will be the element at time = i + 1
+			time++;
 			if (i > 0) finished = finished && players[i].finished();
 		}
 
@@ -486,10 +488,9 @@ void MAPF::SolveBlockingSimple(Conflicted c){
 
 	// Now, get an escape route and update the path with that
 	players[index].MoveToClosestEscapeElement(true, paths[index][paths[index].size() -1]);
-	//TODO: Fix the pathplanning here
 
 	//Now that we've got an escape route, go back to my own destination
-	players[index].executeTimeSpaceAstar();
+	players[index].executeTimeSpaceAstarFromLastIndex();
 
 	//Update the paths
 	paths[index] = players[index].getPath();
