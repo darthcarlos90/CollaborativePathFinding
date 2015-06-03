@@ -757,6 +757,8 @@ Node Agent::EscapeAstar(Node start){
 
 
 		vector<Node> adjacents = getAdjacents(P, destination);
+		// Sort the adjacents to the cheapest one
+		std::sort(adjacents.begin(), adjacents.end());
 		for (unsigned int i = 0; i < adjacents.size(); i++){
 			if (adjacents[i].getType() == 0){ // If we found an empty element
 				P = adjacents[i]; // Set it to P
@@ -784,16 +786,29 @@ void Agent::MoveToClosestEscapeElement(bool KeepRoute, Node start){
 	//First, lets get the closest escape Element
 	Node escapeNode = EscapeAstar(start);
 
-	//Now, if you dont want to keep the route, clear it
-	if (!KeepRoute)	time_route.clear();
+	if (!KeepRoute){
+		// If you want to clear the route, clear it and return t to 0
+		time_route.clear();
 
-	// Now that the route is cleared, we set time t to 0, since we are starting again
-	t = 0;
+		// Now that the route is cleared, we set time t to 0, since we are starting again
+		t = 0;
+	}
+	//Before restarting, we need to prepare the elements for the search
+	// First step, clear the lists
+	time_openList.clear();
+	time_closedList.clear();
 
-	// now we restart the search, but we look for the escape Node
-	TimeSpaceAstarHelper(actualNode, escapeNode);
+	// Since we will use this element twice, a pointer is created
+	Node* lastNode = &time_route[time_route.size() - 1];
+	// Second step, remove the parent of the last element of the route
+	lastNode->clearParent();
 
-	// Now we have the route to the escape route 
+	// now we can restart the search, but we look for the escape Node
+	TimeSpaceAstarHelper(*lastNode, escapeNode);
+
+	// Now we have the route to the escape route
+
+	lastNode = NULL; // CLEAN UP
 	
 }
 

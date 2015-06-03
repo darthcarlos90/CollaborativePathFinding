@@ -485,7 +485,7 @@ void MAPF::SolveBlockingSimple(Conflicted c){
 	}
 
 	// Now, get an escape route and update the path with that
-	players[index].MoveToClosestEscapeElement(false, paths[index][paths[index].size() -1]);
+	players[index].MoveToClosestEscapeElement(true, paths[index][paths[index].size() -1]);
 	//TODO: Fix the pathplanning here
 
 	//Now that we've got an escape route, go back to my own destination
