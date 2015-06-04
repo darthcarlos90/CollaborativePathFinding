@@ -21,6 +21,25 @@ Agent::~Agent(void){
 }
 
 /*
+	At the copy constructor, I am only going to add the stuff that I need to use when
+	passing agents as parameters in methods, that way I hope to save some innecesary coding
+	or passing some innecesary elements;
+*/
+Agent::Agent(const Agent& other){
+	// For now, I just need the path and the id perhaps
+	this->id = other.id;
+	this->time_route = other.time_route;
+	this->actualNode = other.actualNode;
+	this->destination = other.destination;
+
+	//Things that I dont need
+	map = NULL;
+
+	// TODO: If I need more elements at the copy constructor, just add them
+}
+
+
+/*
 Astar algorithm built from the Tutorial 2 on AI and from the
 video at this link: https ://www.youtube.com/watch?v=KNXfSOx4eEE
 
@@ -91,21 +110,25 @@ void Agent::executeSpatialAstar(Node start, Node finish){
 	}
 }
 
-void Agent::move(int t){
+void Agent::move(unsigned int t){
 	/*
 	Step 3: Every t, advance one spot in the road.
 	- If d has been reached or we reaced to the end of the road, stop;
 		otherwise, continue advancing.
 	*/
-	if (actualNode == destination) {
+	
+	if (actualNode == destination && t >= time_route.size()) {
 		active = false; //we reached the end of the route 
 	}
 	else {
+		Node pastNode = actualNode;// for debug
 		actualNode = time_route[t - 1];
 		stepsTaken++;
+		map->setElement(pastNode.getX(), pastNode.getY(), 0); // For debugging
 	}
 		
 	map->setElement(actualNode.getX(), actualNode.getY(), id + 2);
+	
 
 	cout << "Unit: " << id + 2 << " at location: " << actualNode.getX() << " , " << actualNode.getY();
 	if (!active) cout << " This element is finished.";
@@ -120,9 +143,7 @@ void Agent::move(int t){
 			This are cleared because the g, h, and f values of the nodes have changed, since now we
 			are repathing from the perspective of the actualNode, not the beggining node.
 		*/
-		time_openList.clear(); 
-		time_closedList.clear();
-		actualNode.clearParent(); //Clear the parent, so this is a true starting point
+		time_route[time_route.size() -1].clearParent(); //Clear the parent, so this is a true starting point
 		stepsTaken = 0;
 		int new_starting_time = time_route.size();
 		TimeSpaceAstarHelper(time_route[time_route.size() - 1], // The las node on the path
@@ -507,7 +528,7 @@ void Agent::reserveRoute(int starting_time){
 	// Otherwise only process the step limit moves
 	else limit = steps_limit;
 
-	for (unsigned int i = 0; i < limit; i++){
+	for (int i = 0; i < limit; i++){
 		//Check if the node is reserved for this given time
 		// Just in case timedAdjacents failed
 		if (map->isReserved(time_route[i], reservation_time, id)){
@@ -597,7 +618,7 @@ bool Agent::isOnMyRoute(Node n){
 	return FindNodeAtList(n, time_route);
 }
 
-void Agent::AddNodeToPathAtTimeT(Node n, int t){
+void Agent::AddNodeToPathAtTimeT(Node n, unsigned int t){
 	if (time_route.empty()){ // if the route is empty
 		time_route.push_back(n);
 	} else if (t < time_route.size()){
@@ -674,11 +695,11 @@ Node Agent::EscapeAstar(Node start){
 
 		for (unsigned int i = 0; i < adjacents.size(); i++){
 			if (adjacents[i].getType() != 1){ // If we found an empty element
-				
-				P = adjacents[i]; // Set it to P
-				pathFound = true; // And break the loop
-				break;
-				
+				if (adjacents[i] != P){
+					P = adjacents[i]; // Set it to P
+					pathFound = true; // And break the loop
+					break;
+				}				
 			}
 			//TODO: Im pretty sure this is useless
 			else {// Else, proceed with the normal Astar
@@ -725,7 +746,7 @@ void Agent::MoveToClosestEscapeElement(bool KeepRoute, Node start){
 	
 }
 
-void Agent::RepeatStepAtIndex(int index, int times){
+void Agent::RepeatStepAtIndex(unsigned int index, int times){
 	//If the index is in the correct ranfge
 	if (index < time_route.size()){
 		vector<Node> temp;

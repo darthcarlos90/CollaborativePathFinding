@@ -115,3 +115,6 @@ struct Conflicted{
 	//Map m; // A peace of the map where the conflict will be solved;
 
 };
+
+
+static int returnNumber1() { return 1; }

@@ -9,6 +9,9 @@ public:
 	Agent(Node location, Node destination, Map *m, int id, unsigned int D);
 	~Agent(void);
 
+	//Copy constructor
+	Agent(const Agent& other);
+
 	void SetLocationNode(Node n) { actualNode = n; }
 
 	void SetDestination(Node n) { destination = n; }
@@ -21,7 +24,7 @@ public:
 	void setId(int new_id) { id = new_id; }
 
 	// Moves to the element on the time t
-	void move(int t);
+	void move(unsigned int t);
 
 	/*
 		This function moves the entity to the spot their suposed to be on the time t
@@ -85,7 +88,7 @@ public:
 	Node getDestination() { return destination; }
 
 	bool isOnMyRoute(Node n);
-	void AddNodeToPathAtTimeT(Node n, int t);
+	void AddNodeToPathAtTimeT(Node n, unsigned int t);
 	void ReroutePathUsingSpatialAstar(int time);
 	void modifyMap(vector <Node> otherPath);
 	/*
@@ -99,7 +102,7 @@ public:
 	void ReroutePathUsingCBS();
 
 	// Repeats the value at the index, the number of times indicated in the parameter
-	void RepeatStepAtIndex(int index, int times);
+	void RepeatStepAtIndex(unsigned int index, int times);
 
 	void PushElementAtTheBackOfRoute(Node val);
 	unsigned int pathSize() { return time_route.size(); }

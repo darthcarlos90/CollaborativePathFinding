@@ -151,7 +151,7 @@ void Node::clearParent(){
 	depth = 0;
 }
 
-int Node::getDepth() const{ 
+unsigned int Node::getDepth() const{ 
 	if(has_parent) return depth; // Security measure
 	else return 0;
 }

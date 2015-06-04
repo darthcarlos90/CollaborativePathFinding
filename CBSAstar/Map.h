@@ -6,6 +6,7 @@
 
 
 
+
 class Map{
 public:
 	Map(Matrix<int>* mat);
@@ -40,6 +41,12 @@ public:
 	Matrix<int>* getData(){ return data; }
 
 	std::vector<Constraint> GetReservationTableConstraints();
+
+	/*
+		The parameters are, the seed, which consists on the seed to create the sub map, 
+		and the path of the other element which we are comparing unto.
+	*/
+	Map createSubMap(Node seed, std::vector<Node> other_path);
 
 
 private:

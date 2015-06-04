@@ -144,14 +144,12 @@ void MAPF::MoveBySilvers(){
 	bool finished = false;
 	while (!finished){
 		system("cls");
-		//TODO: One element is not moving
 		finished = players[0].finished();
 		for (unsigned int i = 0; i < players.size(); i++){
-			players[i].move(i + 1); // The element at i will be the element at time = i + 1
-			time++;
+			players[i].move(time); // The element at i will be the element at time = i + 1
 			if (i > 0) finished = finished && players[i].finished();
 		}
-
+		time++;
 		map->printData();
 		system("pause");
 	}
@@ -448,7 +446,7 @@ void MAPF::Blocking(){
 				if (NodeExistsOnList(paths[j], destination)){
 					// If the element is on the list, check if player i will arrive to its destination before player j
 					int timeOcurrance = GetIndexAtArray(paths[j], destination);
-					if (timeOcurrance > paths[i].size()){
+					if (timeOcurrance >= paths[i].size()){
 						/*
 							If the player j needs to acces players i destination point after player i is finished,
 							then we have a conflict. Now we need to check if it is a simple conflict or a complex conflict.
@@ -456,8 +454,7 @@ void MAPF::Blocking(){
 						Conflicted c;
 						//The first player to be added is the player that needs to move
 						c.agents.push_back(players[i].getId());
-						c.locations.push_back(destination.getLocation());
-						c.times.push_back(timeOcurrance + 1);
+						c.times.push_back(timeOcurrance + 1); /* We add 1 because a node at index i, ocurrs at time i + 1*/
 
 						if (map->adjacentHelper(destination).size() > 2){
 							// If there are more than 2 adjacents to this node, we have a simple blocking state
@@ -481,7 +478,8 @@ void MAPF::SolveBlockingSimple(Conflicted c){
 	int index = getIndexOfAgent(c.agents[0]); // Get the index of the agent we are going to use
 	if (paths[index].size() < c.times[0]){ // If at the time stated, the element is just waiting there
 		// Fill the path with the destination until the time t is reached
-		while (players[index].pathSize() < c.times[0]){
+		int limit = c.times[0] - paths[index].size() - 1;
+		for (int i = 0; i < limit; i++){
 			players[index].PushElementAtTheBackOfRoute(players[index].getDestination());
 		}
 	}

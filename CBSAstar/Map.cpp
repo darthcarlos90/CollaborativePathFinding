@@ -177,3 +177,32 @@ void Map::setData(Matrix<int> val) {
 std::vector<Constraint> Map::GetReservationTableConstraints(){
 	return reservationTable.getFullConstraints();
 }
+
+Map Map::createSubMap(Node seed, std::vector<Node> other_path){
+	// Get the adjacents of the element
+	vector<Node> adjacents = adjacentHelper(seed);
+
+	//Check which adjacents participate on the route of the other element
+	bool found = false;
+	Node participates;
+	for (unsigned int i = 0; i < adjacents.size(); i++){
+		if (std::find(other_path.begin(), other_path.end(), adjacents[i]) != other_path.end()){
+			participates = adjacents[i];
+			found = true;
+			break;
+		}
+	}
+
+	// Check if it is on the sides, or if it is up/down
+	bool sideFlag = false;
+	bool upDownFlag = false;
+	if (participates.getX() == seed.getX()){
+		sideFlag = true;
+	}
+	else if (participates.getY() == seed.getY()){
+		upDownFlag = true;
+	}
+
+	//TODO: Finish this algorithm
+
+}
