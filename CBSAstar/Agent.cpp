@@ -691,7 +691,7 @@ Node Agent::GetEscapeNodeNotOnRoute(Node start, vector<Node> path){
 		vector<Node> adjacents = getAdjacents(P, destination);
 
 		for (unsigned int i = 0; i < adjacents.size(); i++){
-			if (!FindNodeAtList(adjacents[i], path)){ // If we found an empty element
+			if (!FindNodeAtList(adjacents[i], path)){ // If the node is not part of the others route.
 				P = adjacents[i]; // Set it to P
 				nodeFound = true; // And break the loop
 				break;
@@ -767,6 +767,7 @@ Node Agent::EscapeAstar(Node start){
 }
 
 void Agent::MoveToClosestEscapeElement(bool KeepRoute, Node start){
+	
 	//Clear the lists first
 	spatial_openList.clear();
 	spatial_closedList.clear();
@@ -793,8 +794,9 @@ void Agent::MoveToClosestEscapeElement(bool KeepRoute, Node start){
 	// Now we have the route to the escape route
 
 	lastNode = NULL; // CLEAN UP
-	
 }
+
+
 
 void Agent::RepeatStepAtIndex(unsigned int index, int times){
 	//If the index is in the correct ranfge

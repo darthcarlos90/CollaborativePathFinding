@@ -334,7 +334,7 @@ void MAPF::SolveDeadLock(Conflicted c){
 		//See if you are in the other players route
 		if (players[c.agents[1]].isOnMyRoute(players[index].getActualLocation())){
 			//Now, look for the closest element that is not on the route, and move there
-			players[index].MoveToClosestEscapeElement(false, players[index].getActualLocation());
+			players[index].MoveToClosestEscapeElement(false, players[index].getActualLocation(), c.type);
 		}
 		else{
 			//Otherwise, the first element of the route is your actual Location
@@ -454,6 +454,7 @@ void MAPF::Blocking(){
 						Conflicted c;
 						//The first player to be added is the player that needs to move
 						c.agents.push_back(players[i].getId());
+						c.agents.push_back(players[j].getId());
 						c.times.push_back(timeOcurrance + 1); /* We add 1 because a node at index i, ocurrs at time i + 1*/
 
 						if (map->adjacentHelper(destination).size() > 2){
@@ -485,7 +486,7 @@ void MAPF::SolveBlockingSimple(Conflicted c){
 	}
 
 	// Now, get an escape route and update the path with that
-	players[index].MoveToClosestEscapeElement(true, paths[index][paths[index].size() -1]);
+	players[index].MoveToClosestEscapeElement(true, paths[index][paths[index].size() -1], c.type);
 
 	//Now that we've got an escape route, go back to my own destination
 	players[index].executeTimeSpaceAstarFromLastIndex();
@@ -496,6 +497,18 @@ void MAPF::SolveBlockingSimple(Conflicted c){
 }
 
 void MAPF::SolveBlockingComplex(Conflicted c){
+	// The type of blocking element is detected, now lets solve it
+	int indexToMove = getIndexOfAgent(c.agents[0]);
+	int indexOther = getIndexOfAgent(c.agents[1]);
+
+	/*
+		Let's use the escape Astar v2 to get the closest element to move, but that doesn´t take part of the
+		other elements route.
+	*/
+	Node escape = players[indexToMove].GetEscapeNodeNotOnRoute(players[indexToMove].getDestination(), players[indexOther].getPath());
+
+	// No build the submap
+	//TODO: Left here
 
 }
 

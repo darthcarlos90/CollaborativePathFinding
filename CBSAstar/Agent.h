@@ -107,6 +107,8 @@ public:
 	void PushElementAtTheBackOfRoute(Node val);
 	unsigned int pathSize() { return time_route.size(); }
 
+	Node GetEscapeNodeNotOnRoute(Node start, vector<Node> path);
+
 
 private:
 	//Helper functions
@@ -124,7 +126,7 @@ private:
 		This method will look for the closest element that is not part of the path given on the
 		parameters.
 	*/
-	Node GetEscapeNodeNotOnRoute(Node start, vector<Node> path);
+	
 	
 	int id;
 

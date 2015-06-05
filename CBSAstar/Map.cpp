@@ -179,6 +179,6 @@ std::vector<Constraint> Map::GetReservationTableConstraints(){
 }
 
 Map Map::createSubMap(Node seed, std::vector<Node> other_path){
-	
+	return Map();
 
 }
