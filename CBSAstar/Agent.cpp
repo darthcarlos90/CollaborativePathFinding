@@ -659,6 +659,58 @@ void Agent::modifyMap(vector <Node> otherPath){
 		map->setElement(otherPath[i].getX(), otherPath[i].getY(), 99); // Just a value
 	}
 }
+Node Agent::GetEscapeNodeNotOnRoute(Node start, vector<Node> path){
+	int starting_time = time_route.size();
+	bool nodeFound = false;
+	//Let A be the starting point
+	Node A = start;
+	// Assign f, g and h values to A
+	A.setG(0);
+	A.calculateManhattanHeuristic(destination);
+	A.calculateF();
+
+	//Add A to the open list, At this point, A shoul be the only node on the open list
+	spatial_openList.push_back(A);
+
+	Node P;
+	//If the goal was found, break
+	while (!nodeFound){
+
+		// If the open list is empty, no path was found, break
+		if (spatial_openList.size() == 0) break;
+
+		//let p be the best node in the open list
+		/*	Since the openList is sorted every time an item is added, then the best
+		option to select is the first item
+		*/
+		P = spatial_openList[0];
+		spatial_closedList.push_back(P);
+		spatial_openList.erase(spatial_openList.begin());
+
+
+		vector<Node> adjacents = getAdjacents(P, destination);
+
+		for (unsigned int i = 0; i < adjacents.size(); i++){
+			if (!FindNodeAtList(adjacents[i], path)){ // If we found an empty element
+				P = adjacents[i]; // Set it to P
+				nodeFound = true; // And break the loop
+				break;
+			}
+
+			else {// Else, proceed with the normal Astar
+				if (!FindNodeAtList(adjacents[i], spatial_closedList)){
+					if (!FindNodeAtList(adjacents[i], spatial_openList))
+						spatial_openList.push_back(adjacents[i]);
+				}
+			}
+			std::sort(spatial_openList.begin(), spatial_openList.end());
+		}
+	}
+
+	//Once the element has been found, return it
+	return P;
+}
+
 
 Node Agent::EscapeAstar(Node start){
 	int starting_time = time_route.size();
@@ -689,19 +741,17 @@ Node Agent::EscapeAstar(Node start){
 		spatial_openList.erase(spatial_openList.begin());
 
 
-		vector<Node> adjacents = getTimedAdjacents(P, starting_time);
+		vector<Node> adjacents = getAdjacents(P, destination);
 		// Sort the adjacents to the cheapest one
 		std::sort(adjacents.begin(), adjacents.end());
 
 		for (unsigned int i = 0; i < adjacents.size(); i++){
-			if (adjacents[i].getType() != 1){ // If we found an empty element
-				if (adjacents[i] != P){
-					P = adjacents[i]; // Set it to P
-					pathFound = true; // And break the loop
-					break;
-				}				
+			if (!map->isReserved(adjacents[i], starting_time, id)){ // If we found an empty element
+				P = adjacents[i]; // Set it to P
+				pathFound = true; // And break the loop
+				break;
 			}
-			//TODO: Im pretty sure this is useless
+			
 			else {// Else, proceed with the normal Astar
 				if (!FindNodeAtList(adjacents[i], spatial_closedList)){
 					if (!FindNodeAtList(adjacents[i], spatial_openList))
@@ -793,4 +843,7 @@ void Agent::reserveRouteFromIndex(unsigned int index){
 		}
 	}
 }
+
+
+
 

@@ -83,7 +83,7 @@ Node& Node::operator= (const Node& n){
 
 
 void Node::calculateManhattanHeuristic(Node destination){
-	
+
 	int finalX = abs(x - destination.getX());
 	int finalY = abs(y - destination.getY());
 	//We are now blocking diagonal movements

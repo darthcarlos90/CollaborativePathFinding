@@ -120,6 +120,11 @@ private:
 		of the critical zone is located, and returns that element.
 	*/
 	Node EscapeAstar(Node start); // The time at which a set of adjacent elements will be found
+	/*
+		This method will look for the closest element that is not part of the path given on the
+		parameters.
+	*/
+	Node GetEscapeNodeNotOnRoute(Node start, vector<Node> path);
 	
 	int id;
 
