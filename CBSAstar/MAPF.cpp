@@ -84,27 +84,16 @@ void MAPF::StartSilversPathFinding(){
 }
 
 void MAPF::StartCBSPathFinding(){
-	//Create the constraint tree
-	tree = new ConstraintTree();
+	/*
+		Fix: Now the CBS needs a parameter to know on who run the CBS, the players given by the user, or
+		some other custom players.
+		Date: 10/06/2015
+		Why?
+		Re-use of code
+	*/
 	
-	//Create the root node
-	root = new CBTNode();
+	RunCBSUsingPlayers(players);
 
-	//Add the agents to the root node
-	for (unsigned int i = 0; i < players.size(); i++){
-		root->addAgent(&players[i]);
-	}
-
-	//find the individual paths of the elements
-	root->CalculatePaths();
-
-	//calculate the cost of this node
-	root->calculateCost();
-
-	//insert the root into the tree
-	tree->insertRoot(root);
-
-	CBSHelper();
 }
 
 void MAPF::CBSHelper(){
@@ -126,6 +115,31 @@ void MAPF::CBSHelper(){
 			P->ExpandNode();
 		}
 	}
+}
+
+void MAPF::RunCBSUsingPlayers(vector<Agent> agents){
+	//Create the constraint tree
+	tree = new ConstraintTree();
+
+	//Create the root node
+	root = new CBTNode();
+
+	//Add the agents to the root node
+	for (unsigned int i = 0; i < agents.size(); i++){
+		root->addAgent(&agents[i]);
+	}
+
+	//find the individual paths of the elements
+	root->CalculatePaths();
+
+	//calculate the cost of this node
+	root->calculateCost();
+
+	//insert the root into the tree
+	tree->insertRoot(root);
+	
+	CBSHelper();
+
 }
 
 void MAPF::MoveEntities(int type){
@@ -334,7 +348,7 @@ void MAPF::SolveDeadLock(Conflicted c){
 		//See if you are in the other players route
 		if (players[c.agents[1]].isOnMyRoute(players[index].getActualLocation())){
 			//Now, look for the closest element that is not on the route, and move there
-			players[index].MoveToClosestEscapeElement(false, players[index].getActualLocation(), c.type);
+			players[index].MoveToClosestEscapeElement(false, players[index].getActualLocation());
 		}
 		else{
 			//Otherwise, the first element of the route is your actual Location
@@ -455,6 +469,11 @@ void MAPF::Blocking(){
 						//The first player to be added is the player that needs to move
 						c.agents.push_back(players[i].getId());
 						c.agents.push_back(players[j].getId());
+
+						// The locations of the elements that will be needed for the creation of the submap
+						c.locations.push_back(destination.getLocation()); // First the blocking element
+						c.locations.push_back(paths[j][timeOcurrance + 1].getLocation()); // Second the blocked element
+						
 						c.times.push_back(timeOcurrance + 1); /* We add 1 because a node at index i, ocurrs at time i + 1*/
 
 						if (map->adjacentHelper(destination).size() > 2){
@@ -486,7 +505,7 @@ void MAPF::SolveBlockingSimple(Conflicted c){
 	}
 
 	// Now, get an escape route and update the path with that
-	players[index].MoveToClosestEscapeElement(true, paths[index][paths[index].size() -1], c.type);
+	players[index].MoveToClosestEscapeElement(true, paths[index][paths[index].size() -1]);
 
 	//Now that we've got an escape route, go back to my own destination
 	players[index].executeTimeSpaceAstarFromLastIndex();
@@ -501,15 +520,109 @@ void MAPF::SolveBlockingComplex(Conflicted c){
 	int indexToMove = getIndexOfAgent(c.agents[0]);
 	int indexOther = getIndexOfAgent(c.agents[1]);
 
+	// References to make life easier
+	Agent &toMove = players[indexToMove];
+	Agent &otherAgent = players[indexOther];
+
+	Location exchange_rate;
 	/*
 		Let's use the escape Astar v2 to get the closest element to move, but that doesn´t take part of the
 		other elements route.
 	*/
-	Node escape = players[indexToMove].GetEscapeNodeNotOnRoute(players[indexToMove].getDestination(), players[indexOther].getPath());
+	Node escape = toMove.GetEscapeNodeNotOnRoute(toMove.getDestination(), otherAgent.getPath());
 
-	// No build the submap
-	//TODO: Left here
+	// Now build the submap
+	Map submap = map->createSubMap(c.locations[0], escape.getLocation(), c.locations[1], &exchange_rate);
 
+	// Get at what time does the element enters the submap (And the location)
+	int time_index = -1;
+	for (unsigned int i = 0; i < paths[indexOther].size(); i++){
+		// If the element of the map at that location is -1, we find the danger zone
+		if (map->getValueAt(paths[indexOther][i].getLocation()) == -1){
+			time_index = i;
+			break;
+		}
+	}
+
+	// We have found an error
+	if (time_index == -1){
+		return;
+	}
+
+	// Now we need to get the index where the element is out of the danger zone
+	int exit_index = -1;
+	for (unsigned int i = time_index; i < paths[indexOther].size(); i++){
+		if (map->getValueAt(paths[indexOther][i].getLocation()) != -1){
+			exit_index = i;
+			break;
+		}
+	}
+	//Other error
+	if (exit_index == -1){
+		return;
+	}
+
+	//clean the map of the -1
+	map->cleanMap();
+
+	//Now we need to change from normal map coordinates, to submap coordinates
+	Location agentLocation1 = paths[indexOther][time_index].getLocation();
+	agentLocation1.x = agentLocation1.x - exchange_rate.x;
+	agentLocation1.y = agentLocation1.y - exchange_rate.y;
+
+	Location agentLocation2 = c.locations[0];
+	agentLocation2.x = agentLocation2.x - exchange_rate.x;
+	agentLocation2.y = agentLocation2.y - exchange_rate.y;
+
+	//Now we can create a CBS with agents
+	//First change the escape node to the new location
+	escape.ConvertToSubmapCoordinates(exchange_rate);
+	Agent agent1(Node(0, 0, agentLocation1.x, agentLocation1.y), Node(0, 0, c.locations[1].x - exchange_rate.x, c.locations[1].y - exchange_rate.y), &submap, 0, 5);
+	Agent agent2(Node(0, 0, agentLocation2.x, agentLocation2.y), escape, &submap, 1, 5);
+	
+	vector<Agent> agents;
+	agents.push_back(agent1);
+	agents.push_back(agent2);
+
+	//Run the CBS Using the correct players
+	RunCBSUsingPlayers(agents);
+
+	// Once the paths have been calculated, now we can update the paths of the agents (converting them to normal coordinates)
+	vector<Node> new_path;
+	// First get all the elements befor the agent got into the danger zone
+	for (int i = 0; i < time_index; i++){
+		new_path.push_back(paths[indexOther][i]);
+	}
+
+	// Now, get the elements calculated by CBS
+	vector<Node> path1 = agent1.getPath();
+	vector<Node> path2 = agent2.getPath();
+
+	// Now we transform the elements of the path from submap coordinates, to global coordinates
+	// And we update the paths of the other elements
+	for (unsigned int i = 0; i < path1.size(); i++){
+		path1[i].ConvertToMapCoordinates(exchange_rate);
+		new_path.push_back(path1[i]);
+	}
+
+	for (unsigned int i = 0; i < path2.size(); i++){
+		path2[i].ConvertToMapCoordinates(exchange_rate);
+		toMove.PushElementAtTheBackOfRoute(path2[i]);
+	}
+
+	// Finish updating the path of the element that is fololowing its path
+	for (int i = time_index + 1; i < otherAgent.pathSize(); i++){
+		new_path.push_back(paths[indexOther][i]);
+	}
+
+	otherAgent.setPath(new_path); //Update the path directly to the agent
+	
+	//Update the paths
+	paths[indexOther] = otherAgent.getPath();
+	paths[indexToMove] = toMove.getPath();
+
+	// Now lets test it!
+	//TODO: Remove this when the 
 }
 
 bool MAPF::existsInList(vector<int> list, int val){

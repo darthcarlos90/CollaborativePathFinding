@@ -155,3 +155,13 @@ unsigned int Node::getDepth() const{
 	if(has_parent) return depth; // Security measure
 	else return 0;
 }
+
+void Node::ConvertToSubmapCoordinates(Location exchange){
+	x = x - exchange.x;
+	y = y - exchange.y;
+}
+
+void Node::ConvertToMapCoordinates(Location exchange){
+	x = x + exchange.x;
+	y = y + exchange.y;
+}

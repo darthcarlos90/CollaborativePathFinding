@@ -33,6 +33,9 @@ public:
 		this->x = x;
 		this->y = y;
 	}
+
+	void ConvertToSubmapCoordinates(Location exchange);
+	void ConvertToMapCoordinates(Location exchange);
 	
 	int getX() const { return x; }
 	int getY() const { return y; }

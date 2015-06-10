@@ -13,11 +13,13 @@ public:
 	Map();
 	Map(const Map& m);
 	~Map(void);
+
 	int getRows() { return data->get_x_size(); }
 	int getColumns() { return data->get_y_size(); }
 	void setElement(int x, int y, int val);
 	void printData();
 	int getValueAt(int x, int y);
+	int getValueAt(Location loc);
 	void setValue(int x, int y, int val);
 
 	//Another fix, this changes to public, and getAdjacents and get timed Adjacents go to unit
@@ -43,10 +45,15 @@ public:
 	std::vector<Constraint> GetReservationTableConstraints();
 
 	/*
-		The parameters are, the seed, which consists on the seed to create the sub map, 
-		and the path of the other element which we are comparing unto.
+		This element creates a sub-map based on the parameters given.
+		Params:
+			- Node blocking: The Node where the blocking element is located.
+			- Node escape: The escape node where the blocking element is moving.
+			- Node blocked: The element that is being blocked, the acces to
+			- Node difference: The difference should help transform from normal map
+				coordinates to submap coordinates.
 	*/
-	Map createSubMap(Node seed, std::vector<Node> other_path);
+	Map createSubMap(Location blocking, Location escape, Location blocked, Location* difference = NULL);
 
 
 private:

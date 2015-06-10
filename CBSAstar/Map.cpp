@@ -16,6 +16,7 @@ Map::Map(){
 //Copy cosntructor
 Map::Map(const Map& m){
 	data = NULL;
+	//TODO: Possible exception in here
 	data = m.data;
 	reservationTable = m.reservationTable;
 	t = m.t;
@@ -131,6 +132,10 @@ int Map::getValueAt(int x, int y){
 	return data->get_element(x, y);
 }
 
+int Map::getValueAt(Location loc){
+	return data->get_element(loc.x, loc.y);
+}
+
 void Map::setValue(int x, int y, int val){
 	data->set_element(x, y, val);
 }
@@ -138,7 +143,7 @@ void Map::setValue(int x, int y, int val){
 void Map::cleanMap(){
 	for (int i = 0; i < data->get_x_size(); i++){
 		for (int j = 0; j < data->get_y_size(); j++){
-			if (data->get_element(i, j) > 1){
+			if (data->get_element(i, j) != 1){
 				data->set_element(i, j, 0);
 			}
 		}
@@ -153,10 +158,16 @@ Matrix<int> Map::getSubData(int lowerX, int lowerY, int upperX, int upperY){
 	Matrix<int> matrix(upperX - lowerX, upperY - lowerY);
 	int x = 0;
 	int y = 0;
-	//Populate the matrix with the values from this matrix
+	// Populate the matrix with the values from this matrix
+	// Mark our matrix with -1 creating a "danger zone"
 	for (int i = lowerX; i < upperX; i++){
 		for (int j = lowerY; j < upperY; j++){
-			matrix.set_element(x, y, data->get_element(i, j));
+			if (data->get_element(i, j) != 1){
+				matrix.set_element(x, y, 0);
+				data->set_element(i, j, -1); // Set the data to -1 so that we can later acces it
+			}
+			else matrix.set_element(x, y, 1);
+			
 			y++;
 		}
 		x++;
@@ -178,7 +189,40 @@ std::vector<Constraint> Map::GetReservationTableConstraints(){
 	return reservationTable.getFullConstraints();
 }
 
-Map Map::createSubMap(Node seed, std::vector<Node> other_path){
-	return Map();
+Map Map::createSubMap(Location blocking, Location escape, Location blocked, Location* difference){
+	
+	/*
+		Get the smaller x and y values between the parameters, t
+	*/
+	Location lowerBounds = blocking;
+	Location upperBounds = blocking;
 
+	if (lowerBounds.x > escape.x) lowerBounds.x = escape.x;
+	if (lowerBounds.y > escape.y) lowerBounds.y = escape.y;
+
+	if (upperBounds.x < escape.x) upperBounds.x = escape.x;
+	if (upperBounds.y < escape.y) upperBounds.y = escape.y;
+
+	if (lowerBounds.x > blocked.x) lowerBounds.x = blocked.x;
+	if (lowerBounds.y > blocked.y) lowerBounds.y = blocked.y;
+
+	if (upperBounds.x < blocked.x) upperBounds.x = blocked.x;
+	if (upperBounds.y < blocked.y) upperBounds.y = blocked.y;
+
+	//Now that we have the bounds of our submap, we can create the matrix with the data
+	Matrix<int> *subdata = new Matrix<int>();
+	*subdata = getSubData(lowerBounds.x, lowerBounds.y, upperBounds.x, upperBounds.y);
+
+	//Now we can return a map based on the subdata
+	Map submap(subdata);
+
+	subdata = NULL;
+
+	// If there is a pointer, lets feed it data
+	if (difference){
+		*difference = lowerBounds;
+	}
+
+	//return the result
+	return submap;
 }
