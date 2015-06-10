@@ -10,7 +10,7 @@
 class Map{
 public:
 	Map(Matrix<int>* mat);
-	Map();
+	Map(void);
 	Map(const Map& m);
 	~Map(void);
 

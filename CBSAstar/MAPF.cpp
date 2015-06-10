@@ -611,7 +611,7 @@ void MAPF::SolveBlockingComplex(Conflicted c){
 	}
 
 	// Finish updating the path of the element that is fololowing its path
-	for (int i = time_index + 1; i < otherAgent.pathSize(); i++){
+	for (unsigned int i = time_index + 1; i < otherAgent.pathSize(); i++){
 		new_path.push_back(paths[indexOther][i]);
 	}
 
@@ -622,7 +622,7 @@ void MAPF::SolveBlockingComplex(Conflicted c){
 	paths[indexToMove] = toMove.getPath();
 
 	// Now lets test it!
-	//TODO: Remove this when the 
+	//TODO: Remove this when the testing is finished
 }
 
 bool MAPF::existsInList(vector<int> list, int val){
@@ -639,7 +639,7 @@ bool MAPF::NodeExistsOnList(vector<Node> list, Node val){
 
 int MAPF::GetIndexAtArray(vector<Node> list, Node val){
 	int result = -1;
-	for (int i = 0; i < list.size(); i++){
+	for (unsigned int i = 0; i < list.size(); i++){
 		if (val == list[i]){
 			result = i;
 			break;

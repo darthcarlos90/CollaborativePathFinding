@@ -8,7 +8,7 @@ Map::Map(Matrix<int>* mat){
 }
 
 //Empty constructor for several purposes
-Map::Map(){
+Map::Map(void){
 	data = NULL; //Make the data pointer null
 	has_data = false;
 }
