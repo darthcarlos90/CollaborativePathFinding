@@ -173,7 +173,8 @@ Matrix<int> Map::getSubData(int lowerX, int lowerY, int upperX, int upperY){
 		x++;
 		y = 0;
 	}
-
+	cout << *data;
+	cout << matrix;
 	
 	return matrix;
 

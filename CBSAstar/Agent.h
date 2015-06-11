@@ -10,7 +10,7 @@ public:
 	~Agent(void);
 
 	//Copy constructor
-	Agent(const Agent& other);
+	//Agent(const Agent& other);
 
 	void SetLocationNode(Node n) { actualNode = n; }
 

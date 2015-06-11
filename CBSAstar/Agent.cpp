@@ -25,18 +25,18 @@ Agent::~Agent(void){
 	passing agents as parameters in methods, that way I hope to save some innecesary coding
 	or passing some innecesary elements;
 */
-Agent::Agent(const Agent& other){
-	// For now, I just need the path and the id perhaps
-	this->id = other.id;
-	this->time_route = other.time_route;
-	this->actualNode = other.actualNode;
-	this->destination = other.destination;
-
-	//Things that I dont need
-	map = NULL;
-
-	// TODO: If I need more elements at the copy constructor, just add them
-}
+//Agent::Agent(const Agent& other){
+//	// For now, I just need the path and the id perhaps
+//	this->id = other.id;
+//	this->time_route = other.time_route;
+//	this->actualNode = other.actualNode;
+//	this->destination = other.destination;
+//
+//	//Things that I dont need
+//	map = NULL;
+//
+//	// TODO: If I need more elements at the copy constructor, just add them
+//}
 
 
 /*
@@ -660,6 +660,11 @@ void Agent::modifyMap(vector <Node> otherPath){
 	}
 }
 Node Agent::GetEscapeNodeNotOnRoute(Node start, vector<Node> path){
+	// Clear the lists for a better execution of the algorithm
+	spatial_openList.clear();
+	spatial_closedList.clear();
+
+	
 	int starting_time = time_route.size();
 	bool nodeFound = false;
 	//Let A be the starting point
