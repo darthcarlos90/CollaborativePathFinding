@@ -107,6 +107,10 @@ Matrix<T>& Matrix<T>::operator=(const Matrix<T>& rhs){
 		}
 	}
 
+	//bug: update the x_size and y_size
+	x_size = rhs.get_x_size();
+	y_size = rhs.get_y_size();
+
 	return *this;
 }
 

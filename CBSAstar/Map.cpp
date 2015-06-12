@@ -15,17 +15,16 @@ Map::Map(void){
 
 //Copy cosntructor
 Map::Map(const Map& m){
-	data = NULL;
-	//TODO: Possible exception in here
-	data = m.data;
+	data = new Matrix<int>();
+	*data = *m.data; // trying to create a copy of the data, not point to the pointer
 	reservationTable = m.reservationTable;
 	t = m.t;
 	has_data = m.has_data;
 }
 
 Map::~Map(void){
-	delete data; // Fix, now we are on charge BITCHES!!
-	data = NULL; //I'm not in charge of destroying this pointer
+	delete data;
+	data = NULL; 
 	//delete nodes;
 }
 
@@ -155,13 +154,17 @@ int Map::CalculateD(){
 }
 
 Matrix<int> Map::getSubData(int lowerX, int lowerY, int upperX, int upperY){
-	Matrix<int> matrix(upperX - lowerX, upperY - lowerY);
+	// We add 1 to make it row/column inclusive
+	int x_size = (upperX - lowerX) + 1;
+	int y_size = (upperY - lowerY) + 1;
+	
+	Matrix<int> matrix(x_size, y_size);
 	int x = 0;
 	int y = 0;
 	// Populate the matrix with the values from this matrix
 	// Mark our matrix with -1 creating a "danger zone"
-	for (int i = lowerX; i < upperX; i++){
-		for (int j = lowerY; j < upperY; j++){
+	for (int i = lowerX; i <= upperX; i++){
+		for (int j = lowerY; j <= upperY; j++){
 			if (data->get_element(i, j) != 1){
 				matrix.set_element(x, y, 0);
 				data->set_element(i, j, -1); // Set the data to -1 so that we can later acces it
@@ -173,8 +176,9 @@ Matrix<int> Map::getSubData(int lowerX, int lowerY, int upperX, int upperY){
 		x++;
 		y = 0;
 	}
-	cout << *data;
-	cout << matrix;
+	//Uncomment for debugging
+	/*cout << *data;
+	cout << matrix;*/
 	
 	return matrix;
 
@@ -193,22 +197,54 @@ std::vector<Constraint> Map::GetReservationTableConstraints(){
 Map Map::createSubMap(Location blocking, Location escape, Location blocked, Location* difference){
 	
 	/*
-		Get the smaller x and y values between the parameters, t
+	Get the row where the blocking element is.
 	*/
 	Location lowerBounds = blocking;
 	Location upperBounds = blocking;
 
-	if (lowerBounds.x > escape.x) lowerBounds.x = escape.x;
-	if (lowerBounds.y > escape.y) lowerBounds.y = escape.y;
+	/*
+		If the escape element is on the same row as the blocking element, then
+		grab the upper and lower rows.
+	*/
+	if (blocking.y == escape.y){
+		if(lowerBounds.y > 0) 
+			lowerBounds.y = lowerBounds.y - 1;
+		if(upperBounds.y < data->get_y_size())
+			upperBounds.y = upperBounds.y + 1;
+	} //Otherwise, get the row where the escape element is
+	else {
+		if (lowerBounds.y > escape.y) 
+			lowerBounds.y = escape.y;
+		else if (upperBounds.y < escape.y) 
+			upperBounds.y = escape.y;
+	}
 
-	if (upperBounds.x < escape.x) upperBounds.x = escape.x;
-	if (upperBounds.y < escape.y) upperBounds.y = escape.y;
-
-	if (lowerBounds.x > blocked.x) lowerBounds.x = blocked.x;
+	/*
+		Get the elements that are on the furthest side of the 
+	*/
+	if (lowerBounds.x > escape.x) 
+		lowerBounds.x = escape.x;
+	if (upperBounds.x < escape.x) 
+		upperBounds.x = escape.x;
+	if (lowerBounds.x > blocked.x) 
+		lowerBounds.x = blocked.x;
+	if (upperBounds.x < blocked.x) 
+		upperBounds.x = blocked.x;
+	
+	//Finally, add the elements if they are outside our danger zone
 	if (lowerBounds.y > blocked.y) lowerBounds.y = blocked.y;
-
-	if (upperBounds.x < blocked.x) upperBounds.x = blocked.x;
 	if (upperBounds.y < blocked.y) upperBounds.y = blocked.y;
+
+	/*
+		There are some situations, where leaving the exact size of the submap may 
+		cause deadlocks to happen. Since CBS apparently is not optimized for
+		deadlocks, the submap will be expanded a bit.
+	*/
+
+	if(upperBounds.x < data->get_x_size())upperBounds.x = upperBounds.x + 1;
+	if(upperBounds.y < data->get_y_size())upperBounds.y = upperBounds.y + 1;
+	if(lowerBounds.x > 0) lowerBounds.x = lowerBounds.x - 1;
+	if(lowerBounds.y > 0)lowerBounds.y = lowerBounds.y - 1;
 
 	//Now that we have the bounds of our submap, we can create the matrix with the data
 	Matrix<int> *subdata = new Matrix<int>();

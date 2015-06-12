@@ -529,6 +529,7 @@ void MAPF::SolveBlockingComplex(Conflicted c){
 		Let's use the escape Astar v2 to get the closest element to move, but that doesn´t take part of the
 		other elements route.
 	*/
+	//TODO: Apply the com 1 comments modifications to this peace of code
 	Node escape = toMove.GetEscapeNodeNotOnRoute(toMove.getDestination(), otherAgent.getPath());
 
 	// Now build the submap
@@ -544,9 +545,12 @@ void MAPF::SolveBlockingComplex(Conflicted c){
 		}
 	}
 
-	// We have found an error
+	/*
+		If the time index is still -1, it means that the submap covers the whole map!
+		Therefore the starting index will be 0
+	*/
 	if (time_index == -1){
-		return;
+		time_index = 0;
 	}
 
 	// Now we need to get the index where the element is out of the danger zone
@@ -557,9 +561,13 @@ void MAPF::SolveBlockingComplex(Conflicted c){
 			break;
 		}
 	}
-	//Other error
+	/*
+		Again, if the exit index is -1 it means that the submap is the whole map,
+		or the destination of the entity is part of the submap, that is why the exit index
+		will be the last element of the path
+	*/
 	if (exit_index == -1){
-		return;
+		paths[indexOther].size() - 1;
 	}
 
 	//clean the map of the -1

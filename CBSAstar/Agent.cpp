@@ -475,7 +475,12 @@ void Agent::ModifyRouteOnConstraints(vector<Constraint> constraints){
 					vector<Node> temp_path;
 					// push all the elements of the path from 0 till t -1 of the constraint
 					if (c.t == 0){
-						temp_path.push_back(time_route[0]);
+						/*
+							If the conflict occurs on the first movement of both elements,
+							then the other element must wait on its first step before moving
+							to some other step.
+						*/
+						temp_path.push_back(actualNode);
 					}
 					else {
 						for (unsigned int i = 0; i < c.t; i++){
