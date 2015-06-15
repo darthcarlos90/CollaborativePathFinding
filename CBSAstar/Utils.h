@@ -5,6 +5,7 @@
 */
 
 #pragma once
+#include "Location.h"
 #include <vector>
 
 /*
@@ -14,37 +15,6 @@
 
 enum conflict_type{
 	DEADLOCK, BLOCKING_SIMPLE, BLOCKING_COMPLEX
-};
-
-/*
-Struct created to easily group the locations being read.
-*/
-struct Location{
-	Location(int x, int y, int id){
-		this->x = x;
-		this->y = y;
-		this->id = id;
-	};
-
-	Location(int x, int y){
-		this->x = x;
-		this->y = y;
-		id = -1; //no id, plain location
-	}
-
-	Location(){
-		x = 0;
-		y = 0;
-		id = -1;
-	}
-
-	bool operator == (const Location& l){
-		return (this->x == l.x && this->y == l.y);
-	}
-
-	int x;
-	int y;
-	int id; //id of this location (id of the unit-to-be)
 };
 
 /*

@@ -530,6 +530,8 @@ void MAPF::SolveBlockingComplex(Conflicted c){
 		other elements route.
 	*/
 	//TODO: Apply the com 1 comments modifications to this peace of code
+	
+	
 	Node escape = toMove.GetEscapeNodeNotOnRoute(toMove.getDestination(), otherAgent.getPath());
 
 	// Now build the submap
