@@ -63,6 +63,15 @@ public:
 	*/
 	void WaitAtIndex(int id, int index, int times);
 
+	/*
+		There are times, when the agent is created null. Even though the path
+		is calculated correctly, the agets yet remain null, thus acces to the agents
+		produces errors.
+		TODO: Fix that shit
+		This method grants acces to the paths, BUT, it must be fixed
+	*/
+	vector<Node> getPathAt(unsigned int index);
+
 
 
 private:

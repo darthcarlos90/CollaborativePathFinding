@@ -252,3 +252,7 @@ void CBTNode::WaitAtIndex(int id, int index, int times){
 	agents[id]->RepeatStepAtIndex(index, times);
 	paths[id] = agents[id]->getPath(); // Update the paths otherwise they will get overriden
 }
+
+vector <Node> CBTNode::getPathAt(unsigned int index){
+	return paths[index]; 
+}

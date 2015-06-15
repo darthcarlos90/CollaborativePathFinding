@@ -87,10 +87,7 @@ void Agent::executeSpatialAstar(Node start, Node finish){
 
 		vector<Node> adjacents = getAdjacents(P, finish);
 		for (unsigned int i = 0; i < adjacents.size(); i++){
-			if (!FindNodeAtList(adjacents[i], spatial_closedList)){
-				if (!FindNodeAtList(adjacents[i], spatial_openList))
-					spatial_openList.push_back(adjacents[i]);
-			}
+			addToSpatialOpenList(adjacents[i]);
 		}
 		std::sort(spatial_openList.begin(), spatial_openList.end());
 	}
@@ -664,11 +661,12 @@ void Agent::modifyMap(vector <Node> otherPath){
 		map->setElement(otherPath[i].getX(), otherPath[i].getY(), 99); // Just a value
 	}
 }
-Node Agent::GetEscapeNodeNotOnRoute(Node start, vector<Node> path){
+Node Agent::GetEscapeNodeNotOnRoute(Node start, vector<Node> path, bool lowerThan){
 	// Clear the lists for a better execution of the algorithm
 	spatial_openList.clear();
 	spatial_closedList.clear();
 
+	
 	
 	int starting_time = time_route.size();
 	bool nodeFound = false;
@@ -702,23 +700,36 @@ Node Agent::GetEscapeNodeNotOnRoute(Node start, vector<Node> path){
 
 		for (unsigned int i = 0; i < adjacents.size(); i++){
 			if (!FindNodeAtList(adjacents[i], path)){ // If the node is not part of the others route.
-				P = adjacents[i]; // Set it to P
-				nodeFound = true; // And break the loop
-				break;
-			}
+				bool isOpposite = false;
+				if (lowerThan){
+					if (adjacents[i].getLocation() > start.getLocation())
+						isOpposite = true;
+				}
+				else {
+					if (adjacents[i].getLocation() < start.getLocation())
+						isOpposite = true;
+				}
 
-			else {// Else, proceed with the normal Astar
-				if (!FindNodeAtList(adjacents[i], spatial_closedList)){
-					if (!FindNodeAtList(adjacents[i], spatial_openList))
-						spatial_openList.push_back(adjacents[i]);
+				if (isOpposite){
+					P = adjacents[i]; // Set it to P
+					nodeFound = true; // And break the loop
+					break;
 				}
 			}
-			std::sort(spatial_openList.begin(), spatial_openList.end());
+			else addToSpatialOpenList(adjacents[i]);
 		}
+		std::sort(spatial_openList.begin(), spatial_openList.end());
 	}
 
 	//Once the element has been found, return it
 	return P;
+}
+
+void Agent::addToSpatialOpenList(Node n){
+	if (!FindNodeAtList(n, spatial_closedList)){
+		if (!FindNodeAtList(n, spatial_openList))
+			spatial_openList.push_back(n);
+	}
 }
 
 
@@ -763,10 +774,7 @@ Node Agent::EscapeAstar(Node start){
 			}
 			
 			else {// Else, proceed with the normal Astar
-				if (!FindNodeAtList(adjacents[i], spatial_closedList)){
-					if (!FindNodeAtList(adjacents[i], spatial_openList))
-						spatial_openList.push_back(adjacents[i]);
-					}
+				addToSpatialOpenList(adjacents[i]);
 			}
 			std::sort(spatial_openList.begin(), spatial_openList.end());
 		}

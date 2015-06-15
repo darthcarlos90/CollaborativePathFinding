@@ -107,7 +107,7 @@ public:
 	void PushElementAtTheBackOfRoute(Node val);
 	unsigned int pathSize() { return time_route.size(); }
 
-	Node GetEscapeNodeNotOnRoute(Node start, vector<Node> path);
+	Node GetEscapeNodeNotOnRoute(Node start, vector<Node> path, bool lowerThan);
 
 
 private:
@@ -117,6 +117,8 @@ private:
 	void calculateSIC();
 	void reserveRoute(int starting_time); // To be used in the Silver's Astar
 	void reserveRouteFromIndex(unsigned int index);
+	void addToSpatialOpenList(Node n);
+
 	/*
 		This method runs a normal Astar algorithm, and stops until an element out
 		of the critical zone is located, and returns that element.

@@ -521,6 +521,7 @@ void MAPF::SolveBlockingComplex(Conflicted c){
 	int indexOther = getIndexOfAgent(c.agents[1]);
 
 	// References to make life easier
+	//TODO: Test, shifted indexes
 	Agent &toMove = players[indexToMove];
 	Agent &otherAgent = players[indexOther];
 
@@ -528,11 +529,20 @@ void MAPF::SolveBlockingComplex(Conflicted c){
 	/*
 		Let's use the escape Astar v2 to get the closest element to move, but that doesn´t take part of the
 		other elements route.
+		Firstly, let's compare both the locations of the elements in order to see where is the other element going
+		in relationship to the blocking element.
+	*/	
+	Location blockingLocation = toMove.getDestination().getLocation();
+	Location otherLocation = otherAgent.getActualLocation().getLocation();
+	
+	/*
+		Lets see if it is lower than or bigger than the element
 	*/
-	//TODO: Apply the com 1 comments modifications to this peace of code
+	bool lowerThan = false;
+	if (otherLocation < blockingLocation) lowerThan = true;
 	
-	
-	Node escape = toMove.GetEscapeNodeNotOnRoute(toMove.getDestination(), otherAgent.getPath());
+	// We pass that parameter so that the method can bring up the correct escape element
+	Node escape = toMove.GetEscapeNodeNotOnRoute(toMove.getDestination(), otherAgent.getPath(), lowerThan);
 
 	// Now build the submap
 	Map submap = map->createSubMap(c.locations[0], escape.getLocation(), c.locations[1], &exchange_rate);
@@ -605,8 +615,8 @@ void MAPF::SolveBlockingComplex(Conflicted c){
 	}
 
 	// Now, get the elements calculated by CBS
-	vector<Node> path1 = agent1.getPath();
-	vector<Node> path2 = agent2.getPath();
+	vector<Node> path1 = tree->getSolution()->getPathAt(0);
+	vector<Node> path2 = tree->getSolution()->getPathAt(1);
 
 	// Now we transform the elements of the path from submap coordinates, to global coordinates
 	// And we update the paths of the other elements
