@@ -8,8 +8,6 @@
 	Author: Carlos Tirado
 */
 
-
-
 class MAPF{
 public:
 	MAPF(string filename); // inputs information from a map (for static maps)

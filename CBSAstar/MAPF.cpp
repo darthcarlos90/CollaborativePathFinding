@@ -211,44 +211,7 @@ void MAPF::RevisePaths(){
 	
 }
 
-void MAPF::Deadlock(){
-	
-	for (unsigned int toCompare = 0; toCompare < paths.size(); toCompare++){ // This represent the index of the element we are comparing
-		for (unsigned int index = toCompare + 1; index < paths.size(); index++){ // this will traverse the second compared element
-			for (int i = 0; i < paths[toCompare].size() - 2; i++){ // this represents the element on the first agent
-				for (int j = 0; j < paths[index].size() - 2; j++){ // this represents the element on the second agent
-					if ((paths[toCompare][i] == paths[index][j]) && (abs(i - j) <= 2)){ // if the elements are equal, lets see if the progress of the route is the same	
-						/*
-							If the next element of toCompare, is the element before of the current element
-							*/
-						if (j >= 2){ // This is needed in order to ensure the correct index is compared
 
-							if (paths[toCompare][i + 1] == paths[index][j - 1]){
-								/*
-									Means that the second element is also in each others route, we have a possible
-									bottleneck lets check the tird element.
-									*/
-
-								if (paths[toCompare][i + 2] == paths[index][j - 2]){
-									// We have a narrow path conflict
-									Conflicted c;
-									c.type = DEADLOCK;
-									c.agents.push_back(players[toCompare].getId());
-									c.locations.push_back(paths[toCompare][i].getLocation());
-									c.agents.push_back(players[index].getId());
-									c.locations.push_back(paths[index][j].getLocation());
-									c.times.push_back(i - 2);
-									c.times.push_back(j + 2);
-									agent_conflicts.push_back(c); // Add it to the conflicts that need to be solved
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-	}
-}
 
 /*
 	This method counts the elements on the critical zone of a conflict, and if a vector is added to
@@ -320,6 +283,47 @@ void MAPF::solveConflicts(){
 	}
 	
 }
+#pragma region probablyunused
+
+void MAPF::Deadlock(){
+
+	for (unsigned int toCompare = 0; toCompare < paths.size(); toCompare++){ // This represent the index of the element we are comparing
+		for (unsigned int index = toCompare + 1; index < paths.size(); index++){ // this will traverse the second compared element
+			for (int i = 0; i < paths[toCompare].size() - 2; i++){ // this represents the element on the first agent
+				for (int j = 0; j < paths[index].size() - 2; j++){ // this represents the element on the second agent
+					if ((paths[toCompare][i] == paths[index][j]) && (abs(i - j) <= 2)){ // if the elements are equal, lets see if the progress of the route is the same	
+						/*
+						If the next element of toCompare, is the element before of the current element
+						*/
+						if (j >= 2){ // This is needed in order to ensure the correct index is compared
+
+							if (paths[toCompare][i + 1] == paths[index][j - 1]){
+								/*
+								Means that the second element is also in each others route, we have a possible
+								bottleneck lets check the tird element.
+								*/
+
+								if (paths[toCompare][i + 2] == paths[index][j - 2]){
+									// We have a narrow path conflict
+									Conflicted c;
+									c.type = DEADLOCK;
+									c.agents.push_back(players[toCompare].getId());
+									c.locations.push_back(paths[toCompare][i].getLocation());
+									c.agents.push_back(players[index].getId());
+									c.locations.push_back(paths[index][j].getLocation());
+									c.times.push_back(i - 2);
+									c.times.push_back(j + 2);
+									agent_conflicts.push_back(c); // Add it to the conflicts that need to be solved
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
 
 void MAPF::SolveDeadLock(Conflicted c){
 	// Select an element to modify on the conflicted list
@@ -450,7 +454,7 @@ void MAPF::DefaultHelper(Conflicted c){
 	// Finished solving conflicts, empty the list
 	agent_conflicts.clear();
 }
-
+#pragma endregion
 
 void MAPF::Blocking(){
 	for (unsigned int i = 0; i < players.size(); i++){ // This is to traverse through the players
@@ -598,8 +602,9 @@ void MAPF::SolveBlockingComplex(Conflicted c){
 	//First change the escape node to the new location
 	escape.ConvertToSubmapCoordinates(exchange_rate);
 	Agent agent1(Node(0, 0, agentLocation1.x, agentLocation1.y), Node(0, 0, c.locations[1].x - exchange_rate.x, c.locations[1].y - exchange_rate.y), &submap, 0, 5);
-	Agent agent2(Node(0, 0, agentLocation2.x, agentLocation2.y), escape, &submap, 1, 5);
-	
+	Agent agent2(Node(0, 0, agentLocation2.x, agentLocation2.y), Node(0, 0, agentLocation2.x, agentLocation2.y), &submap, 1, 5);
+	agent2.setPartialDestination(escape);
+
 	vector<Agent> agents;
 	agents.push_back(agent1);
 	agents.push_back(agent2);
@@ -610,7 +615,7 @@ void MAPF::SolveBlockingComplex(Conflicted c){
 	// Once the paths have been calculated, now we can update the paths of the agents (converting them to normal coordinates)
 	vector<Node> new_path;
 	// First get all the elements befor the agent got into the danger zone
-	for (int i = 0; i < time_index; i++){
+	for (int i = 0; i <= time_index; i++){
 		new_path.push_back(paths[indexOther][i]);
 	}
 
@@ -618,8 +623,11 @@ void MAPF::SolveBlockingComplex(Conflicted c){
 	vector<Node> path1 = tree->getSolution()->getPathAt(0);
 	vector<Node> path2 = tree->getSolution()->getPathAt(1);
 
-	// Now we transform the elements of the path from submap coordinates, to global coordinates
-	// And we update the paths of the other elements
+
+	/*	
+		Now we transform the elements of the path from submap coordinates, to global coordinates
+		And we update the paths of the other elements
+	*/
 	for (unsigned int i = 0; i < path1.size(); i++){
 		path1[i].ConvertToMapCoordinates(exchange_rate);
 		new_path.push_back(path1[i]);

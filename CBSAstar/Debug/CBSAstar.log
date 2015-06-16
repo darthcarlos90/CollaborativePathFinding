@@ -1,19 +1,9 @@
-﻿Build started 15/06/2015 18:43:27.
+﻿Build started 16/06/2015 16:19:15.
      1>Project "H:\Dissertation\Dissertation\example code\cbsastar\CBSAstar\CBSAstar.vcxproj" on node 2 (Build target(s)).
      1>ClCompile:
-         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /sdl /Od /Oy- /D WIN32 /D _DEBUG /D _CONSOLE /D _LIB /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt CBTNode.cpp ConstraintTree.cpp MAPF.cpp main.cpp
-         MAPF.cpp
-     1>h:\dissertation\dissertation\example code\cbsastar\cbsastar\mapf.cpp(218): warning C4018: '<' : signed/unsigned mismatch
-     1>h:\dissertation\dissertation\example code\cbsastar\cbsastar\mapf.cpp(219): warning C4018: '<' : signed/unsigned mismatch
-     1>h:\dissertation\dissertation\example code\cbsastar\cbsastar\mapf.cpp(286): warning C4018: '>=' : signed/unsigned mismatch
-     1>h:\dissertation\dissertation\example code\cbsastar\cbsastar\mapf.cpp(463): warning C4018: '>=' : signed/unsigned mismatch
-     1>h:\dissertation\dissertation\example code\cbsastar\cbsastar\mapf.cpp(499): warning C4018: '<' : signed/unsigned mismatch
-     1>h:\dissertation\dissertation\example code\cbsastar\cbsastar\mapf.cpp(582): warning C4552: '-' : operator has no effect; expected operator with side-effect
-         CBTNode.cpp
-         Generating Code...
-         Skipping... (no relevant changes detected)
-         main.cpp
-         ConstraintTree.cpp
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /sdl /Od /Oy- /D WIN32 /D _DEBUG /D _CONSOLE /D _LIB /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt Agent.cpp
+         Agent.cpp
+     1>h:\dissertation\dissertation\example code\cbsastar\cbsastar\agent.cpp(564): warning C4018: '<' : signed/unsigned mismatch
        Link:
          C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"H:\Dissertation\Dissertation\example code\cbsastar\Debug\CBSAstar.exe" /INCREMENTAL /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"H:\Dissertation\Dissertation\example code\cbsastar\Debug\CBSAstar.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"H:\Dissertation\Dissertation\example code\cbsastar\Debug\CBSAstar.lib" /MACHINE:X86 Debug\CBTNode.obj
          Debug\ConstraintTree.obj
@@ -30,4 +20,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:07.95
+Time Elapsed 00:00:04.53

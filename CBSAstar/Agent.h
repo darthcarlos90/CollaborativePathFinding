@@ -109,6 +109,16 @@ public:
 
 	Node GetEscapeNodeNotOnRoute(Node start, vector<Node> path, bool lowerThan);
 
+	/*
+		This method sets the stepsTaken to steps limit, so that the
+		replanning is forced.
+	*/
+	void ActivateReplanFlag();
+
+	Node getPartialDestination() { return partialDestination; }
+	void setPartialDestination(Node val);
+	bool hasPartialDestination() { return has_partial_destination; }
+
 
 private:
 	//Helper functions
@@ -134,12 +144,14 @@ private:
 
 	Node actualNode;
 	Node destination;
+	Node partialDestination;
 
 	Map* map;
 	
 	unsigned int steps_limit;
 
-	bool active;	
+	bool active;
+	bool has_partial_destination;
 
 	unsigned int stepsTaken;
 

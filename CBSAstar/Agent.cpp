@@ -14,6 +14,7 @@ actualNode(location)
 	map->setElement(destination.getX(), destination.getY(), id + 2);
 	system("cls");
 	map->printData();
+	has_partial_destination = false;
 }
 
 Agent::~Agent(void){
@@ -45,6 +46,9 @@ video at this link: https ://www.youtube.com/watch?v=KNXfSOx4eEE
 
 */
 void Agent::executeSpatialAstar(Node start, Node finish){
+	// Firstly cleaer the routes
+	spatial_openList.clear();
+	spatial_closedList.clear();
 
 	bool pathFound = false;
 	//Let A be the starting point
@@ -135,7 +139,7 @@ void Agent::move(unsigned int t){
 		Step 4: If the d/2 has been reached, and the last step doesn't arrives to the destination,
 		then we need to plan the rest of the route
 	*/
-	if(stepsTaken == steps_limit / 2 && time_route[time_route.size() - 1] != destination){
+	if(stepsTaken >= (steps_limit / 2) && time_route[time_route.size() - 1] != destination){
 		/*
 			This are cleared because the g, h, and f values of the nodes have changed, since now we
 			are repathing from the perspective of the actualNode, not the beggining node.
@@ -438,9 +442,15 @@ int Agent::getSic(){
 void Agent::calculateRoute(){
 	time_route.clear();
 	spatial_route.clear();
-	spatial_openList.clear();
-	spatial_closedList.clear();
-	executeSpatialAstar(actualNode, destination);
+	// If there is a partial destination
+	if (has_partial_destination){
+		//First calculate the route to the partial destination
+		executeSpatialAstar(actualNode, partialDestination);
+		
+		//Now go the the actual destination
+		executeSpatialAstar(partialDestination, destination);
+	} else executeSpatialAstar(actualNode, destination);
+	
 	time_route = spatial_route; // Because the route was saved on the spatial route
 	spatial_route.clear();
 	calculateSIC();
@@ -668,7 +678,6 @@ Node Agent::GetEscapeNodeNotOnRoute(Node start, vector<Node> path, bool lowerTha
 
 	
 	
-	int starting_time = time_route.size();
 	bool nodeFound = false;
 	//Let A be the starting point
 	Node A = start;
@@ -864,6 +873,11 @@ void Agent::reserveRouteFromIndex(unsigned int index){
 	}
 }
 
+void Agent::ActivateReplanFlag(){
+	stepsTaken = steps_limit;
+}
 
-
-
+void Agent::setPartialDestination(Node val){
+	partialDestination = val;
+	has_partial_destination = true;
+}
