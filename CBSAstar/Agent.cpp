@@ -122,10 +122,11 @@ void Agent::move(unsigned int t){
 		active = false; //we reached the end of the route 
 	}
 	else {
-		Node pastNode = actualNode;// for debug
+		//TODO: Past Node debugging
+		//Node pastNode = actualNode;// for debug
 		actualNode = time_route[t - 1];
 		stepsTaken++;
-		map->setElement(pastNode.getX(), pastNode.getY(), 0); // For debugging
+		//map->setElement(pastNode.getX(), pastNode.getY(), 0); // For debugging
 	}
 		
 	map->setElement(actualNode.getX(), actualNode.getY(), id + 2);
@@ -446,7 +447,7 @@ void Agent::calculateRoute(){
 	if (has_partial_destination){
 		//First calculate the route to the partial destination
 		executeSpatialAstar(actualNode, partialDestination);
-		
+		spatial_route.push_back(partialDestination); // Wait there a bit ..
 		//Now go the the actual destination
 		executeSpatialAstar(partialDestination, destination);
 	} else executeSpatialAstar(actualNode, destination);
@@ -729,6 +730,8 @@ Node Agent::GetEscapeNodeNotOnRoute(Node start, vector<Node> path, bool lowerTha
 		}
 		std::sort(spatial_openList.begin(), spatial_openList.end());
 	}
+	// Clear parent in case it is used for some other stuff in the future
+	P.clearParent();
 
 	//Once the element has been found, return it
 	return P;

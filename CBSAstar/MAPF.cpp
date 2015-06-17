@@ -524,8 +524,9 @@ void MAPF::SolveBlockingComplex(Conflicted c){
 	int indexToMove = getIndexOfAgent(c.agents[0]);
 	int indexOther = getIndexOfAgent(c.agents[1]);
 
+	
+
 	// References to make life easier
-	//TODO: Test, shifted indexes
 	Agent &toMove = players[indexToMove];
 	Agent &otherAgent = players[indexOther];
 
@@ -561,12 +562,27 @@ void MAPF::SolveBlockingComplex(Conflicted c){
 		}
 	}
 
+	
+
 	/*
 		If the time index is still -1, it means that the submap covers the whole map!
 		Therefore the starting index will be 0
 	*/
 	if (time_index == -1){
 		time_index = 0;
+	}
+
+	/*
+	If the route of the element that is about to move is less than the route of the other element,
+	let's make it wait until the element reaches the critical zone
+	*/
+
+	if (toMove.pathSize() < time_index + 1){
+		while (toMove.pathSize() < time_index + 1){
+			toMove.PushElementAtTheBackOfRoute(toMove.getDestination());
+		}
+
+		paths[indexToMove] = toMove.getPath();
 	}
 
 	// Now we need to get the index where the element is out of the danger zone
@@ -583,7 +599,7 @@ void MAPF::SolveBlockingComplex(Conflicted c){
 		will be the last element of the path
 	*/
 	if (exit_index == -1){
-		paths[indexOther].size() - 1;
+		exit_index = paths[indexOther].size() - 1;
 	}
 
 	//clean the map of the -1
@@ -594,6 +610,10 @@ void MAPF::SolveBlockingComplex(Conflicted c){
 	agentLocation1.x = agentLocation1.x - exchange_rate.x;
 	agentLocation1.y = agentLocation1.y - exchange_rate.y;
 
+	Location agentExitLocation = paths[indexOther][exit_index].getLocation();
+	agentExitLocation.x = agentExitLocation.x - exchange_rate.x;
+	agentExitLocation.y = agentExitLocation.y - exchange_rate.y;
+
 	Location agentLocation2 = c.locations[0];
 	agentLocation2.x = agentLocation2.x - exchange_rate.x;
 	agentLocation2.y = agentLocation2.y - exchange_rate.y;
@@ -601,7 +621,7 @@ void MAPF::SolveBlockingComplex(Conflicted c){
 	//Now we can create a CBS with agents
 	//First change the escape node to the new location
 	escape.ConvertToSubmapCoordinates(exchange_rate);
-	Agent agent1(Node(0, 0, agentLocation1.x, agentLocation1.y), Node(0, 0, c.locations[1].x - exchange_rate.x, c.locations[1].y - exchange_rate.y), &submap, 0, 5);
+	Agent agent1(Node(0, 0, agentLocation1.x, agentLocation1.y), Node(0, 0, agentExitLocation.x, agentExitLocation.y), &submap, 0, 5);
 	Agent agent2(Node(0, 0, agentLocation2.x, agentLocation2.y), Node(0, 0, agentLocation2.x, agentLocation2.y), &submap, 1, 5);
 	agent2.setPartialDestination(escape);
 
@@ -639,7 +659,7 @@ void MAPF::SolveBlockingComplex(Conflicted c){
 	}
 
 	// Finish updating the path of the element that is fololowing its path
-	for (unsigned int i = time_index + 1; i < otherAgent.pathSize(); i++){
+	for (unsigned int i = exit_index; i < otherAgent.pathSize(); i++){
 		new_path.push_back(paths[indexOther][i]);
 	}
 

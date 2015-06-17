@@ -117,19 +117,6 @@ bool CBTNode::findConstraintsConflicts(unsigned int t){
 									participateOnConflict.push_back(toCompareId);
 								if (!isAtList(i, participateOnConflict)) 
 									participateOnConflict.push_back(i);
-							//} else if (toCompare == paths[i][t + 1] && toCompare1 == paths[i][t]){
-							//	// We have a conflict
-							//	conflict.v = toCompare1.getLocation();
-							//	conflict.t = t + 1;
-							//	conflict.addUser(toCompareId);
-							//	conflict.addUser(i);
-							//	conflict.empty = false;
-							//	foundConflict = true;
-
-							//	if (!isAtList(toCompareId, participateOnConflict))
-							//		participateOnConflict.push_back(toCompareId);
-							//	if (!isAtList(i, participateOnConflict))
-							//		participateOnConflict.push_back(i);
 							}
 						}
 					}
