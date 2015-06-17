@@ -8,7 +8,7 @@ int main(void){
 	getline(cin, filename);
 	MAPF m(filename);*/
 	
-	MAPF m("testcaseBlocking2.txt"); //Just for debugging Ill hardcode the filename
+	MAPF m("testcaseBlocking.txt"); //Just for debugging Ill hardcode the filename
 	//Load the routes for the entities
 	m.Start(1); //hardoced for now
 	m.RevisePaths(); //Revise the paths for any conflict, and solve it

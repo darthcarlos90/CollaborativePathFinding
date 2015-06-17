@@ -15,6 +15,7 @@ actualNode(location)
 	system("cls");
 	map->printData();
 	has_partial_destination = false;
+	needsPathVerification = false;
 }
 
 Agent::~Agent(void){
@@ -152,6 +153,7 @@ void Agent::move(unsigned int t){
 			destination, // The destination of the pathfinding
 			new_starting_time); // So that the reroute starts at the end of the route
 		reserveRouteFromIndex(new_starting_time); // The index will be the last index of the table
+		needsPathVerification = true;
 	}
 	
 }

@@ -118,6 +118,9 @@ public:
 	Node getPartialDestination() { return partialDestination; }
 	void setPartialDestination(Node val);
 	bool hasPartialDestination() { return has_partial_destination; }
+	
+	bool NeedsPathVerification() { return needsPathVerification; }
+	void SetPathVerificationFlag(bool val){ needsPathVerification = val; }
 
 
 private:
@@ -156,6 +159,7 @@ private:
 	unsigned int stepsTaken;
 
 	int SIC; //Sum of Individual Costs
+	bool needsPathVerification;
 
 	std::vector<Node> spatial_openList;
 	std::vector<Node> spatial_closedList;

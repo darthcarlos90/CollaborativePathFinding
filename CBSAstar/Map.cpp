@@ -209,7 +209,7 @@ Map Map::createSubMap(Location blocking, Location escape, Location blocked, Loca
 	if (blocking.y == escape.y){
 		if(lowerBounds.y > 0) 
 			lowerBounds.y = lowerBounds.y - 1;
-		if(upperBounds.y < data->get_y_size())
+		if(upperBounds.y < data->get_y_size() - 1)
 			upperBounds.y = upperBounds.y + 1;
 	} //Otherwise, get the row where the escape element is
 	else {
@@ -241,8 +241,8 @@ Map Map::createSubMap(Location blocking, Location escape, Location blocked, Loca
 		deadlocks, the submap will be expanded a bit.
 	*/
 
-	if(upperBounds.x < data->get_x_size())upperBounds.x = upperBounds.x + 1;
-	if(upperBounds.y < data->get_y_size())upperBounds.y = upperBounds.y + 1;
+	if(upperBounds.x < data->get_x_size() - 1)upperBounds.x = upperBounds.x + 1;
+	if(upperBounds.y < data->get_y_size() - 1)upperBounds.y = upperBounds.y + 1;
 	if(lowerBounds.x > 0) lowerBounds.x = lowerBounds.x - 1;
 	if(lowerBounds.y > 0)lowerBounds.y = lowerBounds.y - 1;
 

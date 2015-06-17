@@ -156,13 +156,27 @@ void MAPF::MoveEntities(int type){
 void MAPF::MoveBySilvers(){
 	time++;
 	bool finished = false;
+	bool verify = false;
 	while (!finished){
 		system("cls");
 		finished = players[0].finished();
 		for (unsigned int i = 0; i < players.size(); i++){
 			players[i].move(time); // The element at i will be the element at time = i + 1
 			if (i > 0) finished = finished && players[i].finished();
+			verify = verify || players[i].NeedsPathVerification(); // When An element just updated its path
 		}
+		// If an element just changed it's path, verify it
+		if (verify){
+			verify = false;
+			// Update the paths on the lists
+			for (unsigned int i = 0; i < players.size(); i++){
+				paths[i] = players[i].getPath();
+				players[i].SetPathVerificationFlag(false);
+			}
+			//Now revise the paths
+			RevisePaths();
+		}
+
 		time++;
 		map->printData();
 		system("pause");
@@ -589,7 +603,7 @@ void MAPF::SolveBlockingComplex(Conflicted c){
 	int exit_index = -1;
 	for (unsigned int i = time_index; i < paths[indexOther].size(); i++){
 		if (map->getValueAt(paths[indexOther][i].getLocation()) != -1){
-			exit_index = i;
+			exit_index = i - 1;
 			break;
 		}
 	}
