@@ -120,7 +120,7 @@ void Map::printData(){
 
 void Map::reserve(int t, Node n, int id){
 	reservationTable.Reserve(t, n, id);
-	reservationTable.Reserve(t + 1, n, id); // Al reservations must include a reservation for next t
+	reservationTable.Reserve(t + 1, n, id); // All reservations must include a reservation for next t
 }
 
 bool Map::isReserved(Node n, int t, int id){

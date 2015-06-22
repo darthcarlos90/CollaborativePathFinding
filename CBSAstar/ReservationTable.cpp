@@ -46,19 +46,21 @@ void ReservationTable::addConstraint(Constraint c){
 //Look for a node to see if it is reserved at time t by someone different to id
 bool ReservationTable::isReserved(Node element, int t, int id){
 	bool reserved = false;
+	if (reservations.find(t) != reservations.end()){
+		//Get the constraints at time t
+		std::vector<Constraint> temp = reservations[t];
 
-	//Get the constraints at time t
-	std::vector<Constraint> temp = reservations[t];
-
-	for (unsigned int i = 0; i < temp.size(); i++){
-		//If the current constraint has the same location as the input
-		if (temp[i].location == element.getLocation()){
-			if (temp[i].id != id){ // it is reserved by someone else
-				reserved = true;
-				break;
+		for (unsigned int i = 0; i < temp.size(); i++){
+			//If the current constraint has the same location as the input
+			if (temp[i].location == element.getLocation()){
+				if (temp[i].id != id){ // it is reserved by someone else
+					reserved = true;
+					break;
+				}
 			}
 		}
 	}
+	
 	return reserved;
 }
 

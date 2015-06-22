@@ -538,7 +538,6 @@ void MAPF::SolveBlockingComplex(Conflicted c){
 	int indexToMove = getIndexOfAgent(c.agents[0]);
 	int indexOther = getIndexOfAgent(c.agents[1]);
 
-	
 
 	// References to make life easier
 	Agent &toMove = players[indexToMove];
@@ -566,38 +565,65 @@ void MAPF::SolveBlockingComplex(Conflicted c){
 	// Now build the submap
 	Map submap = map->createSubMap(c.locations[0], escape.getLocation(), c.locations[1], &exchange_rate);
 
+	
+	/*
+		Fix: We are going to revise the actual value of time, so if it is bigger than 0,
+		it means the pathfinding already started, and that we need to modify some parts of the route
+		after the time that has passed.
+		Date: 22/06/2015
+		Why?
+		Because if we keep modifying it when the element enters the critical zone, we will modify elements
+		on time that already passed, and that is wrong. Very wrong.
+	*/
 	// Get at what time does the element enters the submap (And the location)
 	int time_index = -1;
-	for (unsigned int i = 0; i < paths[indexOther].size(); i++){
-		// If the element of the map at that location is -1, we find the danger zone
-		if (map->getValueAt(paths[indexOther][i].getLocation()) == -1){
-			time_index = i;
-			break;
+
+	if (time > 0){
+		// The for loop will start at the current time
+		for (unsigned int i = time - 1; i < paths[indexOther].size(); i++){
+			// If the element of the map at that location is -1, we find the danger zone
+			if (map->getValueAt(paths[indexOther][i].getLocation()) == -1){
+				time_index = i;
+				break;
+			}
+		}
+
+		if (time_index == -1){
+			time_index = time - 1;
 		}
 	}
+	else {
+		for (unsigned int i = 0; i < paths[indexOther].size(); i++){
+			// If the element of the map at that location is -1, we find the danger zone
+			if (map->getValueAt(paths[indexOther][i].getLocation()) == -1){
+				time_index = i;
+				break;
+			}
+		}
 
-	
-
-	/*
+		/*
 		If the time index is still -1, it means that the submap covers the whole map!
 		Therefore the starting index will be 0
-	*/
-	if (time_index == -1){
-		time_index = 0;
-	}
-
-	/*
-	If the route of the element that is about to move is less than the route of the other element,
-	let's make it wait until the element reaches the critical zone
-	*/
-
-	if (toMove.pathSize() < time_index + 1){
-		while (toMove.pathSize() < time_index + 1){
-			toMove.PushElementAtTheBackOfRoute(toMove.getDestination());
+		*/
+		if (time_index == -1){
+			time_index = 0;
 		}
 
-		paths[indexToMove] = toMove.getPath();
+		/*
+		If the route of the element that is about to move is less than the route of the other element,
+		let's make it wait until the element reaches the critical zone
+		*/
+
+		if (toMove.pathSize() < time_index + 1){
+			while (toMove.pathSize() < time_index + 1){
+				toMove.PushElementAtTheBackOfRoute(toMove.getDestination());
+			}
+
+			paths[indexToMove] = toMove.getPath();
+		}
 	}
+
+	// The rest of this code is the same for both types of corrections
 
 	// Now we need to get the index where the element is out of the danger zone
 	int exit_index = -1;
