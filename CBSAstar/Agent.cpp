@@ -47,9 +47,6 @@ video at this link: https ://www.youtube.com/watch?v=KNXfSOx4eEE
 
 */
 void Agent::executeSpatialAstar(Node start, Node finish){
-	// Firstly cleaer the routes
-	spatial_openList.clear();
-	spatial_closedList.clear();
 
 	bool pathFound = false;
 	//Let A be the starting point
@@ -73,9 +70,9 @@ void Agent::executeSpatialAstar(Node start, Node finish){
 		/*	Since the openList is sorted every time an item is added, then the best
 			option to select is the first item
 		*/
-		P = spatial_openList[0];
+		P = GetSmallestNodeFromOpenList(spatial_openList);
 		spatial_closedList.push_back(P);
-		spatial_openList.erase(spatial_openList.begin());
+		//spatial_openList.erase(spatial_openList.begin());
 
 		/*
 			Fix:The comparison here was changed, instead to see if the type is of 3, we compare against
@@ -94,7 +91,16 @@ void Agent::executeSpatialAstar(Node start, Node finish){
 		for (unsigned int i = 0; i < adjacents.size(); i++){
 			addToSpatialOpenList(adjacents[i]);
 		}
-		std::sort(spatial_openList.begin(), spatial_openList.end());
+		/*
+			Fix: because the node class is too "heavy" to be sorted, it will be changed for a 
+			normal linear search.
+			Date: 23/06/2015
+			Why?
+			Because when sorting, it involves calling too much of the copy constructor,
+			specially in really large lists. with this, and with the parent elements, it
+			takes too much time to sort a list of nodes.
+		*/
+		//std::sort(spatial_openList.begin(), spatial_openList.end());
 	}
 
 	vector<Node> inverse_route;
@@ -227,9 +233,10 @@ void Agent::TimeSpaceAstarHelper(Node start, Node finish, int time){
 		/*	Since the openList is sorted every time an item is added, then the best
 			option to select is the first item
 		*/
-		P = time_openList[0];
+		//P = time_openList[0];
+		P = GetSmallestNodeFromOpenList(time_openList);
 		time_closedList.push_back(P);
-		time_openList.erase(time_openList.begin()); 
+		//time_openList.erase(time_openList.begin()); 
 
 		// If P is the goal node, then finished this 
 		if (P == finish){
@@ -242,17 +249,25 @@ void Agent::TimeSpaceAstarHelper(Node start, Node finish, int time){
 		vector<Node> adjacents = getTimedAdjacents(P, time);
 
 		for (unsigned int i = 0; i < adjacents.size(); i++){
-			if (adjacents[i] == P){ //if the option is to stay, dont ignore it
+			if (adjacents[i] == P){ //if the option is to stay, don't ignore it
 				time_openList.push_back(adjacents[i]);
 			}
 			else {
-				if (!FindNodeAtList(adjacents[i], time_closedList)){
-					if (!FindNodeAtList(adjacents[i], time_openList))
+				//if (!FindNodeAtList(adjacents[i], time_closedList))
+				if (!FindNodeAtList(adjacents[i], time_openList))
+					time_openList.push_back(adjacents[i]);
+				else {
+					int index = GetIndexOfElement(time_openList, adjacents[i]);
+					if (time_openList[index].getG() > adjacents[i].getG()){
+						time_openList.erase(time_openList.begin() + index);
 						time_openList.push_back(adjacents[i]);
+
+					}
 				}
 			}
 		}
-		std::sort(time_openList.begin(), time_openList.end());
+		//TODO: Fix this one too
+		//std::sort(time_openList.begin(), time_openList.end());
 		time++; //Increase time
 		counter--; // Decrease the counter
 		if (counter == 0){ //If the counter reached 0
@@ -286,8 +301,7 @@ void Agent::TimeSpaceAstarHelper(Node start, Node finish, int time){
 			for (unsigned int i = 0; i < partial_path_nodes.size(); i++){
 				vector<Node> around = getTimedAdjacents(partial_path_nodes[i], time); // get the adjacents
 				std::sort(around.begin(), around.end()); //sort so the first element is the smaller
-				spatial_route.clear(); // clear the route
-					
+				clearSpatialLists(true);
 				executeSpatialAstar(around[0], destination);
 				int route_value = 0;
 					
@@ -442,14 +456,22 @@ int Agent::getSic(){
 	return SIC;
 }
 
+void Agent::clearSpatialLists(bool clearSpatialRoute){
+	spatial_openList.clear();
+	spatial_closedList.clear();
+	if (clearSpatialRoute) spatial_route.clear();
+}
+
 void Agent::calculateRoute(){
 	time_route.clear();
-	spatial_route.clear();
+	clearSpatialLists(true);
+	
 	// If there is a partial destination
 	if (has_partial_destination){
 		//First calculate the route to the partial destination
 		executeSpatialAstar(actualNode, partialDestination);
 		spatial_route.push_back(partialDestination); // Wait there a bit ..
+		clearSpatialLists(false);
 		//Now go the the actual destination
 		executeSpatialAstar(partialDestination, destination);
 	} else executeSpatialAstar(actualNode, destination);
@@ -460,9 +482,7 @@ void Agent::calculateRoute(){
 }
 
 void Agent::ReroutePathUsingCBS(){
-	spatial_route.clear();
-	spatial_openList.clear();
-	spatial_closedList.clear();
+	clearSpatialLists(true);
 	executeSpatialAstar(time_route[time_route.size() - 1], destination);
 	for (unsigned int i = 0; i < spatial_route.size(); i++){
 		time_route.push_back(spatial_route[i]);
@@ -703,9 +723,10 @@ Node Agent::GetEscapeNodeNotOnRoute(Node start, vector<Node> path, bool lowerTha
 		/*	Since the openList is sorted every time an item is added, then the best
 		option to select is the first item
 		*/
-		P = spatial_openList[0];
+		//P = spatial_openList[0];
+		P = GetSmallestNodeFromOpenList(spatial_openList);
 		spatial_closedList.push_back(P);
-		spatial_openList.erase(spatial_openList.begin());
+		//spatial_openList.erase(spatial_openList.begin());
 
 
 		vector<Node> adjacents = getAdjacents(P, destination);
@@ -730,7 +751,8 @@ Node Agent::GetEscapeNodeNotOnRoute(Node start, vector<Node> path, bool lowerTha
 			}
 			else addToSpatialOpenList(adjacents[i]);
 		}
-		std::sort(spatial_openList.begin(), spatial_openList.end());
+		//TODO: Fix this in a bit
+		//std::sort(spatial_openList.begin(), spatial_openList.end());
 	}
 	// Clear parent in case it is used for some other stuff in the future
 	P.clearParent();
@@ -740,10 +762,36 @@ Node Agent::GetEscapeNodeNotOnRoute(Node start, vector<Node> path, bool lowerTha
 }
 
 void Agent::addToSpatialOpenList(Node n){
-	if (!FindNodeAtList(n, spatial_closedList)){
-		if (!FindNodeAtList(n, spatial_openList))
+	//TODO: Fix later if stuff starts breaking
+	//if (!FindNodeAtList(n, spatial_closedList)){
+	//If it is at the open list
+	if (!FindNodeAtList(n, spatial_openList))
+		spatial_openList.push_back(n);
+	else {
+		int index = GetIndexOfElement(spatial_openList, n);
+		/* 
+			If the element on the list has a bigger G value than the
+			one we are trying to add, then we should change paths.
+		*/
+		if (spatial_openList[index].getG() > n.getG()){
+			spatial_openList.erase(spatial_openList.begin() + index);
 			spatial_openList.push_back(n);
+		}
 	}
+	//}
+}
+
+// Returns the index of an element on a list
+int Agent::GetIndexOfElement(vector<Node> list, Node element){
+	int result = -1;
+	for (unsigned int i = 0; i < list.size(); i++){
+		if (element == list[i]){
+			result = i;
+			break;
+		}
+	}
+
+	return result;
 }
 
 
@@ -771,9 +819,10 @@ Node Agent::EscapeAstar(Node start){
 		/*	Since the openList is sorted every time an item is added, then the best
 		option to select is the first item
 		*/
-		P = spatial_openList[0];
+		//P = spatial_openList[0];
+		P = GetSmallestNodeFromOpenList(spatial_openList);
 		spatial_closedList.push_back(P);
-		spatial_openList.erase(spatial_openList.begin());
+		//spatial_openList.erase(spatial_openList.begin());
 
 
 		vector<Node> adjacents = getAdjacents(P, destination);
@@ -790,7 +839,8 @@ Node Agent::EscapeAstar(Node start){
 			else {// Else, proceed with the normal Astar
 				addToSpatialOpenList(adjacents[i]);
 			}
-			std::sort(spatial_openList.begin(), spatial_openList.end());
+			//TODO: Fix
+			//std::sort(spatial_openList.begin(), spatial_openList.end());
 		}
 	}
 
@@ -885,4 +935,19 @@ void Agent::ActivateReplanFlag(){
 void Agent::setPartialDestination(Node val){
 	partialDestination = val;
 	has_partial_destination = true;
+}
+
+Node Agent::GetSmallestNodeFromOpenList(vector<Node> &openlist){
+	Node smallest = openlist[0];
+	unsigned int index_smaller = 0;
+	for (unsigned int i = 1; i < openlist.size(); i++){
+		if (openlist[i] < smallest){
+			index_smaller = i;
+			smallest = openlist[i];
+		}
+	}
+
+	openlist.erase(openlist.begin() + index_smaller);
+
+	return smallest;
 }

@@ -131,6 +131,9 @@ private:
 	void reserveRoute(int starting_time); // To be used in the Silver's Astar
 	void reserveRouteFromIndex(unsigned int index);
 	void addToSpatialOpenList(Node n);
+	int GetIndexOfElement(vector<Node> list, Node element);
+	void clearSpatialLists(bool clearSpatialRoute);
+	Node GetSmallestNodeFromOpenList(vector<Node> &openlist);
 
 	/*
 		This method runs a normal Astar algorithm, and stops until an element out
