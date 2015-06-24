@@ -43,16 +43,16 @@ public:
 
 	void calculateRoute();// calculates the route using spatial astar
 	//Execute a normal Astar using manhattan distance as heuristic
-	void executeSpatialAstar(Node start, Node finish);
+	void executeSpatialAstar(Location start, Location finish);
 
 	//Execute spatial Astar until you find certain node
-	void executeSpatialAstarUntilFound(Node start, Node toFind);
+	void executeSpatialAstarUntilFound(Location start, Node toFind);
 
 	void executeTimeSpaceAstar(int starting_time);
 
 	void executeTimeSpaceAstarFromLastIndex();
 
-	void calculateRealHeuristic(Node* toCalculate, Node finish);
+	void calculateRealHeuristic(Node* toCalculate, Location finish);
 
 	
 	int getSic();
@@ -75,9 +75,10 @@ public:
 		Note: This methods will remain public, if not used elsewhere, they will be changed
 		to private.
 	*/
-	std::vector<Node> getAdjacents(Node element, Node ending);
-	std::vector<Node> getAdjacents2(Location location, int time);
+	std::vector<Node> getAdjacents(Node element, Location ending);
+	std::vector<Node> getTimedAdjacentsWithoutParents(Node location, int time);
 	std::vector<Node> getTimedAdjacents(Node element, int res_time);
+	std::vector<Node> getAdjacentsWithoutParents(Node element);
 
 	bool finished() { return !active; }
 
@@ -85,7 +86,9 @@ public:
 	int getY() const { return actualNode.getY(); }
 
 	Node getActualLocation() { return actualNode; }
+	Location getLocation() { return actualNode.getLocation(); }
 	Node getDestination() { return destination; }
+	Location getDestinationLocation() { return destination.getLocation(); }
 
 	bool isOnMyRoute(Node n);
 	void AddNodeToPathAtTimeT(Node n, unsigned int t);
@@ -97,7 +100,7 @@ public:
 		the route you already have.
 		time: the current time t to search for adjacents
 	*/
-	void MoveToClosestEscapeElement(bool keepRoute, Node start);
+	void MoveToClosestEscapeElement(bool keepRoute, Location start);
 
 	void ReroutePathUsingCBS();
 
@@ -107,7 +110,7 @@ public:
 	void PushElementAtTheBackOfRoute(Node val);
 	unsigned int pathSize() { return time_route.size(); }
 
-	Node GetEscapeNodeNotOnRoute(Node start, vector<Node> path, bool lowerThan);
+	Node GetEscapeNodeNotOnRoute(Location start, vector<Node> path, bool lowerThan);
 
 	/*
 		This method sets the stepsTaken to steps limit, so that the
@@ -125,21 +128,27 @@ public:
 
 private:
 	//Helper functions
-	void TimeSpaceAstarHelper(Node start, Node finish, int time);
+	void TimeSpaceAstarHelper(Location start, Location finish, int time);
 	bool FindNodeAtList(Node n, vector<Node> list); //Find a node at a given list
 	void calculateSIC();
 	void reserveRoute(int starting_time); // To be used in the Silver's Astar
 	void reserveRouteFromIndex(unsigned int index);
 	void addToSpatialOpenList(Node n);
+	void addToTimeOpenList(Node n);
 	int GetIndexOfElement(vector<Node> list, Node element);
 	void clearSpatialLists(bool clearSpatialRoute);
-	Node GetSmallestNodeFromOpenList(vector<Node> &openlist);
+	
+	Node GetSmallestNodeFromSpatialOpenList();
+	Node GetSmallestNodeFromTimeOpenList();
+	
+	void UpdateIndexSmallerSpatial();
+	void UpdateIndexSmallerTime();
 
 	/*
 		This method runs a normal Astar algorithm, and stops until an element out
 		of the critical zone is located, and returns that element.
 	*/
-	Node EscapeAstar(Node start); // The time at which a set of adjacent elements will be found
+	Node EscapeAstar(Location start); // The time at which a set of adjacent elements will be found
 	/*
 		This method will look for the closest element that is not part of the path given on the
 		parameters.
@@ -167,10 +176,12 @@ private:
 	std::vector<Node> spatial_openList;
 	std::vector<Node> spatial_closedList;
 	std::vector<Node> spatial_route;
+	unsigned int index_lower_spatial_openList;
 
 	std::vector<Node> time_openList;
 	std::vector<Node> time_closedList;
 	std::vector<Node> time_route;
+	unsigned int index_lower_time_openList;
 
 	std::vector<Node> partial_path_nodes;
 };

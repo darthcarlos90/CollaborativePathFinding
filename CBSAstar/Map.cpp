@@ -32,13 +32,13 @@ Map::~Map(void){
 	Helper method that retrieves the adjacent elements of a Node, if an adjacent element is a
 	wall, it will be ignored
 */
-vector<Node> Map::adjacentHelper(Node element){
+vector<Node> Map::adjacentHelper(Location element){
 	vector<Node> result;
 	int type;
 
 	//x & y elements of the element in consideration
-	int x = element.getX();
-	int y = element.getY();
+	int x = element.x;
+	int y = element.y;
 	/*
 		Fix: The diagonal movements are disbaled.
 		Date: 21/05/2015

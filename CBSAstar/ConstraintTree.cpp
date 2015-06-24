@@ -32,7 +32,7 @@ CBTNode* ConstraintTree::getSolution(){
 
 void ConstraintTree::terminate_tree(CBTNode* n){
 	if (n->hasChildren()){
-		for (unsigned int i = 0; i < n->nChildren(); i++){
+		for (int i = 0; i < n->nChildren(); i++){
 			terminate_tree(n->childAt(i));
 		}
 	}

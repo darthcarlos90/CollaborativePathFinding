@@ -31,6 +31,20 @@ Node::Node(int type, int tempg, int x_pos, int y_pos){
 	depth = 0;
 }
 
+Node::Node(int type, Location location){
+	this->type = type;
+	x = location.x;
+	y = location.y;
+	g = 0;
+	h = 0;
+	f = 0;
+	tempg = 0;
+	parent = NULL;
+	has_parent = false;
+	my_location = location;
+
+}
+
 Node::~Node(void){
 	if (parent && has_parent){ //just in case
 		delete parent;
@@ -82,10 +96,10 @@ Node& Node::operator= (const Node& n){
 }
 
 
-void Node::calculateManhattanHeuristic(Node destination){
+void Node::calculateManhattanHeuristic(Location destination){
 
-	int finalX = abs(x - destination.getX());
-	int finalY = abs(y - destination.getY());
+	int finalX = abs(x - destination.x);
+	int finalY = abs(y - destination.y);
 	//We are now blocking diagonal movements
 	/*if (finalX < finalY){
 		h = (finalX * 14);
@@ -101,6 +115,9 @@ void Node::calculateManhattanHeuristic(Node destination){
 
 bool Node::operator < (const Node & n)const{
 	if (f == n.getF()){
+		if (h == n.getH()){
+			return (g < n.getG());
+		}
 		return (h < n.getH());
 	}
 	return (f < n.getF());
@@ -108,6 +125,9 @@ bool Node::operator < (const Node & n)const{
 
 bool Node::operator >(const Node &n)const{
 	if (f == n.getF()){
+		if (h == n.getH()){
+			return (g > n.getG());
+		}
 		return (h > n.getH());
 	}
 	return (f > n.getF());

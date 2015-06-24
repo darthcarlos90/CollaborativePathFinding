@@ -245,7 +245,7 @@ int MAPF::countCriticalZone(Conflicted c, vector<Node>* criticalZoneNodes){
 	// Traverse through the two paths of the elements
 	for (unsigned int i = 0; i < path0.size(); i++){
 		for (unsigned int j = 0; j < path1.size(); j++){
-			int difference = 0;
+			unsigned int difference = 0;
 			bool equal = (path0[i] == path1[j]);
 			if (equal) result++; // If the first element is the same, we have our first node on the list
 			while (equal){
@@ -343,7 +343,8 @@ void MAPF::SolveDeadLock(Conflicted c){
 	// Select an element to modify on the conflicted list
 	int index = getIndexOfAgent(c.agents[0]);
 	int otherIndex = getIndexOfAgent(c.agents[1]);
-	vector<Node> adjacents = players[index].getAdjacents2(c.locations[0], c.times[0]);
+	Node temp(0, c.locations[0]);
+	vector<Node> adjacents = players[index].getTimedAdjacentsWithoutParents(temp, c.times[0]);
 	if (adjacents.size() > 2){ // If the amount of adjacents are bigger than 2, we are on a head to head collision
 		// First, order the adjacents
 		std::sort(adjacents.begin(), adjacents.end());
@@ -366,7 +367,7 @@ void MAPF::SolveDeadLock(Conflicted c){
 		//See if you are in the other players route
 		if (players[c.agents[1]].isOnMyRoute(players[index].getActualLocation())){
 			//Now, look for the closest element that is not on the route, and move there
-			players[index].MoveToClosestEscapeElement(false, players[index].getActualLocation());
+			players[index].MoveToClosestEscapeElement(false, players[index].getLocation());
 		}
 		else{
 			//Otherwise, the first element of the route is your actual Location
@@ -477,7 +478,7 @@ void MAPF::Blocking(){
 			if (i != j){
 				if (NodeExistsOnList(paths[j], destination)){
 					// If the element is on the list, check if player i will arrive to its destination before player j
-					int timeOcurrance = GetIndexAtArray(paths[j], destination);
+					unsigned int timeOcurrance = GetIndexAtArray(paths[j], destination);
 					if (timeOcurrance >= paths[i].size()){
 						/*
 							If the player j needs to acces players i destination point after player i is finished,
@@ -494,7 +495,7 @@ void MAPF::Blocking(){
 						
 						c.times.push_back(timeOcurrance + 1); /* We add 1 because a node at index i, ocurrs at time i + 1*/
 
-						if (map->adjacentHelper(destination).size() > 2){
+						if (map->adjacentHelper(destination.getLocation()).size() > 2){
 							// If there are more than 2 adjacents to this node, we have a simple blocking state
 							c.type = BLOCKING_SIMPLE;
 						}
@@ -523,7 +524,7 @@ void MAPF::SolveBlockingSimple(Conflicted c){
 	}
 
 	// Now, get an escape route and update the path with that
-	players[index].MoveToClosestEscapeElement(true, paths[index][paths[index].size() -1]);
+	players[index].MoveToClosestEscapeElement(true, paths[index][paths[index].size() -1].getLocation());
 
 	//Now that we've got an escape route, go back to my own destination
 	players[index].executeTimeSpaceAstarFromLastIndex();
@@ -560,7 +561,7 @@ void MAPF::SolveBlockingComplex(Conflicted c){
 	if (otherLocation < blockingLocation) lowerThan = true;
 	
 	// We pass that parameter so that the method can bring up the correct escape element
-	Node escape = toMove.GetEscapeNodeNotOnRoute(toMove.getDestination(), otherAgent.getPath(), lowerThan);
+	Node escape = toMove.GetEscapeNodeNotOnRoute(toMove.getDestinationLocation(), otherAgent.getPath(), lowerThan);
 
 	// Now build the submap
 	Map submap = map->createSubMap(c.locations[0], escape.getLocation(), c.locations[1], &exchange_rate);

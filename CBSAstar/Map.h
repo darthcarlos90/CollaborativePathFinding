@@ -23,7 +23,7 @@ public:
 	void setValue(int x, int y, int val);
 
 	//Another fix, this changes to public, and getAdjacents and get timed Adjacents go to unit
-	vector<Node> adjacentHelper(Node element);//Adjacent helper function that returns adjacents
+	vector<Node> adjacentHelper(Location element);//Adjacent helper function that returns adjacents
 
 	
 	void reserve(int t, Node n, int id);

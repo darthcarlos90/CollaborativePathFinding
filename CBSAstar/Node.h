@@ -8,6 +8,7 @@ class Node{
 public:
 	Node(void);
 	Node(int type, int tempg, int x_pos, int y_pos);
+	Node(int type, Location location);
 	Node(const Node& n);//copy constructor
 	~Node(void);
 
@@ -20,7 +21,7 @@ public:
 	void setG(int val) { g = val; }
 	int getG() const { return g; }
 
-	void calculateManhattanHeuristic(Node destination);
+	void calculateManhattanHeuristic(Location destination);
 	
 
 	void setH(int val) { h = val; }

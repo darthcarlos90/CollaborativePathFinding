@@ -69,7 +69,7 @@ void FileReader::readData(std::string filename){
 				int index = 0;
 				string temp_x;
 				string temp_y;
-				for (int i = 0; i < reader.size(); i++){
+				for (unsigned int i = 0; i < reader.size(); i++){
 					if (reader[i] == ' '){
 						index = i + 1;
 						break;
@@ -77,7 +77,7 @@ void FileReader::readData(std::string filename){
 					temp_x += reader[i];
 				}
 
-				for (int i = index; i < reader.size(); i++){
+				for (unsigned int i = index; i < reader.size(); i++){
 					if (reader[i] == ' '){
 						index = i + 1;
 						break;
@@ -88,7 +88,7 @@ void FileReader::readData(std::string filename){
 				startings.push_back(start);
 				temp_x = "";
 				temp_y = "";
-				for (int i = index; i < reader.size(); i++){
+				for (unsigned int i = index; i < reader.size(); i++){
 					if (reader[i] == ' '){
 						index = i + 1;
 						break;
@@ -96,7 +96,7 @@ void FileReader::readData(std::string filename){
 					temp_x += reader[i];
 				}
 
-				for (int i = index; i < reader.size(); i++){
+				for (unsigned int i = index; i < reader.size(); i++){
 					if (reader[i] == ' '){
 						break;
 					}

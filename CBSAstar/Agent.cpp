@@ -16,6 +16,8 @@ actualNode(location)
 	map->printData();
 	has_partial_destination = false;
 	needsPathVerification = false;
+	index_lower_spatial_openList = 0;
+	index_lower_time_openList = 0;
 }
 
 Agent::~Agent(void){
@@ -46,11 +48,11 @@ Astar algorithm built from the Tutorial 2 on AI and from the
 video at this link: https ://www.youtube.com/watch?v=KNXfSOx4eEE
 
 */
-void Agent::executeSpatialAstar(Node start, Node finish){
+void Agent::executeSpatialAstar(Location start, Location finish){
 
 	bool pathFound = false;
 	//Let A be the starting point
-	Node A = start;
+	Node A (0, start);
 	// Assign f, g and h values to A
 	A.setG(0);
 	A.calculateManhattanHeuristic(finish);
@@ -70,7 +72,8 @@ void Agent::executeSpatialAstar(Node start, Node finish){
 		/*	Since the openList is sorted every time an item is added, then the best
 			option to select is the first item
 		*/
-		P = GetSmallestNodeFromOpenList(spatial_openList);
+		P = GetSmallestNodeFromSpatialOpenList();
+		//P = spatial_openList[0];
 		spatial_closedList.push_back(P);
 		//spatial_openList.erase(spatial_openList.begin());
 
@@ -82,7 +85,7 @@ void Agent::executeSpatialAstar(Node start, Node finish){
 			Because originally it was comparing against 3, but because we are on time-space Astar, that
 			methodology is used no more, so now we compare to see if it is the destination node.
 		*/
-		if (P == finish){
+		if (P.getLocation() == finish){
 			pathFound = true;
 			break;
 		}
@@ -100,6 +103,7 @@ void Agent::executeSpatialAstar(Node start, Node finish){
 			specially in really large lists. with this, and with the parent elements, it
 			takes too much time to sort a list of nodes.
 		*/
+		//TODO: Fix if no results are given
 		//std::sort(spatial_openList.begin(), spatial_openList.end());
 	}
 
@@ -114,6 +118,8 @@ void Agent::executeSpatialAstar(Node start, Node finish){
 	else inverse_route.push_back(P); //This in case the next node is the answer
 	//For some reason the route is backwards, lets but it on the corect order
 	for (int i = inverse_route.size() - 1; i >= 0; i--){
+		//TODO: Remove if something breaks
+		inverse_route[i].clearParent(); // To save memory
 		spatial_route.push_back(inverse_route[i]);
 	}
 }
@@ -155,8 +161,9 @@ void Agent::move(unsigned int t){
 		time_route[time_route.size() -1].clearParent(); //Clear the parent, so this is a true starting point
 		stepsTaken = 0;
 		int new_starting_time = time_route.size();
-		TimeSpaceAstarHelper(time_route[time_route.size() - 1], // The las node on the path
-			destination, // The destination of the pathfinding
+		TimeSpaceAstarHelper(
+			time_route[time_route.size() - 1].getLocation(), // The las node on the path
+			destination.getLocation(), // The destination of the pathfinding
 			new_starting_time); // So that the reroute starts at the end of the route
 		reserveRouteFromIndex(new_starting_time); // The index will be the last index of the table
 		needsPathVerification = true;
@@ -176,7 +183,7 @@ void Agent::executeTimeSpaceAstar(int starting_time){
 	/*
 		Steps 1 and 2 are described in the function that will execute.
 	*/
-	TimeSpaceAstarHelper(actualNode, destination, starting_time);
+	TimeSpaceAstarHelper(actualNode.getLocation(), destination.getLocation(), starting_time);
 	
 	// Now that we have a route, reserve it
 	reserveRoute(starting_time + 1);
@@ -189,11 +196,14 @@ void Agent::executeTimeSpaceAstar(int starting_time){
 */
 void Agent::executeTimeSpaceAstarFromLastIndex(){
 	int index = time_route.size();
-	TimeSpaceAstarHelper(time_route[time_route.size() - 1], destination, time_route.size());
+	TimeSpaceAstarHelper(
+		time_route[time_route.size() - 1].getLocation(), 
+		destination.getLocation(), 
+		time_route.size());
 	reserveRouteFromIndex(index);
 }
 
-void Agent::TimeSpaceAstarHelper(Node start, Node finish, int time){	
+void Agent::TimeSpaceAstarHelper(Location start, Location finish, int time){	
 	// In case they're not empty
 	time_closedList.clear();
 	time_openList.clear();
@@ -205,7 +215,7 @@ void Agent::TimeSpaceAstarHelper(Node start, Node finish, int time){
 	for some time t, otherwise, it will not be used.
 	*/
 	bool pathFound = false;
-	Node A = start; //Let A be the starting point
+	Node A(0, start); //Let A be the starting point
 
 	A.setG(10);
 	calculateRealHeuristic(&A, finish);
@@ -217,9 +227,10 @@ void Agent::TimeSpaceAstarHelper(Node start, Node finish, int time){
 		Because this could lead to other elements illegally moving to the starting point
 		in a given time.
 	*/
-	map->reserve(time, start, id);
+	map->reserve(time, A, id);
 	
 	time_openList.push_back(A); //We put it on the open list
+	index_lower_time_openList = 0;
 	Node P;
 	
 	
@@ -234,12 +245,12 @@ void Agent::TimeSpaceAstarHelper(Node start, Node finish, int time){
 			option to select is the first item
 		*/
 		//P = time_openList[0];
-		P = GetSmallestNodeFromOpenList(time_openList);
+		P = GetSmallestNodeFromTimeOpenList();
 		time_closedList.push_back(P);
 		//time_openList.erase(time_openList.begin()); 
 
 		// If P is the goal node, then finished this 
-		if (P == finish){
+		if (P.getLocation() == finish){
 			pathFound = true;
 			break;
 		}
@@ -249,24 +260,9 @@ void Agent::TimeSpaceAstarHelper(Node start, Node finish, int time){
 		vector<Node> adjacents = getTimedAdjacents(P, time);
 
 		for (unsigned int i = 0; i < adjacents.size(); i++){
-			if (adjacents[i] == P){ //if the option is to stay, don't ignore it
-				time_openList.push_back(adjacents[i]);
-			}
-			else {
-				//if (!FindNodeAtList(adjacents[i], time_closedList))
-				if (!FindNodeAtList(adjacents[i], time_openList))
-					time_openList.push_back(adjacents[i]);
-				else {
-					int index = GetIndexOfElement(time_openList, adjacents[i]);
-					if (time_openList[index].getG() > adjacents[i].getG()){
-						time_openList.erase(time_openList.begin() + index);
-						time_openList.push_back(adjacents[i]);
-
-					}
-				}
-			}
+			addToTimeOpenList(adjacents[i]);
 		}
-		//TODO: Fix this one too
+		
 		//std::sort(time_openList.begin(), time_openList.end());
 		time++; //Increase time
 		counter--; // Decrease the counter
@@ -302,7 +298,7 @@ void Agent::TimeSpaceAstarHelper(Node start, Node finish, int time){
 				vector<Node> around = getTimedAdjacents(partial_path_nodes[i], time); // get the adjacents
 				std::sort(around.begin(), around.end()); //sort so the first element is the smaller
 				clearSpatialLists(true);
-				executeSpatialAstar(around[0], destination);
+				executeSpatialAstar(around[0].getLocation(), destination.getLocation());
 				int route_value = 0;
 					
 				//Get the value of the route
@@ -342,6 +338,8 @@ void Agent::TimeSpaceAstarHelper(Node start, Node finish, int time){
 
 	//get the nodes in order
 	for (int i = temp.size() - 1; i >= 0; i--){
+		//TODO: Fix if something brakes
+		temp[i].clearParent(); //to save memory on copying parents, since parents are not being used anymore
 		time_route.push_back(temp[i]);
 	}
 	// TODO: Updated for now
@@ -349,13 +347,13 @@ void Agent::TimeSpaceAstarHelper(Node start, Node finish, int time){
 }
 
 
-void Agent::executeSpatialAstarUntilFound(Node start, Node toFind){
+void Agent::executeSpatialAstarUntilFound(Location start, Node toFind){
 	if (!FindNodeAtList(toFind, spatial_closedList)){
-		executeSpatialAstar(start, toFind);
+		executeSpatialAstar(start, toFind.getLocation());
 	}
 }
 
-void Agent::calculateRealHeuristic(Node* toCalculate, Node finish){
+void Agent::calculateRealHeuristic(Node* toCalculate, Location finish){
 	executeSpatialAstarUntilFound(finish, *toCalculate);
 	for (unsigned int i = 0; i < spatial_closedList.size(); i++){
 		if (spatial_closedList[i] == *toCalculate){
@@ -367,10 +365,10 @@ void Agent::calculateRealHeuristic(Node* toCalculate, Node finish){
 }
 
 
-vector<Node> Agent::getAdjacents(Node element, Node ending){
+vector<Node> Agent::getAdjacents(Node element, Location ending){
 	vector<Node> result;
 
-	result = map->adjacentHelper(element); // Use helper function to make life easier
+	result = map->adjacentHelper(element.getLocation()); // Use helper function to make life easier
 
 	//calculate heuristic of every element
 	for (unsigned int i = 0; i < result.size(); i++){
@@ -383,16 +381,28 @@ vector<Node> Agent::getAdjacents(Node element, Node ending){
 	return result;
 }
 
+vector<Node> Agent::getAdjacentsWithoutParents(Node element){
+	vector<Node> result;
+	result = map->adjacentHelper(element.getLocation()); // Use helper function to make life easier
 
-vector<Node> Agent::getAdjacents2(Location location,int time){
-	Node n(0,0, location.x, location.y);
-	return getTimedAdjacents(n, time);
+	//calculate heuristic of every element
+	for (unsigned int i = 0; i < result.size(); i++){
+		result[i].setH(0);
+		//Set parent just to calculate	G
+		result[i].setParent(element);
+		result[i].calculateG();
+		result[i].calculateF();
+		result[i].clearParent();
+	}
+
+	return result;
+
 }
 
 //Basically remove all the reserved adjacent nodes
 std::vector<Node> Agent::getTimedAdjacents(Node element, int res_time){
 	//First, get the adjacents of the node
-	std::vector<Node> temp = map->adjacentHelper(element);
+	std::vector<Node> temp = map->adjacentHelper(element.getLocation());
 	bool reservedElement = false;
 	//Then, check if they where reserved
 	std::vector<Node> result;
@@ -406,7 +416,7 @@ std::vector<Node> Agent::getTimedAdjacents(Node element, int res_time){
 	//Now that we have all the available nodes, we calculate their real heuristic value
 	for (unsigned int i = 0; i < result.size(); i++){
 		
-		calculateRealHeuristic(&result[i], destination);
+		calculateRealHeuristic(&result[i], destination.getLocation());
 		//calculate the rest
 		result[i].setParent(element);
 		result[i].calculateG();
@@ -416,10 +426,38 @@ std::vector<Node> Agent::getTimedAdjacents(Node element, int res_time){
 	if (reservedElement){
 		if (!map->isReserved(element, res_time, id)){
 			element.setG(10);
-			calculateRealHeuristic(&element, destination);
+			calculateRealHeuristic(&element, destination.getLocation());
 			element.calculateF();
 			result.push_back(element);
 		}
+	}
+
+	return result;
+}
+
+
+vector<Node> Agent::getTimedAdjacentsWithoutParents(Node location, int time){
+	//First, get the adjacents of the node
+	std::vector<Node> temp = map->adjacentHelper(location.getLocation());
+	bool reservedElement = false;
+	//Then, check if they where reserved
+	std::vector<Node> result;
+	for (unsigned int i = 0; i < temp.size(); i++){
+		if (!map->isReserved(temp[i], time, id)){
+			result.push_back(temp[i]);
+		}
+		else reservedElement = true;
+	}
+
+	//Now that we have all the available nodes, we calculate their real heuristic value
+	for (unsigned int i = 0; i < result.size(); i++){
+		//Set parent only so you can calculate G, then remove it
+		result[i].setParent(location);
+		result[i].setH(0);
+		//calculate the rest
+		result[i].calculateG();
+		result[i].calculateF();
+		result[i].clearParent();
 	}
 
 	return result;
@@ -459,6 +497,7 @@ int Agent::getSic(){
 void Agent::clearSpatialLists(bool clearSpatialRoute){
 	spatial_openList.clear();
 	spatial_closedList.clear();
+	index_lower_spatial_openList = 0;
 	if (clearSpatialRoute) spatial_route.clear();
 }
 
@@ -469,12 +508,12 @@ void Agent::calculateRoute(){
 	// If there is a partial destination
 	if (has_partial_destination){
 		//First calculate the route to the partial destination
-		executeSpatialAstar(actualNode, partialDestination);
+		executeSpatialAstar(actualNode.getLocation(), partialDestination.getLocation());
 		spatial_route.push_back(partialDestination); // Wait there a bit ..
 		clearSpatialLists(false);
 		//Now go the the actual destination
-		executeSpatialAstar(partialDestination, destination);
-	} else executeSpatialAstar(actualNode, destination);
+		executeSpatialAstar(partialDestination.getLocation(), destination.getLocation());
+	} else executeSpatialAstar(actualNode.getLocation(), destination.getLocation());
 	
 	time_route = spatial_route; // Because the route was saved on the spatial route
 	spatial_route.clear();
@@ -483,7 +522,9 @@ void Agent::calculateRoute(){
 
 void Agent::ReroutePathUsingCBS(){
 	clearSpatialLists(true);
-	executeSpatialAstar(time_route[time_route.size() - 1], destination);
+	executeSpatialAstar(
+		time_route[time_route.size() - 1].getLocation(), 
+		destination.getLocation());
 	for (unsigned int i = 0; i < spatial_route.size(); i++){
 		time_route.push_back(spatial_route[i]);
 	}
@@ -584,7 +625,7 @@ void Agent::reserveRoute(int starting_time){
 					vector<Node> temp_route;
 
 					//Get all the nodes before the incident
-					for (unsigned int index = 0; index < i; index++){
+					for (int index = 0; index < i; index++){
 						temp_route.push_back(time_route[index]);
 					}
 
@@ -625,7 +666,10 @@ void Agent::reserveRoute(int starting_time){
 			Because it is necesary for a more efficient detection of deadlocks.
 		*/
 		int index_toStart = time_route.size();
-		TimeSpaceAstarHelper(time_route[time_route.size() - 1], destination, time_route.size());
+		TimeSpaceAstarHelper(
+			time_route[time_route.size() - 1].getLocation(), 
+			destination.getLocation(), 
+			time_route.size());
 		// Now from the point you left at reserve your route
 		reserveRouteFromIndex(index_toStart);
 
@@ -680,11 +724,9 @@ void Agent::ReroutePathUsingSpatialAstar(int time){
 	//Run astar until the destination from the new spot
 	time_closedList.clear();
 	time_openList.clear();
-	spatial_closedList.clear();
-	spatial_openList.clear();
-	spatial_route.clear();
-	time_route[time - 1].clearParent(); // Because we are starting from this point
-	TimeSpaceAstarHelper(time_route[time - 1], destination, time);
+	clearSpatialLists(true);
+	TimeSpaceAstarHelper(time_route[time - 1].getLocation(), 
+		destination.getLocation(), time);
 }
 
 // This method modifies the path so that an element outside of the others path is found
@@ -694,7 +736,7 @@ void Agent::modifyMap(vector <Node> otherPath){
 		map->setElement(otherPath[i].getX(), otherPath[i].getY(), 99); // Just a value
 	}
 }
-Node Agent::GetEscapeNodeNotOnRoute(Node start, vector<Node> path, bool lowerThan){
+Node Agent::GetEscapeNodeNotOnRoute(Location start, vector<Node> path, bool lowerThan){
 	// Clear the lists for a better execution of the algorithm
 	spatial_openList.clear();
 	spatial_closedList.clear();
@@ -703,14 +745,15 @@ Node Agent::GetEscapeNodeNotOnRoute(Node start, vector<Node> path, bool lowerTha
 	
 	bool nodeFound = false;
 	//Let A be the starting point
-	Node A = start;
+	Node A(0, start);
 	// Assign f, g and h values to A
 	A.setG(0);
-	A.calculateManhattanHeuristic(destination);
+	A.setH(0);
 	A.calculateF();
 
 	//Add A to the open list, At this point, A shoul be the only node on the open list
 	spatial_openList.push_back(A);
+	index_lower_spatial_openList = 0;
 
 	Node P;
 	//If the goal was found, break
@@ -724,22 +767,22 @@ Node Agent::GetEscapeNodeNotOnRoute(Node start, vector<Node> path, bool lowerTha
 		option to select is the first item
 		*/
 		//P = spatial_openList[0];
-		P = GetSmallestNodeFromOpenList(spatial_openList);
+		P = GetSmallestNodeFromSpatialOpenList();
 		spatial_closedList.push_back(P);
 		//spatial_openList.erase(spatial_openList.begin());
 
-
-		vector<Node> adjacents = getAdjacents(P, destination);
+		//TODO: Get Adjacents without parent :D
+		vector<Node> adjacents = getAdjacentsWithoutParents(P);
 
 		for (unsigned int i = 0; i < adjacents.size(); i++){
 			if (!FindNodeAtList(adjacents[i], path)){ // If the node is not part of the others route.
 				bool isOpposite = false;
 				if (lowerThan){
-					if (adjacents[i].getLocation() > start.getLocation())
+					if (adjacents[i].getLocation() > start)
 						isOpposite = true;
 				}
 				else {
-					if (adjacents[i].getLocation() < start.getLocation())
+					if (adjacents[i].getLocation() < start)
 						isOpposite = true;
 				}
 
@@ -751,35 +794,67 @@ Node Agent::GetEscapeNodeNotOnRoute(Node start, vector<Node> path, bool lowerTha
 			}
 			else addToSpatialOpenList(adjacents[i]);
 		}
-		//TODO: Fix this in a bit
+		
 		//std::sort(spatial_openList.begin(), spatial_openList.end());
 	}
-	// Clear parent in case it is used for some other stuff in the future
-	P.clearParent();
 
 	//Once the element has been found, return it
 	return P;
 }
 
 void Agent::addToSpatialOpenList(Node n){
-	//TODO: Fix later if stuff starts breaking
-	//if (!FindNodeAtList(n, spatial_closedList)){
-	//If it is at the open list
-	if (!FindNodeAtList(n, spatial_openList))
-		spatial_openList.push_back(n);
-	else {
-		int index = GetIndexOfElement(spatial_openList, n);
-		/* 
-			If the element on the list has a bigger G value than the
-			one we are trying to add, then we should change paths.
-		*/
-		if (spatial_openList[index].getG() > n.getG()){
-			spatial_openList.erase(spatial_openList.begin() + index);
+	if (!FindNodeAtList(n, spatial_closedList)){
+		//If it is at the open list
+		if (!FindNodeAtList(n, spatial_openList)){
+			if (spatial_openList.size() > 0){
+				if (n < spatial_openList[index_lower_spatial_openList])
+					index_lower_spatial_openList = spatial_openList.size();
+			}
 			spatial_openList.push_back(n);
 		}
+		else {
+			int index = GetIndexOfElement(spatial_openList, n);
+			/* 
+				If the element on the list has a bigger G value than the
+				one we are trying to add, then we should change paths.
+			*/
+			if (spatial_openList[index].getG() > n.getG()){
+				spatial_openList.erase(spatial_openList.begin() + index);
+				spatial_openList.push_back(n);
+				UpdateIndexSmallerSpatial();
+			}
+		}
 	}
-	//}
+	else {
+		//If this element is already in the closed_list, check if it is a better option
+		int index = GetIndexOfElement(spatial_closedList, n);
+		if (spatial_closedList[index].getG() > n.getG()){
+			spatial_closedList[index] = n;
+		}
+	}
 }
+
+void Agent::addToTimeOpenList(Node n){
+	if (!FindNodeAtList(n, time_openList)){
+		if (time_openList.size() > 0){
+			if (n < time_openList[index_lower_time_openList])
+				index_lower_time_openList = time_openList.size();
+		}
+		time_openList.push_back(n);
+	}
+		else {
+			int index = GetIndexOfElement(time_openList, n);
+			if (time_openList[index].getG() > n.getG()){
+				time_openList.erase(time_openList.begin() + index);
+				time_openList.push_back(n);
+				UpdateIndexSmallerTime();
+
+			}
+		}
+	
+}
+
+
 
 // Returns the index of an element on a list
 int Agent::GetIndexOfElement(vector<Node> list, Node element){
@@ -795,14 +870,22 @@ int Agent::GetIndexOfElement(vector<Node> list, Node element){
 }
 
 
-Node Agent::EscapeAstar(Node start){
+Node Agent::EscapeAstar(Location start){
 	int starting_time = time_route.size();
 	bool pathFound = false;
 	//Let A be the starting point
-	Node A = start;
+	Node A(0, start);
 	// Assign f, g and h values to A
 	A.setG(0);
-	A.calculateManhattanHeuristic(destination);
+	/*
+		Fix: When looking for an escape node, the only value that is going to be
+		taken into account is G, not H.
+		Date: 24/06/2015
+		Why?
+		Because we don't actually know what is going to be our destination, so there
+		is no point in setting an H value.
+	*/
+	A.setH(0);
 	A.calculateF();
 
 	//Add A to the open list, At this point, A shoul be the only node on the open list
@@ -820,12 +903,12 @@ Node Agent::EscapeAstar(Node start){
 		option to select is the first item
 		*/
 		//P = spatial_openList[0];
-		P = GetSmallestNodeFromOpenList(spatial_openList);
+		P = GetSmallestNodeFromSpatialOpenList();
 		spatial_closedList.push_back(P);
 		//spatial_openList.erase(spatial_openList.begin());
 
 
-		vector<Node> adjacents = getAdjacents(P, destination);
+		vector<Node> adjacents = getAdjacentsWithoutParents(P);
 		// Sort the adjacents to the cheapest one
 		std::sort(adjacents.begin(), adjacents.end());
 
@@ -839,16 +922,15 @@ Node Agent::EscapeAstar(Node start){
 			else {// Else, proceed with the normal Astar
 				addToSpatialOpenList(adjacents[i]);
 			}
-			//TODO: Fix
+			
 			//std::sort(spatial_openList.begin(), spatial_openList.end());
 		}
 	}
-
 	//Once the element has been found, return it
 	return P;
 }
 
-void Agent::MoveToClosestEscapeElement(bool KeepRoute, Node start){
+void Agent::MoveToClosestEscapeElement(bool KeepRoute, Location start){
 	
 	//Clear the lists first
 	spatial_openList.clear();
@@ -871,7 +953,10 @@ void Agent::MoveToClosestEscapeElement(bool KeepRoute, Node start){
 	lastNode->clearParent();
 
 	// now we can restart the search, but we look for the escape Node
-	TimeSpaceAstarHelper(*lastNode, escapeNode, time_route.size());
+	TimeSpaceAstarHelper(
+		lastNode->getLocation(), 
+		escapeNode.getLocation(),
+		time_route.size());
 
 	// Now we have the route to the escape route
 
@@ -937,17 +1022,42 @@ void Agent::setPartialDestination(Node val){
 	has_partial_destination = true;
 }
 
-Node Agent::GetSmallestNodeFromOpenList(vector<Node> &openlist){
-	Node smallest = openlist[0];
-	unsigned int index_smaller = 0;
-	for (unsigned int i = 1; i < openlist.size(); i++){
-		if (openlist[i] < smallest){
-			index_smaller = i;
-			smallest = openlist[i];
+Node Agent::GetSmallestNodeFromSpatialOpenList(){
+	Node smallest = spatial_openList[index_lower_spatial_openList];
+	spatial_openList.erase(spatial_openList.begin() + index_lower_spatial_openList);
+	UpdateIndexSmallerSpatial();
+	return smallest;
+}
+
+Node Agent::GetSmallestNodeFromTimeOpenList(){
+	Node smallest = time_openList[index_lower_time_openList];
+	time_openList.erase(time_openList.begin() + index_lower_time_openList);
+	UpdateIndexSmallerTime();
+	return smallest;
+}
+
+
+
+void Agent::UpdateIndexSmallerSpatial(){
+	index_lower_spatial_openList = 0;
+	if (spatial_openList.size() > 1){
+		for (unsigned int i = 0; i < spatial_openList.size(); i++){
+			if (spatial_openList[i] < spatial_openList[index_lower_spatial_openList]){
+				index_lower_spatial_openList = i;
+			}
 		}
 	}
+	 
+}
 
-	openlist.erase(openlist.begin() + index_smaller);
-
-	return smallest;
+void Agent::UpdateIndexSmallerTime(){
+	index_lower_time_openList = 0;
+	if (time_openList.size() > 1){
+		for (unsigned int i = 0; i < time_openList.size(); i++){
+			if (time_openList[i] < time_openList[index_lower_time_openList]){
+				index_lower_time_openList = i;
+			}
+		}
+	}
+	
 }
