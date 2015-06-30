@@ -89,78 +89,56 @@ void CBTNode::validatePaths(){
 	}
 }
 
+void CBTNode::CreateConflict(unsigned int time_ocurrence, Location location, vector<int> users){
+	conflict.v = location;
+	conflict.t = time_ocurrence;
+	conflict.users = users;
+
+	conflict.empty = false;
+}
+
 bool CBTNode::findConstraintsConflicts(unsigned int t){
 	bool foundConflict = false;
-	vector<int> participateOnConflict;
-	//TODO: Debug this
 	for (unsigned int toCompareId = 0; toCompareId < paths.size(); toCompareId++){
 		// if the current path that we are analizing has an element on time t
 		if (!foundConflict){
 			if (paths[toCompareId].size() > t){
 				Node toCompare = paths[toCompareId][t];
-			//	Node toCompare1 = paths[toCompareId][t + 1];
-
 				for (unsigned int i = toCompareId + 1; i < paths.size(); i++){
 					//if the other element being analized, has an element on time t
-					if (!foundConflict){
-						if (paths[i].size() > t){
-							//State machine for detecting this conflict
-							if (toCompare == paths[i][t]){ // There is a conflict
-								conflict.v = toCompare.getLocation();
-								conflict.t = t;
-								conflict.addUser(toCompareId);
-								conflict.addUser(i);
-								conflict.empty = false;
-								foundConflict = true;
-								
-								if (!isAtList(toCompareId, participateOnConflict)) 
-									participateOnConflict.push_back(toCompareId);
-								if (!isAtList(i, participateOnConflict)) 
-									participateOnConflict.push_back(i);
-							}
+					if (paths[i].size() > t){
+						//State machine for detecting this conflict
+						if (toCompare == paths[i][t]){ // There is a conflict
+							int users[2] = { toCompareId, i };
+							CreateConflict(t, toCompare.getLocation(), 
+								std::vector<int>(users, users + sizeof users / sizeof users[0]));
+							foundConflict = true;
+							break;
+						}
+						else if (toCompare == paths[i][t + 1]){
+							int users[2] = { toCompareId, i };
+							CreateConflict(t + 1, toCompare.getLocation(), 
+								std::vector<int>(users, users + sizeof users / sizeof users[0]));
+							foundConflict = true;
+							break;
+						}
+						else {
+							// Else there is no conflict, just create the constraints
+							Constraint c(i, paths[i][t].getLocation(), t);
+							Constraint c1(i, paths[i][t].getLocation(), t + 1); // Save that element for a time t + 1								addConstraint(c);
+							addConstraint(c1);
+
+							Constraint c2(toCompareId, toCompare.getLocation(), t);
+							Constraint c3(toCompareId, toCompare.getLocation(), t + 1);
+							addConstraint(c2);
+							addConstraint(c3);
 						}
 					}
-					//Found a conflict, break
-					else break;
 				}
 			}
 		}
 		//Found conflict, break
 		else break;
-	}
-
-	//Now we need to create constraints with the elements that are not participating in conflicts
-	std::sort(participateOnConflict.begin(), participateOnConflict.end());
-	
-	for (unsigned int i = 0; i < paths.size(); i++){
-		if (participateOnConflict.size() > 0){
-			if (i == participateOnConflict[0]){
-				//This element is on conflict, no constraint needed
-				//pop it out of the list
-				participateOnConflict.erase(participateOnConflict.begin());
-
-			}
-			else {
-				//Create a constraint and push it back into the list
-				if (paths[i].size() > t){
-					Constraint c(i, paths[i][t].getLocation(), t);
-					Constraint c1(i, paths[i][t].getLocation(), t + 1); // Save that element for a time t + 1
-					addConstraint(c);
-					addConstraint(c1);
-				}
-			}
-		}
-		else {
-			//I know its repeating, I just want to test it for now !!!!
-			//Create a constraint and push it back into the list
-			if (paths[i].size() > t){ // If there is actually a move at time t
-				//save it
-				Constraint c(i, paths[i][t].getLocation(), t);
-				Constraint c1(i, paths[i][t].getLocation(), t + 1); // Save that element for a time t + 1
-				addConstraint(c);
-				addConstraint(c1);
-			}
-		}
 	}
 
 	return foundConflict;
