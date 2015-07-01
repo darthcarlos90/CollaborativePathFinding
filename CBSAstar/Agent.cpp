@@ -558,8 +558,36 @@ void Agent::ModifyRouteOnConstraints(vector<Constraint> constraints){
 							temp_path.push_back(time_route[i]);
 						}
 					}
-					// Repeat the last step so the agent waits for some other element to use the other cell
-					temp_path.push_back(temp_path[temp_path.size() - 1]);
+
+					// If the last element of the path is different to the current element
+					if (time_route[c.t - 1] != time_route[c.t]){
+						// Repeat the last step so the agent waits for some other element to use the other cell
+						temp_path.push_back(temp_path[temp_path.size() - 1]);
+					}
+					//Otherwise
+					else {
+						int index_different = 0;
+						// Look backwards on the temp_path and look for a different element
+						for (unsigned int j = temp_path.size() - 1; j >= 0; j--){
+							if (temp_path[j] != time_route[c.t]){
+								index_different = j;
+								break;
+							}
+						}
+
+						/*
+							Now that we have the index with the different element, we need to change
+							all the elements from that index, until the end of the temp_path + 1.
+						*/
+
+						for (unsigned int j = index_different + 1; j < temp_path.size(); j++){
+							temp_path[j] = temp_path[index_different];
+						}
+
+						// Now, add at the end the different element where we want it to stay
+						temp_path.push_back(temp_path[index_different]);
+					}
+					
 
 					//finish adding the elements of the route
 					for (unsigned int i = c.t; i < time_route.size(); i++){

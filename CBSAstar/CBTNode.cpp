@@ -60,8 +60,10 @@ void CBTNode::ExpandNode(){
 
 	for (unsigned int i = 0; i < conflict.users.size(); i++){
 		Constraint cnst(conflict.users[i], conflict.v, conflict.t);
+		Constraint cnst2(conflict.users[i], conflict.v, conflict.t + 1);
 		CBTNode* child = new CBTNode(constraints, agents, paths);
 		child->addConstraint(cnst);
+		child->addConstraint(cnst2);
 		child->RecalculateRoutesOnConstraints();
 		children.push_back(child);
 	}
@@ -125,7 +127,8 @@ bool CBTNode::findConstraintsConflicts(unsigned int t){
 						else {
 							// Else there is no conflict, just create the constraints
 							Constraint c(i, paths[i][t].getLocation(), t);
-							Constraint c1(i, paths[i][t].getLocation(), t + 1); // Save that element for a time t + 1								addConstraint(c);
+							Constraint c1(i, paths[i][t].getLocation(), t + 1); // Save that element for a time t + 1								
+							addConstraint(c);
 							addConstraint(c1);
 
 							Constraint c2(toCompareId, toCompare.getLocation(), t);
@@ -184,6 +187,7 @@ void CBTNode::RecalculateRoutesOnConstraints(){
 }
 
 void CBTNode::addConstraint(Constraint c){
+	//TODO: If it is possible, add the same constraint but at time t + 1
 	if (!constraints.empty()){
 		if (std::find(constraints.begin(), constraints.end(), c) != constraints.end()){
 			//The element is found, do nothing
