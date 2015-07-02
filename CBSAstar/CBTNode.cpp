@@ -45,7 +45,7 @@ CBTNode* CBTNode::getSmallestChild(){
 void CBTNode::CalculatePaths(){
 	for (unsigned int i = 0; i < agents.size(); i++){
 		//Calculate the paths of each of the agents, as if they where the only element on the grid
-		agents[i]->calculateRoute();
+		agents[i]->calculateRoute(constraints);
 
 		//Get the path, and push it into the paths vector
 		paths.push_back(agents[i]->getPath());
@@ -181,7 +181,8 @@ int CBTNode::addAgent(Agent* a){
 
 void CBTNode::RecalculateRoutesOnConstraints(){
 	for (unsigned int i = 0; i < agents.size(); i++){
-		agents[i]->ModifyRouteOnConstraints(constraints);// Update the paths on the agent
+		//agents[i]->ModifyRouteOnConstraints(constraints);// Update the paths on the agent
+		agents[i]->calculateRoute(constraints);
 		paths[i] = agents[i]->getPath(); // Let the node know the new paths
 	}
 }

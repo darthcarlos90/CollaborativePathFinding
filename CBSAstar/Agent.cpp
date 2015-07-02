@@ -43,6 +43,63 @@ Agent::~Agent(void){
 //}
 
 
+void Agent::ConstraintAstar(Location start, Location finish, vector<Constraint> constraints){
+	
+	bool pathFound = false;
+	//Let A be the starting point
+	Node A(0, start);
+	// Assign f, g and h values to A
+	A.setG(0);
+	A.calculateManhattanHeuristic(finish);
+	A.calculateF();
+
+	//Add A to the open list, At this point, A shoul be the only node on the open list
+	spatial_openList.push_back(A);
+
+	Node P;
+	//If the goal was found, break
+	while (!pathFound){
+
+		// If the open list is empty, no path was found, break
+		if (spatial_openList.size() == 0) break;
+
+		//let p be the best node in the open list
+		/*	Since the openList is sorted every time an item is added, then the best
+		option to select is the first item
+		*/
+		P = GetSmallestNodeFromSpatialOpenList();
+		spatial_closedList.push_back(P);
+
+
+		if (P.getLocation() == finish){
+			pathFound = true;
+			break;
+		}
+
+		vector<Node> adjacents = getAdjacentsonConstraints(P, finish, constraints, P.getDepth() - 1);
+		for (unsigned int i = 0; i < adjacents.size(); i++){
+			addToSpatialOpenList(adjacents[i]);
+		}
+	}
+
+	vector<Node> inverse_route;
+	//Once the path has been found, retrace your steps
+	if (P.hasParent()){
+		while (P.hasParent()){
+			inverse_route.push_back(P);
+			P = P.getParent();
+		}
+	}
+	else inverse_route.push_back(P); //This in case the next node is the answer
+	//For some reason the route is backwards, lets but it on the corect order
+	for (int i = inverse_route.size() - 1; i >= 0; i--){
+		//TODO: Remove if something breaks
+		inverse_route[i].clearParent(); // To save memory
+		time_route.push_back(inverse_route[i]);
+	}
+}
+
+
 /*
 Astar algorithm built from the Tutorial 2 on AI and from the
 video at this link: https ://www.youtube.com/watch?v=KNXfSOx4eEE
@@ -381,6 +438,48 @@ vector<Node> Agent::getAdjacents(Node element, Location ending){
 	return result;
 }
 
+vector<Node> Agent::getAdjacentsonConstraints(Node element, Location ending, vector<Constraint> constraints, int time){
+	vector<Node> temp;
+	vector<Node> result;
+
+	// Get the adjacents of the element
+	temp = map->adjacentHelper(element.getLocation());
+	element.setIndividualG(10);
+	element.calculateG();
+	temp.push_back(element); // So we can have the option to stay
+	for (unsigned int i = 0; i < temp.size(); i++){
+		bool found = false;
+		// Check the constraint list
+		for (unsigned int j = 0; j < constraints.size(); j++){
+			// If the id is different
+			if (constraints[j].id != id){
+				// If the time is the same
+				if (constraints[j].t == time){
+					// and same location
+					if (temp[i].getLocation() == constraints[j].location){
+						// It is reserved, break
+						found = true;
+						break;
+					}
+				}
+			}
+		}
+		// If it is not on the constraint list
+		if (!found){
+			//Calculate its stuff
+			temp[i].calculateManhattanHeuristic(ending);
+			temp[i].setParent(element);
+			temp[i].calculateG();
+			temp[i].calculateF();
+			// Add it to the list
+			result.push_back(temp[i]);
+		}
+	}
+
+	return result;
+
+}
+
 vector<Node> Agent::getAdjacentsWithoutParents(Node element){
 	vector<Node> result;
 	result = map->adjacentHelper(element.getLocation()); // Use helper function to make life easier
@@ -501,22 +600,44 @@ void Agent::clearSpatialLists(bool clearSpatialRoute){
 	if (clearSpatialRoute) spatial_route.clear();
 }
 
-void Agent::calculateRoute(){
-	time_route.clear();
-	clearSpatialLists(true);
+void Agent::calculateRoute(vector<Constraint> constraints){
+	/*
+		Fix: Instead of using executeSpatialAstar we are gonna use a new Astar that takes the Constraints of the
+		CBT into consideration.
+		Date: 02/07/2015
+		Why?
+		Because there has been a misunderstanding from myself about how the stuff in the CBS algorithm works.
+	*/
+	if (constraints.empty()){
+		time_route.clear();
+		clearSpatialLists(true);
+
+		// If there is a partial destination
+		if (has_partial_destination){
+			//First calculate the route to the partial destination
+			executeSpatialAstar(actualNode.getLocation(), partialDestination.getLocation());
+			spatial_route.push_back(partialDestination); // Wait there a bit ..
+			clearSpatialLists(false);
+			//Now go the the actual destination
+			executeSpatialAstar(partialDestination.getLocation(), destination.getLocation());
+		}
+		else executeSpatialAstar(actualNode.getLocation(), destination.getLocation());
+
+		time_route = spatial_route; // Because the route was saved on the spatial route
+		spatial_route.clear();
+	}
+	else {
+		// if there is a partial destination
+		if (has_partial_destination){
+			// Follow the same procedure as above, except that this time use other methods
+			ConstraintAstar(actualNode.getLocation(), partialDestination.getLocation(), constraints);
+			time_route.push_back(partialDestination);
+			clearSpatialLists(false);
+			ConstraintAstar(partialDestination.getLocation(), destination.getLocation(), constraints);
+		}
+		else ConstraintAstar(actualNode.getLocation(), destination.getLocation(), constraints);
+	}
 	
-	// If there is a partial destination
-	if (has_partial_destination){
-		//First calculate the route to the partial destination
-		executeSpatialAstar(actualNode.getLocation(), partialDestination.getLocation());
-		spatial_route.push_back(partialDestination); // Wait there a bit ..
-		clearSpatialLists(false);
-		//Now go the the actual destination
-		executeSpatialAstar(partialDestination.getLocation(), destination.getLocation());
-	} else executeSpatialAstar(actualNode.getLocation(), destination.getLocation());
-	
-	time_route = spatial_route; // Because the route was saved on the spatial route
-	spatial_route.clear();
 	calculateSIC();
 }
 
@@ -566,26 +687,64 @@ void Agent::ModifyRouteOnConstraints(vector<Constraint> constraints){
 					}
 					//Otherwise
 					else {
-						int index_different = 0;
+						int index_different = -1;
 						// Look backwards on the temp_path and look for a different element
-						for (unsigned int j = temp_path.size() - 1; j >= 0; j--){
+						for (int j = temp_path.size() - 1; j >= 0; j--){
 							if (temp_path[j] != time_route[c.t]){
 								index_different = j;
 								break;
 							}
 						}
-
+						
 						/*
+							If the index of the different is -1 it means that all the elements till the begining
+							are the same, which will end up getting either an invalid movement,
+							or an infinite loop in the code.
+						*/
+						if (index_different == -1){
+							// If the index is -1, lets get an escape node
+							temp_path.clear(); // Clear the list
+							
+							temp_path.push_back(time_route[0]); // Just add the first node
+							
+							// Now we get the escape node
+							Node escape = GetSimpleEscapeNode(temp_path[0].getLocation());
+							
+							
+							// Now we add the route to that node to our path
+							temp_path.push_back(escape);
+
+							// Now we will wait n times here until the conflict passes
+							while (temp_path.size() <= c.t + 1){
+								temp_path.push_back(escape);
+							}
+
+							// Finally, lets trace to the node at c.t on the path
+							clearSpatialLists(true);
+							executeSpatialAstar(escape.getLocation(), time_route[c.t].getLocation());
+							// The path is on the spatial route, so lets take it and put it on the partial path
+							for (unsigned int j = 0; j <= spatial_route.size() - 1; j++){
+								temp_path.push_back(spatial_route[j]);
+							}
+
+
+						}
+						else {
+							/*
 							Now that we have the index with the different element, we need to change
 							all the elements from that index, until the end of the temp_path + 1.
-						*/
+							*/
 
-						for (unsigned int j = index_different + 1; j < temp_path.size(); j++){
-							temp_path[j] = temp_path[index_different];
+							for (unsigned int j = index_different + 1; j < temp_path.size(); j++){
+								temp_path[j] = temp_path[index_different];
+							}
+
+							// Now, add at the end the different element where we want it to stay
+							temp_path.push_back(temp_path[index_different]);
+
 						}
 
-						// Now, add at the end the different element where we want it to stay
-						temp_path.push_back(temp_path[index_different]);
+						
 					}
 					
 
@@ -764,6 +923,41 @@ void Agent::modifyMap(vector <Node> otherPath){
 		map->setElement(otherPath[i].getX(), otherPath[i].getY(), 99); // Just a value
 	}
 }
+
+
+/*
+	Returns a simple escape node, meaning, just the cheapest
+	adjacent node to the location given in the parameters.
+*/
+Node Agent::GetSimpleEscapeNode(Location start){
+
+	// A is the node from the location
+	Node A(0, start);
+	A.setG(0);
+	A.setH(0);
+	A.calculateF();
+	
+	Node result;
+
+	// Get the adjacents	
+	vector<Node> adjacents = getAdjacents(A, destination.getLocation());
+	
+	// Sort the adjacents
+	std::sort(adjacents.begin(), adjacents.end());
+	
+	/*
+		Here, we get the biggest element of the list. Why the biggest?
+		Because the buggest means it is the furthest away from the destination.
+		Right? RIIGHT?????
+	*/
+	result = adjacents[adjacents.size() - 1];
+	result.clearParent();
+
+	return result;
+	
+}
+
+// Gets an escape route that is not part of the path indicated in the parameters
 Node Agent::GetEscapeNodeNotOnRoute(Location start, vector<Node> path, bool lowerThan){
 	// Clear the lists for a better execution of the algorithm
 	spatial_openList.clear();

@@ -41,7 +41,7 @@ public:
 		be able to do all the calculations of Astar.
 	*/
 
-	void calculateRoute();// calculates the route using spatial astar
+	void calculateRoute(vector<Constraint> constraints);// calculates the route using spatial astar
 	//Execute a normal Astar using manhattan distance as heuristic
 	void executeSpatialAstar(Location start, Location finish);
 
@@ -79,6 +79,8 @@ public:
 	std::vector<Node> getTimedAdjacentsWithoutParents(Node location, int time);
 	std::vector<Node> getTimedAdjacents(Node element, int res_time);
 	std::vector<Node> getAdjacentsWithoutParents(Node element);
+	std::vector<Node> getAdjacentsonConstraints(Node element, Location endint, vector<Constraint> constraints, int time);
+
 
 	bool finished() { return !active; }
 
@@ -111,6 +113,9 @@ public:
 	unsigned int pathSize() { return time_route.size(); }
 
 	Node GetEscapeNodeNotOnRoute(Location start, vector<Node> path, bool lowerThan);
+	
+	// TODO: Not used, eliminate soon
+	Node GetSimpleEscapeNode(Location start);
 
 	/*
 		This method sets the stepsTaken to steps limit, so that the
@@ -149,10 +154,8 @@ private:
 		of the critical zone is located, and returns that element.
 	*/
 	Node EscapeAstar(Location start); // The time at which a set of adjacent elements will be found
-	/*
-		This method will look for the closest element that is not part of the path given on the
-		parameters.
-	*/
+	
+	void ConstraintAstar(Location start, Location finish, vector<Constraint> constraints);
 	
 	
 	int id;
