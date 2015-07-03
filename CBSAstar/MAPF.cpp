@@ -174,7 +174,7 @@ void MAPF::MoveBySilvers(){
 				players[i].SetPathVerificationFlag(false);
 			}
 			//Now revise the paths
-			RevisePaths();
+			//RevisePaths();
 		}
 
 		time++;
@@ -443,30 +443,7 @@ void MAPF::DefaultHelper(Conflicted c){
 
 
 	CBSHelper();
-	//Comented for now, but I believe this does the same as the method above
-	//// Now let's find a solution to the routes
-	//bool solutionFound = false;
 
-	////Get the best node of the tree
-	//CBTNode *P = tree->getSolution();
-
-	////While we can't find the solution
-	//while (!solutionFound){
-	//	//Validate the paths until a conflict occurs
-	//	P->validatePaths();
-
-	//	//If it is a goal node, end this, we found the solution
-	//	if (P->isGoal()) {
-	//		solutionFound = true;
-	//		P->UpdateAgentsPaths();
-	//	}
-	//	else {
-	//		P->ExpandNode();
-	//	}
-
-	//	P = tree->getSolution(); // Set the best node in the tree to be P
-	//}
-	// Finished solving conflicts, empty the list
 	agent_conflicts.clear();
 }
 #pragma endregion

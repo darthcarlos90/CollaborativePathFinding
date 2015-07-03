@@ -41,7 +41,7 @@ public:
 		be able to do all the calculations of Astar.
 	*/
 
-	void calculateRoute(vector<Constraint> constraints);// calculates the route using spatial astar
+	void calculateRoute();// calculates the route using spatial astar
 	//Execute a normal Astar using manhattan distance as heuristic
 	void executeSpatialAstar(Location start, Location finish);
 
@@ -155,8 +155,9 @@ private:
 	*/
 	Node EscapeAstar(Location start); // The time at which a set of adjacent elements will be found
 	
-	void ConstraintAstar(Location start, Location finish, vector<Constraint> constraints);
+	void ConstraintAstar(Location start, Location finish, int starting_time, vector<Constraint> constraints);
 	
+	bool validMovement(Location location, int time, vector<Constraint> constraints);
 	
 	int id;
 

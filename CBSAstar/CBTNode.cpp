@@ -45,7 +45,7 @@ CBTNode* CBTNode::getSmallestChild(){
 void CBTNode::CalculatePaths(){
 	for (unsigned int i = 0; i < agents.size(); i++){
 		//Calculate the paths of each of the agents, as if they where the only element on the grid
-		agents[i]->calculateRoute(constraints);
+		agents[i]->calculateRoute();
 
 		//Get the path, and push it into the paths vector
 		paths.push_back(agents[i]->getPath());
@@ -102,6 +102,7 @@ void CBTNode::CreateConflict(unsigned int time_ocurrence, Location location, vec
 bool CBTNode::findConstraintsConflicts(unsigned int t){
 	bool foundConflict = false;
 	for (unsigned int toCompareId = 0; toCompareId < paths.size(); toCompareId++){
+		bool found = false;
 		// if the current path that we are analizing has an element on time t
 		if (!foundConflict){
 			if (paths[toCompareId].size() > t){
@@ -115,16 +116,22 @@ bool CBTNode::findConstraintsConflicts(unsigned int t){
 							CreateConflict(t, toCompare.getLocation(), 
 								std::vector<int>(users, users + sizeof users / sizeof users[0]));
 							foundConflict = true;
+							found = true;
 							break;
 						}
-						else if (toCompare == paths[i][t + 1]){
-							int users[2] = { toCompareId, i };
-							CreateConflict(t + 1, toCompare.getLocation(), 
-								std::vector<int>(users, users + sizeof users / sizeof users[0]));
-							foundConflict = true;
-							break;
+						else if ((t + 1) < paths[i].size()){
+							if (toCompare == paths[i][t + 1]){
+								int users[2] = { toCompareId, i };
+								CreateConflict(t + 1, toCompare.getLocation(),
+									std::vector<int>(users, users + sizeof users / sizeof users[0]));
+								foundConflict = true;
+								found = true;
+								break;
+							}
 						}
-						else {
+
+
+						if(!found) {
 							// Else there is no conflict, just create the constraints
 							Constraint c(i, paths[i][t].getLocation(), t);
 							Constraint c1(i, paths[i][t].getLocation(), t + 1); // Save that element for a time t + 1								
@@ -181,8 +188,7 @@ int CBTNode::addAgent(Agent* a){
 
 void CBTNode::RecalculateRoutesOnConstraints(){
 	for (unsigned int i = 0; i < agents.size(); i++){
-		//agents[i]->ModifyRouteOnConstraints(constraints);// Update the paths on the agent
-		agents[i]->calculateRoute(constraints);
+		agents[i]->ModifyRouteOnConstraints(constraints);// Update the paths on the agent
 		paths[i] = agents[i]->getPath(); // Let the node know the new paths
 	}
 }

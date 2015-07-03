@@ -43,7 +43,7 @@ Agent::~Agent(void){
 //}
 
 
-void Agent::ConstraintAstar(Location start, Location finish, vector<Constraint> constraints){
+void Agent::ConstraintAstar(Location start, Location finish, int starting_time, vector<Constraint> constraints){
 	
 	bool pathFound = false;
 	//Let A be the starting point
@@ -68,18 +68,23 @@ void Agent::ConstraintAstar(Location start, Location finish, vector<Constraint> 
 		option to select is the first item
 		*/
 		P = GetSmallestNodeFromSpatialOpenList();
-		spatial_closedList.push_back(P);
+
+		// If P is a valid movement, it will be processed, otherwise, it will be discarded
+		if (validMovement(P.getLocation(), P.getDepth() + starting_time, constraints)){
+			spatial_closedList.push_back(P);
 
 
-		if (P.getLocation() == finish){
-			pathFound = true;
-			break;
+			if (P.getLocation() == finish){
+				pathFound = true;
+				break;
+			}
+
+			vector<Node> adjacents = getAdjacents(P, finish);
+			for (unsigned int i = 0; i < adjacents.size(); i++){
+				addToSpatialOpenList(adjacents[i]);
+			}
 		}
-
-		vector<Node> adjacents = getAdjacentsonConstraints(P, finish, constraints, P.getDepth() - 1);
-		for (unsigned int i = 0; i < adjacents.size(); i++){
-			addToSpatialOpenList(adjacents[i]);
-		}
+		
 	}
 
 	vector<Node> inverse_route;
@@ -95,7 +100,7 @@ void Agent::ConstraintAstar(Location start, Location finish, vector<Constraint> 
 	for (int i = inverse_route.size() - 1; i >= 0; i--){
 		//TODO: Remove if something breaks
 		inverse_route[i].clearParent(); // To save memory
-		time_route.push_back(inverse_route[i]);
+		spatial_route.push_back(inverse_route[i]);// Save it on the spatial_route
 	}
 }
 
@@ -600,43 +605,24 @@ void Agent::clearSpatialLists(bool clearSpatialRoute){
 	if (clearSpatialRoute) spatial_route.clear();
 }
 
-void Agent::calculateRoute(vector<Constraint> constraints){
-	/*
-		Fix: Instead of using executeSpatialAstar we are gonna use a new Astar that takes the Constraints of the
-		CBT into consideration.
-		Date: 02/07/2015
-		Why?
-		Because there has been a misunderstanding from myself about how the stuff in the CBS algorithm works.
-	*/
-	if (constraints.empty()){
-		time_route.clear();
-		clearSpatialLists(true);
+void Agent::calculateRoute(){
 
-		// If there is a partial destination
-		if (has_partial_destination){
-			//First calculate the route to the partial destination
-			executeSpatialAstar(actualNode.getLocation(), partialDestination.getLocation());
-			spatial_route.push_back(partialDestination); // Wait there a bit ..
-			clearSpatialLists(false);
-			//Now go the the actual destination
-			executeSpatialAstar(partialDestination.getLocation(), destination.getLocation());
-		}
-		else executeSpatialAstar(actualNode.getLocation(), destination.getLocation());
+	time_route.clear();
+	clearSpatialLists(true);
 
-		time_route = spatial_route; // Because the route was saved on the spatial route
-		spatial_route.clear();
+	// If there is a partial destination
+	if (has_partial_destination){
+		//First calculate the route to the partial destination
+		executeSpatialAstar(actualNode.getLocation(), partialDestination.getLocation());
+		spatial_route.push_back(partialDestination); // Wait there a bit ..
+		clearSpatialLists(false);
+		//Now go the the actual destination
+		executeSpatialAstar(partialDestination.getLocation(), destination.getLocation());
 	}
-	else {
-		// if there is a partial destination
-		if (has_partial_destination){
-			// Follow the same procedure as above, except that this time use other methods
-			ConstraintAstar(actualNode.getLocation(), partialDestination.getLocation(), constraints);
-			time_route.push_back(partialDestination);
-			clearSpatialLists(false);
-			ConstraintAstar(partialDestination.getLocation(), destination.getLocation(), constraints);
-		}
-		else ConstraintAstar(actualNode.getLocation(), destination.getLocation(), constraints);
-	}
+	else executeSpatialAstar(actualNode.getLocation(), destination.getLocation());
+
+	time_route = spatial_route; // Because the route was saved on the spatial route
+	spatial_route.clear();
 	
 	calculateSIC();
 }
@@ -654,112 +640,48 @@ void Agent::ReroutePathUsingCBS(){
 }
 
 void Agent::ModifyRouteOnConstraints(vector<Constraint> constraints){
-	
-	for (unsigned int i = 0; i < constraints.size(); i++){
-		Constraint c = constraints[i];
-		//If the constraint is from another agent
-		if (c.id != id){
-			// If this agent has a movement at time t
-			if (time_route.size() > c.t){
-				//If the movement at time t is the same as the constraint
-				if (time_route[c.t].getLocation() == c.location){
-					//Make the element wait for a t = 1 before moving to that spot
-					vector<Node> temp_path;
-					// push all the elements of the path from 0 till t -1 of the constraint
-					if (c.t == 0){
-						/*
-							If the conflict occurs on the first movement of both elements,
-							then the other element must wait on its first step before moving
-							to some other step.
-						*/
-						temp_path.push_back(actualNode);
-					}
-					else {
-						for (unsigned int i = 0; i < c.t; i++){
-							temp_path.push_back(time_route[i]);
-						}
-					}
+	// Lets look for an invalid movement
+	for (unsigned int i = 0; i < time_route.size(); i++){
+		// check each step for an invalid movement
+		if (!validMovement(time_route[i].getLocation(), i, constraints)){
+			// If we found an invalid movement
+			// First we check if it is valid to just wait
+			vector<Node> temp_path;
 
-					// If the last element of the path is different to the current element
-					if (time_route[c.t - 1] != time_route[c.t]){
-						// Repeat the last step so the agent waits for some other element to use the other cell
-						temp_path.push_back(temp_path[temp_path.size() - 1]);
-					}
-					//Otherwise
-					else {
-						int index_different = -1;
-						// Look backwards on the temp_path and look for a different element
-						for (int j = temp_path.size() - 1; j >= 0; j--){
-							if (temp_path[j] != time_route[c.t]){
-								index_different = j;
-								break;
-							}
-						}
-						
-						/*
-							If the index of the different is -1 it means that all the elements till the begining
-							are the same, which will end up getting either an invalid movement,
-							or an infinite loop in the code.
-						*/
-						if (index_different == -1){
-							// If the index is -1, lets get an escape node
-							temp_path.clear(); // Clear the list
-							
-							temp_path.push_back(time_route[0]); // Just add the first node
-							
-							// Now we get the escape node
-							Node escape = GetSimpleEscapeNode(temp_path[0].getLocation());
-							
-							
-							// Now we add the route to that node to our path
-							temp_path.push_back(escape);
-
-							// Now we will wait n times here until the conflict passes
-							while (temp_path.size() <= c.t + 1){
-								temp_path.push_back(escape);
-							}
-
-							// Finally, lets trace to the node at c.t on the path
-							clearSpatialLists(true);
-							executeSpatialAstar(escape.getLocation(), time_route[c.t].getLocation());
-							// The path is on the spatial route, so lets take it and put it on the partial path
-							for (unsigned int j = 0; j <= spatial_route.size() - 1; j++){
-								temp_path.push_back(spatial_route[j]);
-							}
-
-
-						}
-						else {
-							/*
-							Now that we have the index with the different element, we need to change
-							all the elements from that index, until the end of the temp_path + 1.
-							*/
-
-							for (unsigned int j = index_different + 1; j < temp_path.size(); j++){
-								temp_path[j] = temp_path[index_different];
-							}
-
-							// Now, add at the end the different element where we want it to stay
-							temp_path.push_back(temp_path[index_different]);
-
-						}
-
-						
-					}
-					
-
-					//finish adding the elements of the route
-					for (unsigned int i = c.t; i < time_route.size(); i++){
-						temp_path.push_back(time_route[i]);
-					}
-
-					//replace the old route with the new one
-					time_route = temp_path;
+			// Lets push to the temp_path the elements before the incident
+			for (unsigned int index = 0; index < i; index++){
+				temp_path.push_back(time_route[index]);
+			}
+			// if
+			if (validMovement(time_route[i - 1].getLocation(), i, constraints) && // waiting is a valid movement
+				i > 0 &&  // and it is not the first element of the path
+				time_route [i - 1] != time_route[i]){ // and the past element is different to the current element
+				
+				// Repeat the last step so the agent waits for some other element to use the other cell
+				temp_path.push_back(temp_path[temp_path.size() - 1]);
+				
+				
+				//finish adding the elements of the route
+				for (unsigned int index = i; index < time_route.size(); index++){
+					temp_path.push_back(time_route[index]);
 				}
 			}
+			else { // otherwise recalculate path
+				clearSpatialLists(true);
+				// If the movement is invalid, we need to replan the path
+				ConstraintAstar(time_route[i - 1].getLocation(), destination.getLocation(), i - 1, constraints);
+
+				 //After a recalculation is done, add the new steps to the path
+				for (unsigned int i = 0; i < spatial_route.size(); i++){
+					temp_path.push_back(spatial_route[i]);
+				}
+			}
+
+			//replace the old route with the new one
+			time_route = temp_path;
 		}
 	}
-	
+				
 }
 
 void Agent::moveEntity(unsigned int t){
@@ -1282,4 +1204,29 @@ void Agent::UpdateIndexSmallerTime(){
 		}
 	}
 	
+}
+
+/*
+	Checks if a movement is valid against the constraint list
+*/
+bool Agent::validMovement(Location location, int time, vector<Constraint> constraints){
+	bool result = true;
+	for (unsigned int i = 0; i < constraints.size(); i++){
+		// If the current constraint is in the same timespan
+		if (constraints[i].t < time_route.size()){
+			// If the constraint is from another element
+			if (id != constraints[i].id){
+				// If the time is the same
+				if (time == constraints[i].t){
+					// If the location is the same
+					if (location == constraints[i].location){
+						// We have an invalid movement
+						result = false;
+					}
+				}
+			}
+		}
+	}
+
+	return result;
 }
