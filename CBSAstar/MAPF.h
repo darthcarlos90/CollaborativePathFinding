@@ -44,8 +44,6 @@ private:
 	void SolveBlockingComplex(Conflicted c);
 	void DefaultHelper(Conflicted c);
 
-	bool DeadLockHelper(vector<Node> path1, vector<Node> path2, vector<Location>* locations = NULL, vector<int>* times = NULL);
-
 	
 	int countCriticalZone(Conflicted c, vector <Node>* criticalZoneNodes = NULL);
 	int GetIndexAtArray(vector<Node> list, Node val); //This searches element by element, so first make sure the element is there

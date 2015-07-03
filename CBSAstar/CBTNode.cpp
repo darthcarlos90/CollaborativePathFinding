@@ -232,3 +232,51 @@ void CBTNode::WaitAtIndex(int id, int index, int times){
 vector <Node> CBTNode::getPathAt(unsigned int index){
 	return paths[index]; 
 }
+
+
+void CBTNode::FindSpecialCases(){
+	// Just for Now
+	if (FindDeadLock()) SolveDeadLock();
+}
+
+bool CBTNode::FindDeadLock(){
+	bool result = false;
+	for (unsigned int toCompare = 0; toCompare < paths.size(); toCompare++){ // This represent the index of the element we are comparing
+		for (unsigned int index = toCompare + 1; index < paths.size(); index++){ // this will traverse the second compared element
+			for (int i = 0; i < paths[toCompare].size() - 2; i++){ // this represents the element on the first agent
+				for (int j = 0; j < paths[index].size() - 2; j++){ // this represents the element on the second agent
+					if ((paths[toCompare][i] == paths[index][j]) && (abs(i - j) <= 2)){ // if the elements are equal, lets see if the progress of the route is the same	
+						/*
+						If the next element of toCompare, is the element before of the current element
+						*/
+						if (j >= 2){ // This is needed in order to ensure the correct index is compared
+
+							if (paths[toCompare][i + 1] == paths[index][j - 1]){
+								/*
+								Means that the second element is also in each others route, we have a possible
+								bottleneck lets check the tird element.
+								*/
+
+								if (paths[toCompare][i + 2] == paths[index][j - 2]){
+									// We have a narrow path conflict
+									result = true;
+									break;
+								}
+							}
+						}
+					}
+				}
+				if (result) break;
+			}
+			if (result) break;
+		}
+		if (result) break;
+	}
+
+	return result;
+}
+
+
+void CBTNode::SolveDeadLock(){
+	// TODO: Code this
+}

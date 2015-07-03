@@ -72,6 +72,9 @@ public:
 	*/
 	vector<Node> getPathAt(unsigned int index);
 
+	// Copy paste of a method used in another class, since I could find a more efficient way to 
+	// reuse that code
+	void FindSpecialCases();
 
 
 private:
@@ -80,6 +83,8 @@ private:
 	bool findConstraintsConflicts(unsigned int t); //Finds the constraints and conflictsd at time t
 	bool isAtList(int element, vector<int> list); //Looks for a int on a list of ints, if it is there, returns true
 	void CreateConflict(unsigned int time_ocurrence, Location location, vector<int> users);
+	bool FindDeadLock();
+	void SolveDeadLock();
 
 
 	//Properties
