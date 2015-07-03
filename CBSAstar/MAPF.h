@@ -37,7 +37,7 @@ private:
 	int getIndexOfAgent(int id);
 
 	//Each method consists detects one type of conflict
-	void Deadlock(); // returns the length of the critical path
+	bool Deadlock(); // returns the length of the critical path
 	void SolveDeadLock(Conflicted c);
 	void Blocking(); // Detects if a finished element blocks the path of another element
 	void SolveBlockingSimple( Conflicted c); // Solves the blocking 
