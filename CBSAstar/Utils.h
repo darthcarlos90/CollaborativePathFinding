@@ -70,6 +70,8 @@ struct Conflict{
 */
 
 struct Conflicted{
+	
+	
 	std::vector<int> agents; //The ids of the agents involved in the conflict detected
 	int type; //The type of the conflict;
 	std::vector<Location> locations; // At what position where the elements when they found the conflict
@@ -85,6 +87,3 @@ struct Conflicted{
 	//Map m; // A peace of the map where the conflict will be solved;
 
 };
-
-
-static int returnNumber1() { return 1; }

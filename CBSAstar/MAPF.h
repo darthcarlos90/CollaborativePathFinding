@@ -37,12 +37,15 @@ private:
 	int getIndexOfAgent(int id);
 
 	//Each method consists detects one type of conflict
-	bool Deadlock(); // returns the length of the critical path
+	void Deadlock(); // returns the length of the critical path
 	void SolveDeadLock(Conflicted c);
 	void Blocking(); // Detects if a finished element blocks the path of another element
 	void SolveBlockingSimple( Conflicted c); // Solves the blocking 
 	void SolveBlockingComplex(Conflicted c);
 	void DefaultHelper(Conflicted c);
+
+	bool DeadLockHelper(vector<Node> path1, vector<Node> path2, vector<Location>* locations = NULL, vector<int>* times = NULL);
+
 	
 	int countCriticalZone(Conflicted c, vector <Node>* criticalZoneNodes = NULL);
 	int GetIndexAtArray(vector<Node> list, Node val); //This searches element by element, so first make sure the element is there

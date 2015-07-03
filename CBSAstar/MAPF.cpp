@@ -297,43 +297,63 @@ void MAPF::solveConflicts(){
 	}
 	
 }
+
+bool MAPF::DeadLockHelper(vector<Node> path1, vector<Node> path2, vector<Location>* locations, vector<int>* times){
+	bool result = false;
+	for (int i = 0; i < path1.size() - 2; i++){
+		for (int j = 0; j < path2.size() - 2; j++){
+			if (path1[i] == path2[j] && (abs(i - j) <= 2)){ // if the elements are equal lets see if the progress of the route is the same
+				/*
+				If the next element of toCompare, is the element before of the current element
+				*/
+				if (j >= 2){// This is needed in order to ensure the correct index is compare
+					if (path1[i + 1] == path2[j - 1]){
+						/*
+						Means that the second element is also in each others route, we have a possible
+						bottleneck lets check the tird element.
+						*/
+						if (path1[i + 2] == path2[j - 2]){
+							result = true;
+							// Extra return information
+							if (locations){
+								locations->push_back(path1[i].getLocation());
+								locations->push_back(path2[j].getLocation());
+							}
+							if (times){
+								times->push_back(i - 2);
+								times->push_back(j + 2);
+							}
+							break;
+						}
+					}
+				}
+			}
+		}
+
+		if (result) break;
+	}
+
+	return result;
+}
+
 #pragma region probablyunused
 
 void MAPF::Deadlock(){
 
 	for (unsigned int toCompare = 0; toCompare < paths.size(); toCompare++){ // This represent the index of the element we are comparing
 		for (unsigned int index = toCompare + 1; index < paths.size(); index++){ // this will traverse the second compared element
-			for (int i = 0; i < paths[toCompare].size() - 2; i++){ // this represents the element on the first agent
-				for (int j = 0; j < paths[index].size() - 2; j++){ // this represents the element on the second agent
-					if ((paths[toCompare][i] == paths[index][j]) && (abs(i - j) <= 2)){ // if the elements are equal, lets see if the progress of the route is the same	
-						/*
-						If the next element of toCompare, is the element before of the current element
-						*/
-						if (j >= 2){ // This is needed in order to ensure the correct index is compared
-
-							if (paths[toCompare][i + 1] == paths[index][j - 1]){
-								/*
-								Means that the second element is also in each others route, we have a possible
-								bottleneck lets check the tird element.
-								*/
-
-								if (paths[toCompare][i + 2] == paths[index][j - 2]){
-									// We have a narrow path conflict
-									Conflicted c;
-									c.type = DEADLOCK;
-									c.agents.push_back(players[toCompare].getId());
-									c.locations.push_back(paths[toCompare][i].getLocation());
-									c.agents.push_back(players[index].getId());
-									c.locations.push_back(paths[index][j].getLocation());
-									c.times.push_back(i - 2);
-									c.times.push_back(j + 2);
-									agent_conflicts.push_back(c); // Add it to the conflicts that need to be solved
-								}
-							}
-						}
-					}
-				}
-			}
+			vector<Location> locations;
+			vector<int> times;
+			if (DeadLockHelper(paths[toCompare], paths[index], &locations, &times)){
+				// We have a narrow path conflict
+				Conflicted c;
+				c.type = DEADLOCK;
+				c.agents.push_back(players[toCompare].getId());
+				c.agents.push_back(players[index].getId());
+				c.locations = locations;
+				c.times = times;
+				agent_conflicts.push_back(c); // Add it to the conflicts that need to be solved
+			}			
 		}
 	}
 }
