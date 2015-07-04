@@ -260,6 +260,13 @@ bool CBTNode::FindDeadLock(){
 								if (paths[toCompare][i + 2] == paths[index][j - 2]){
 									// We have a narrow path conflict
 									result = true;
+									deadlock.type = DEADLOCK;
+									deadlock.agents.push_back(toCompare);
+									deadlock.locations.push_back(paths[toCompare][i].getLocation());
+									deadlock.agents.push_back(index);
+									deadlock.locations.push_back(paths[index][j].getLocation());
+									deadlock.times.push_back(i - 2);
+									deadlock.times.push_back(j + 2);
 									break;
 								}
 							}
@@ -272,11 +279,63 @@ bool CBTNode::FindDeadLock(){
 		}
 		if (result) break;
 	}
-
+	
 	return result;
 }
 
 
 void CBTNode::SolveDeadLock(){
-	// TODO: Code this
+	int agent1 = deadlock.agents[0];
+	int agent2 = deadlock.agents[1];
+	int hightPriorityIndex;
+	int lowPriorityIndex;
+
+	// For easy coding, pointers
+	Agent* highPriority = NULL;
+	Agent* lowPriority = NULL;
+
+
+	if (LocationAtNodeList(agents[agent1]->getLocation(), paths[agent2])){
+		highPriority = agents[agent1];
+		hightPriorityIndex = agent1;
+		lowPriority = agents[agent2];
+		lowPriorityIndex = agent2;
+	}
+	else{
+		highPriority = agents[agent2];
+		lowPriority = agents[agent1];
+		hightPriorityIndex = agent2;
+		lowPriorityIndex = agent1;
+	}
+
+	// The priority element must calculate its route to it's destination normally
+	highPriority->calculateRoute();
+	// Update the route
+	paths[hightPriorityIndex] = highPriority->getPath();
+
+	// We need to know the amount of steps it took to the other element to get to their destination
+	int highPriorityPathSize = highPriority->pathSize();
+
+	// First, calculate the route as if it was the only element
+	lowPriority->calculateRoute();
+	// Make the low priority element wait in its starting position until high priority element is finished
+	for (int i = 0; i < highPriorityPathSize; i++){
+		lowPriority->AddNodeToPathAtTimeT(lowPriority->getActualLocation(), 0);
+	}
+	// Update the route
+	paths[lowPriorityIndex] = lowPriority->getPath();
+
+
+}
+
+bool CBTNode::LocationAtNodeList(Location location, vector<Node> list){
+	bool result = false;
+	for (unsigned int i = 0; i < list.size(); i++){
+		if (location == list[i].getLocation()){
+			result = true;
+			break;
+		}
+	}
+
+	return result;
 }

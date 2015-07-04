@@ -54,7 +54,14 @@ private:
 	void solveConflicts();
 
 	//CBS helper method so that I don't have to repeat this code over and over again
-	void CBSHelper();
+	/*
+		Fix: if RunCheck is true, then a check for certain events will be ran.
+		Date:04/07/2015
+		Why?
+		Because it turned out that CBS can't deal with certain types of narrow path blocking
+		situations, that is why the algorithm needs a bit of a help.
+	*/
+	void CBSHelper(bool RunCheck);
 
 	//TODO: Keep adding more elements throught the development of this project.
 	FileReader* fr;
