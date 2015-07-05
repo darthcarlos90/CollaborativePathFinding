@@ -96,13 +96,18 @@ void MAPF::StartCBSPathFinding(){
 
 }
 
-//TODO: Left here
-void MAPF::CBSHelper(){
+
+void MAPF::CBSHelper(bool RunCheck){
 	bool solutionFound = false;
 	//While we can't find the solution
 	while (!solutionFound){
 		//Get the best node of the tree
 		CBTNode* P = tree->getSolution();
+		
+		// So that certain special cases could be checked
+		if (RunCheck){
+			P->FindSpecialCases();
+		}
 
 		//Validate the paths until a conflict occurs
 		P->validatePaths();
@@ -139,7 +144,7 @@ void MAPF::RunCBSUsingPlayers(vector<Agent> agents){
 	//insert the root into the tree
 	tree->insertRoot(root);
 	
-	CBSHelper();
+	CBSHelper(true);
 
 }
 
@@ -175,7 +180,7 @@ void MAPF::MoveBySilvers(){
 				players[i].SetPathVerificationFlag(false);
 			}
 			//Now revise the paths
-			//RevisePaths();
+			RevisePaths();
 		}
 
 		time++;
@@ -408,7 +413,7 @@ void MAPF::SolveDeadLock(Conflicted c){
 		tree->insertRoot(root);
 
 		//Now, execute CBS and finish!
-		CBSHelper();
+		CBSHelper(false);
 
 	}
 }
@@ -443,7 +448,7 @@ void MAPF::DefaultHelper(Conflicted c){
 	tree->insertRoot(root);
 
 
-	CBSHelper();
+	CBSHelper(false);
 
 	agent_conflicts.clear();
 }

@@ -811,13 +811,13 @@ void Agent::AddNodeToPathAtTimeT(Node n, unsigned int t){
 		time_route.push_back(n);
 	} else if (t < time_route.size()){
 		vector<Node> result;
-		for (unsigned int i = 0; i <= t; i++){
+		for (unsigned int i = 0; i < t; i++){
 			result.push_back(time_route[i]);
 		}
 
 		result.push_back(n);
 
-		for (unsigned int i = t + 1; i < time_route.size(); i++){
+		for (unsigned int i = t; i < time_route.size(); i++){
 			result.push_back(time_route[i]);
 		}
 

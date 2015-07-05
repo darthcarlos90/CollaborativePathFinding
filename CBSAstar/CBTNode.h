@@ -82,7 +82,7 @@ private:
 	//void findConstraint(int i); // Forgot what is this for, Ill coment it until I remember why this is here
 	bool findConstraintsConflicts(unsigned int t); //Finds the constraints and conflictsd at time t
 	bool isAtList(int element, vector<int> list); //Looks for a int on a list of ints, if it is there, returns true
-	bool LocationAtNodeList(Location location, vector<Node> list);
+	bool LocationAtNodeList(Location location, vector<Node> list, int* index = NULL);
 	void CreateConflict(unsigned int time_ocurrence, Location location, vector<int> users);
 	bool FindDeadLock();
 	void SolveDeadLock();

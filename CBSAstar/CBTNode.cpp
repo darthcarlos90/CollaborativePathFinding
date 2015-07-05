@@ -260,13 +260,8 @@ bool CBTNode::FindDeadLock(){
 								if (paths[toCompare][i + 2] == paths[index][j - 2]){
 									// We have a narrow path conflict
 									result = true;
-									deadlock.type = DEADLOCK;
 									deadlock.agents.push_back(toCompare);
-									deadlock.locations.push_back(paths[toCompare][i].getLocation());
 									deadlock.agents.push_back(index);
-									deadlock.locations.push_back(paths[index][j].getLocation());
-									deadlock.times.push_back(i - 2);
-									deadlock.times.push_back(j + 2);
 									break;
 								}
 							}
@@ -290,48 +285,137 @@ void CBTNode::SolveDeadLock(){
 	int hightPriorityIndex;
 	int lowPriorityIndex;
 
+	bool partialDestinationElement = false;
+
 	// For easy coding, pointers
 	Agent* highPriority = NULL;
 	Agent* lowPriority = NULL;
 
+	// If both have partial destination or if none has partial destination
+	if ((agents[agent1]->hasPartialDestination() && agents[agent2]->hasPartialDestination()) || 
+		(!agents[agent1]->hasPartialDestination() && !agents[agent2]->hasPartialDestination())){
 
-	if (LocationAtNodeList(agents[agent1]->getLocation(), paths[agent2])){
-		highPriority = agents[agent1];
-		hightPriorityIndex = agent1;
-		lowPriority = agents[agent2];
-		lowPriorityIndex = agent2;
+		int difference = abs(static_cast<int>(paths[agent1].size()) - static_cast<int>(paths[agent2].size()));
+		// Making waiting priority by size, the agent with smallest path waits ...
+		if (difference > 5){
+			if (paths[agent1] < paths[agent2]){
+				highPriority = agents[agent2];
+				lowPriority = agents[agent1];
+				hightPriorityIndex = agent2;
+				lowPriorityIndex = agent1;
+			}
+			else {
+				highPriority = agents[agent1];
+				hightPriorityIndex = agent1;
+				lowPriority = agents[agent2];
+				lowPriorityIndex = agent2;
+			}
+
+		}
+		else {
+			// Else priority is dictated by the position of their starting position
+			if (LocationAtNodeList(agents[agent1]->getLocation(), paths[agent2])){
+				highPriority = agents[agent1];
+				hightPriorityIndex = agent1;
+				lowPriority = agents[agent2];
+				lowPriorityIndex = agent2;
+			}
+			else{
+				highPriority = agents[agent2];
+				lowPriority = agents[agent1];
+				hightPriorityIndex = agent2;
+				lowPriorityIndex = agent1;
+			}
+		}
 	}
+	// If only one has a partial destination
 	else{
-		highPriority = agents[agent2];
-		lowPriority = agents[agent1];
-		hightPriorityIndex = agent2;
-		lowPriorityIndex = agent1;
+		partialDestinationElement = true; // A partial destination was found, calculate stuff here
+		// I know , repetition, but I just want to see if it works and then Ill fix this
+		// TODO: Fix this
+		if (agents[agent1]->hasPartialDestination()){
+			highPriority = agents[agent1];
+			hightPriorityIndex = agent1;
+			lowPriority = agents[agent2];
+			lowPriorityIndex = agent2;
+		}
+		else{
+			highPriority = agents[agent2];
+			lowPriority = agents[agent1];
+			hightPriorityIndex = agent2;
+			lowPriorityIndex = agent1;
+		}
+
+		int partialDestinationindex = 0;
+		Location partialDestinationLocation = highPriority->getPartialDestination().getLocation();
+		// Get at what index is the partial destination of the priority agent
+		for (unsigned int i = 0; i < paths[hightPriorityIndex].size(); i++){
+			if (paths[hightPriorityIndex][i].getLocation() == partialDestinationLocation){
+				partialDestinationindex = i;
+				break;
+			}
+		}
+
+		// Save the size of the low priority element.
+		int lowPriorityPathSize = lowPriority->pathSize();
+
+		/*
+			Now, make the low priority element wait until the high priority element reaches
+			their partial destination.
+		*/
+		for (int i = 0; i < partialDestinationindex; i++){
+			lowPriority->AddNodeToPathAtTimeT(lowPriority->getActualLocation(), 0);
+		}
+
+		// Now, make the high priority element wait on the escape node while low priority finishes
+		for (int i = 0; i < lowPriorityPathSize - 1; i++){
+			highPriority->AddNodeToPathAtTimeT(highPriority->getPartialDestination(), partialDestinationindex);
+		}
+
+		//Update paths
+		paths[lowPriorityIndex] = lowPriority->getPath();
+		paths[hightPriorityIndex] = highPriority->getPath();
+
 	}
+	
+	if (!partialDestinationElement){ // If no partial destination was found ...
+		// The priority element must calculate its route to it's destination normally
+		highPriority->calculateRoute();
+		// Update the route
+		paths[hightPriorityIndex] = highPriority->getPath();
 
-	// The priority element must calculate its route to it's destination normally
-	highPriority->calculateRoute();
-	// Update the route
-	paths[hightPriorityIndex] = highPriority->getPath();
+		// We need to know the amount of steps it took to the other element to get to their destination
+		int highPriorityPathSize = highPriority->pathSize();
 
-	// We need to know the amount of steps it took to the other element to get to their destination
-	int highPriorityPathSize = highPriority->pathSize();
+		// First, calculate the route as if it was the only element
+		lowPriority->calculateRoute();
 
-	// First, calculate the route as if it was the only element
-	lowPriority->calculateRoute();
-	// Make the low priority element wait in its starting position until high priority element is finished
-	for (int i = 0; i < highPriorityPathSize; i++){
-		lowPriority->AddNodeToPathAtTimeT(lowPriority->getActualLocation(), 0);
+		// If the actual position of the low priority is part of the high priority
+		int index = 0; // save the index
+		if (LocationAtNodeList(lowPriority->getLocation(), paths[hightPriorityIndex], &index)){
+			for (int i = 0; i < index; i++){
+				lowPriority->AddNodeToPathAtTimeT(lowPriority->getActualLocation(), 0);
+			}
+		}
+		else {
+			// Make the low priority element wait in its starting position until high priority element is finished
+			for (int i = 0; i < highPriorityPathSize; i++){
+				lowPriority->AddNodeToPathAtTimeT(lowPriority->getActualLocation(), 0);
+			}
+		}
+
+		// Update the route
+		paths[lowPriorityIndex] = lowPriority->getPath();
+
 	}
-	// Update the route
-	paths[lowPriorityIndex] = lowPriority->getPath();
-
 
 }
 
-bool CBTNode::LocationAtNodeList(Location location, vector<Node> list){
+bool CBTNode::LocationAtNodeList(Location location, vector<Node> list, int * index){
 	bool result = false;
 	for (unsigned int i = 0; i < list.size(); i++){
 		if (location == list[i].getLocation()){
+			if (index) *index = i;
 			result = true;
 			break;
 		}
