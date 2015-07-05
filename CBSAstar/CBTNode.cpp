@@ -62,16 +62,17 @@ void CBTNode::ExpandNode(){
 		Constraint cnst(conflict.users[i], conflict.v, conflict.t);
 		Constraint cnst2(conflict.users[i], conflict.v, conflict.t + 1);
 		CBTNode* child = new CBTNode(constraints, agents, paths);
+		bool dest_conf = conflict.destination_conflict;
 		child->addConstraint(cnst);
 		child->addConstraint(cnst2);
-		child->RecalculateRoutesOnConstraints();
+		child->RecalculateRoutesOnConstraints(dest_conf);
 		children.push_back(child);
 	}
 }
 
 void CBTNode::validatePaths(){
 	unsigned int largest_size = 0;
-	
+	BalancePaths();
 	//Get the largest path size
 	for (unsigned int i = 0; i < paths.size(); i++){
 		if (paths[i].size() > largest_size) largest_size = paths[i].size();
@@ -91,16 +92,17 @@ void CBTNode::validatePaths(){
 	}
 }
 
-void CBTNode::CreateConflict(unsigned int time_ocurrence, Location location, vector<int> users){
+void CBTNode::CreateConflict(unsigned int time_ocurrence, Location location, vector<int> users, bool dest_con){
 	conflict.v = location;
 	conflict.t = time_ocurrence;
 	conflict.users = users;
-
+	conflict.destination_conflict = dest_con;
 	conflict.empty = false;
 }
 
 bool CBTNode::findConstraintsConflicts(unsigned int t){
 	bool foundConflict = false;
+
 	for (unsigned int toCompareId = 0; toCompareId < paths.size(); toCompareId++){
 		bool found = false;
 		// if the current path that we are analizing has an element on time t
@@ -112,23 +114,52 @@ bool CBTNode::findConstraintsConflicts(unsigned int t){
 					if (paths[i].size() > t){
 						//State machine for detecting this conflict
 						if (toCompare == paths[i][t]){ // There is a conflict
-							int users[2] = { toCompareId, i };
-							CreateConflict(t, toCompare.getLocation(), 
-								std::vector<int>(users, users + sizeof users / sizeof users[0]));
-							foundConflict = true;
-							found = true;
-							break;
-						}
-						else if ((t + 1) < paths[i].size()){
-							if (toCompare == paths[i][t + 1]){
-								int users[2] = { toCompareId, i };
-								CreateConflict(t + 1, toCompare.getLocation(),
-									std::vector<int>(users, users + sizeof users / sizeof users[0]));
+							if (toCompare == paths[i][paths[i].size() - 1]){
+								// This means there is a goal node involved on the conflict, so only add
+								// one agent to the Conflict
+								int users[1] = { toCompareId };
+								CreateConflict(t, toCompare.getLocation(),
+									std::vector<int>(users, users + sizeof users / sizeof users[0]), true);
+								foundConflict = true;
+								found = true;
+								break;
+
+							}
+							else if (paths[i][t] == paths[toCompareId][paths[toCompareId].size() - 1]){
+								int users[1] = { i };
+								CreateConflict(t, toCompare.getLocation(),
+									std::vector<int>(users, users + sizeof users / sizeof users[0]), true);
 								foundConflict = true;
 								found = true;
 								break;
 							}
+							else {
+								int users[2] = { toCompareId, i };
+								CreateConflict(t, toCompare.getLocation(),
+									std::vector<int>(users, users + sizeof users / sizeof users[0]), false);
+								foundConflict = true;
+								found = true;
+								break;
+							}
+							
 						}
+						// Useless
+						/*
+							Why?
+							Cant explain this in english sorry :((((
+							Porque te estas adelantando, por que checar ahorita el indice t + 1, 
+							si en la siguiente iteracion vas a compararlo vs ese
+						*/
+						/*else if ((t + 1) < paths[i].size()){
+							if (toCompare == paths[i][t + 1]){
+								int users[2] = { toCompareId, i };
+								CreateConflict(t + 1, toCompare.getLocation(),
+									std::vector<int>(users, users + sizeof users / sizeof users[0]), false);
+								foundConflict = true;
+								found = true;
+								break;
+							}
+						}*/
 
 
 						if(!found) {
@@ -186,9 +217,9 @@ int CBTNode::addAgent(Agent* a){
 	return a->getId();
 }
 
-void CBTNode::RecalculateRoutesOnConstraints(){
+void CBTNode::RecalculateRoutesOnConstraints(bool dest_conf){
 	for (unsigned int i = 0; i < agents.size(); i++){
-		agents[i]->ModifyRouteOnConstraints(constraints);// Update the paths on the agent
+		agents[i]->ModifyRouteOnConstraints(constraints, dest_conf);// Update the paths on the agent
 		paths[i] = agents[i]->getPath(); // Let the node know the new paths
 	}
 }
@@ -422,4 +453,26 @@ bool CBTNode::LocationAtNodeList(Location location, vector<Node> list, int * ind
 	}
 
 	return result;
+}
+
+void CBTNode::BalancePaths(){
+	unsigned int largestSize = 0;
+	// Get the largest pathsize
+	for (unsigned int i = 0; i < agents.size(); i++){
+		if (agents[i]->pathSize() > largestSize) 
+			largestSize = agents[i]->pathSize();
+	}
+
+	// Update all the paths so they are all the same size
+	for (unsigned int i = 0; i < agents.size(); i++){
+		if (agents[i]->pathSize() != largestSize){
+			for (int j = 0; j < largestSize; j++){
+				// Push to the back of the route the element of the last index
+				agents[i]->PushElementAtTheBackOfRoute(
+					agents[i]->getPath()[agents[i]->pathSize()-1]);
+			}
+			// Update the paths vector
+			paths[i] = agents[i]->getPath();
+		}
+	}
 }

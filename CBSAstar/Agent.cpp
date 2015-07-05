@@ -45,6 +45,7 @@ Agent::~Agent(void){
 
 void Agent::ConstraintAstar(Location start, Location finish, int starting_time, vector<Constraint> constraints){
 	
+	
 	bool pathFound = false;
 	//Let A be the starting point
 	Node A(0, start);
@@ -639,7 +640,7 @@ void Agent::ReroutePathUsingCBS(){
 	calculateSIC();
 }
 
-void Agent::ModifyRouteOnConstraints(vector<Constraint> constraints){
+void Agent::ModifyRouteOnConstraints(vector<Constraint> constraints, bool dest_conf){
 	// Lets look for an invalid movement
 	for (unsigned int i = 0; i < time_route.size(); i++){
 		// check each step for an invalid movement
@@ -655,7 +656,8 @@ void Agent::ModifyRouteOnConstraints(vector<Constraint> constraints){
 			// if
 			if (validMovement(time_route[i - 1].getLocation(), i, constraints) && // waiting is a valid movement
 				i > 0 &&  // and it is not the first element of the path
-				time_route [i - 1] != time_route[i]){ // and the past element is different to the current element
+				time_route [i - 1] != time_route[i] &&// and the past element is different to the current element
+				!dest_conf){  // and is not a destination conflict
 				
 				// Repeat the last step so the agent waits for some other element to use the other cell
 				temp_path.push_back(temp_path[temp_path.size() - 1]);
@@ -917,6 +919,7 @@ Node Agent::GetEscapeNodeNotOnRoute(Location start, vector<Node> path, bool lowe
 
 		//TODO: Get Adjacents without parent :D
 		vector<Node> adjacents = getAdjacentsWithoutParents(P);
+		
 
 		for (unsigned int i = 0; i < adjacents.size(); i++){
 			if (!FindNodeAtList(adjacents[i], path)){ // If the node is not part of the others route.

@@ -43,7 +43,7 @@ public:
 	
 	void addConstraint(Constraint c);
 
-	void RecalculateRoutesOnConstraints();
+	void RecalculateRoutesOnConstraints(bool dest_conf);
 
 	void UpdateAgentsPaths(); // This method updates the path of their agents
 
@@ -76,6 +76,7 @@ public:
 	// reuse that code
 	void FindSpecialCases();
 
+	
 
 private:
 	//Helper functions
@@ -83,9 +84,13 @@ private:
 	bool findConstraintsConflicts(unsigned int t); //Finds the constraints and conflictsd at time t
 	bool isAtList(int element, vector<int> list); //Looks for a int on a list of ints, if it is there, returns true
 	bool LocationAtNodeList(Location location, vector<Node> list, int* index = NULL);
-	void CreateConflict(unsigned int time_ocurrence, Location location, vector<int> users);
+	void CreateConflict(unsigned int time_ocurrence, Location location, vector<int> users, bool dest_con);
 	bool FindDeadLock();
 	void SolveDeadLock();
+
+
+	// This method balances the paths of the agents so a proper check coudld be done
+	void BalancePaths();
 
 
 	//Properties

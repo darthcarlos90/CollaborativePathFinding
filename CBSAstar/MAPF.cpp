@@ -144,7 +144,7 @@ void MAPF::RunCBSUsingPlayers(vector<Agent> agents){
 	//insert the root into the tree
 	tree->insertRoot(root);
 	
-	CBSHelper(true);
+	CBSHelper(false);
 
 }
 
@@ -642,23 +642,73 @@ void MAPF::SolveBlockingComplex(Conflicted c){
 	agentLocation2.x = agentLocation2.x - exchange_rate.x;
 	agentLocation2.y = agentLocation2.y - exchange_rate.y;
 
-	//Now we can create a CBS with agents
+	/*
+		Fix: To avoid any class of head to head collisions, first we are going to calculate the route of one of the elements
+		to its escape node, and the other element will just wait on its place. Afterwards, we will use CBS to pathfind to the destination
+		of both elements.
+		Date: 05/07/2015
+		Why?
+		Because CBS doesnt has the ability to solve head to head collisions. This will be done in parts to help solve that. If there are no head to
+		head collisions, still it will 'look' like an agent is 'waiting' for the other one to finish moving.
+	*/
+
+	//Create a CBS with agents
 	//First change the escape node to the new location
 	escape.ConvertToSubmapCoordinates(exchange_rate);
-	Agent agent1(Node(0, 0, agentLocation1.x, agentLocation1.y), Node(0, 0, agentExitLocation.x, agentExitLocation.y), &submap, 0, 5);
-	Agent agent2(Node(0, 0, agentLocation2.x, agentLocation2.y), Node(0, 0, agentLocation2.x, agentLocation2.y), &submap, 1, 5);
-	agent2.setPartialDestination(escape);
-
+	Agent partialAgent1(Node(0, 0, agentLocation1.x, agentLocation1.y), Node(0, 0, agentLocation1.x, agentLocation1.y), &submap, 0, 5); // Let that element stay where it is
+	Agent partialAgent2(Node(0, 0, agentLocation2.x, agentLocation2.y), escape, &submap, 1, 5);// Escape node is the final destination for this CBS
+	
+	// Run the CBS only for these agents
 	vector<Agent> agents;
+	agents.push_back(partialAgent1);
+	agents.push_back(partialAgent2);
+
+	//Run the CBS for these situation
+	RunCBSUsingPlayers(agents);
+
+	// Get the partial paths
+	vector<Node> escapePath1 = tree->getSolution()->getPathAt(0);
+	vector<Node> escapePath2 = tree->getSolution()->getPathAt(1);
+
+	/*
+		There is one path that only contains one element (since the starting is also the finish destination),
+		for this element, we will repeat this step the amount of times the other agent takes to reach its final destination.
+	*/
+	if (escapePath1.size() < escapePath2.size()){
+		for (unsigned int i = 0; i < escapePath2.size(); i++){
+			escapePath1.push_back(escapePath1[0]);
+		}
+	}
+	else if (escapePath1.size() > escapePath2.size()){
+		while (escapePath1.size() > escapePath2.size()){
+			escapePath1.pop_back();
+		}
+	}
+	
+
+	// Both routes are supposed to be of the same size, so we will transform the coordinates to correct coordinates
+	for (unsigned int i = 0; i < escapePath1.size(); i++){
+		escapePath1[i].ConvertToMapCoordinates(exchange_rate);
+		escapePath2[i].ConvertToMapCoordinates(exchange_rate);
+	}
+	Location partialLocation1 = escapePath1[escapePath1.size() - 1].getLocation();
+	Location partialLocation2 = escapePath2[escapePath2.size() - 1].getLocation();
+
+	// Now we have 2 partial routes, it is time to calculate the routes from their partial destination, to their actual destination
+	//Now we can create a CBS with agents
+	//This will be calculated from partial location to their actual destination (or exit stuff)
+	Agent agent1(Node(0,partialLocation1), Node(0, 0, agentExitLocation.x, agentExitLocation.y), &submap, 0, 5);
+	Agent agent2(Node(0,partialLocation2), Node(0, 0, agentLocation2.x, agentLocation2.y), &submap, 1, 5);
+	agents.clear(); // Clear from the old agents
 	agents.push_back(agent1);
 	agents.push_back(agent2);
 
-	//Run the CBS Using the correct players
+	//Run the CBS
 	RunCBSUsingPlayers(agents);
 
 	// Once the paths have been calculated, now we can update the paths of the agents (converting them to normal coordinates)
 	vector<Node> new_path;
-	// First get all the elements befor the agent got into the danger zone
+	// First get all the elements before the agent got into the danger zone
 	for (int i = 0; i <= time_index; i++){
 		new_path.push_back(paths[indexOther][i]);
 	}
@@ -667,6 +717,11 @@ void MAPF::SolveBlockingComplex(Conflicted c){
 	vector<Node> path1 = tree->getSolution()->getPathAt(0);
 	vector<Node> path2 = tree->getSolution()->getPathAt(1);
 
+	// Now, update paths with the elements of the escape routes
+	for (unsigned int i = 0; i < escapePath1.size(); i++){
+		new_path.push_back(escapePath1[i]);
+		toMove.PushElementAtTheBackOfRoute(escapePath2[i]);
+	}
 
 	/*	
 		Now we transform the elements of the path from submap coordinates, to global coordinates
@@ -694,7 +749,7 @@ void MAPF::SolveBlockingComplex(Conflicted c){
 	paths[indexToMove] = toMove.getPath();
 
 	// Now lets test it!
-	//TODO: Remove this when the testing is finished
+	//TODO: Remove this when the testing is finished FIGERS CROSSED
 }
 
 bool MAPF::existsInList(vector<int> list, int val){

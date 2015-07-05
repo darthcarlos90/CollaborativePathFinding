@@ -47,12 +47,14 @@ struct Conflict{
 		this->v = v;
 		this->t = t;
 		empty = false;
+		destination_conflict = false;
 	}
 
 	//Empty constructor, literally
 	Conflict(){
 		t = -1;
 		empty = true;
+		destination_conflict = false;
 	}
 
 	void addUser(int id){
@@ -63,6 +65,7 @@ struct Conflict{
 	Location v;
 	unsigned int t;
 	bool empty;
+	bool destination_conflict;
 };
 
 /*

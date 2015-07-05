@@ -33,16 +33,17 @@ Node::Node(int type, int tempg, int x_pos, int y_pos){
 
 Node::Node(int type, Location location){
 	this->type = type;
+	tempg = 0;
 	x = location.x;
 	y = location.y;
 	g = 0;
 	h = 0;
 	f = 0;
-	tempg = 0;
 	parent = NULL;
 	has_parent = false;
 	my_location = location;
-
+	my_location.id = type;
+	depth = 0;
 }
 
 Node::~Node(void){
