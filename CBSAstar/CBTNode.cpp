@@ -466,7 +466,8 @@ void CBTNode::BalancePaths(){
 	// Update all the paths so they are all the same size
 	for (unsigned int i = 0; i < agents.size(); i++){
 		if (agents[i]->pathSize() != largestSize){
-			for (int j = 0; j < largestSize; j++){
+			int difference = largestSize - agents[i]->pathSize();
+			for (int j = 0; j < difference; j++){
 				// Push to the back of the route the element of the last index
 				agents[i]->PushElementAtTheBackOfRoute(
 					agents[i]->getPath()[agents[i]->pathSize()-1]);

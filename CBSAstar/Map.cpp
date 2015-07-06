@@ -1,10 +1,15 @@
 #include "Map.h"
 
 Map::Map(Matrix<int>* mat){
-	data = mat;
-	//findNodes(); //Only for use in spatial Astar, not this new method :D
-	cout << *data << endl;
-	has_data = true;
+	if (mat){
+		data = mat;
+		//findNodes(); //Only for use in spatial Astar, not this new method :D
+		cout << *data << endl;
+		has_data = true;
+	}
+	else {
+		has_data = false;
+	}
 }
 
 //Empty constructor for several purposes

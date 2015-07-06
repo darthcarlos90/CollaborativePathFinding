@@ -180,6 +180,8 @@ unsigned int Node::getDepth() const{
 void Node::ConvertToSubmapCoordinates(Location exchange){
 	x = x - exchange.x;
 	y = y - exchange.y;
+	my_location.x = x;
+	my_location.y = y;
 }
 
 void Node::ConvertToMapCoordinates(Location exchange){

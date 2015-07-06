@@ -2,11 +2,6 @@
 #include "Matrix.h"
 #include "ReservationTable.h"
 
-
-
-
-
-
 class Map{
 public:
 	Map(Matrix<int>* mat);
@@ -54,6 +49,8 @@ public:
 				coordinates to submap coordinates.
 	*/
 	Map createSubMap(Location blocking, Location escape, Location blocked, Location* difference = NULL);
+
+	bool hasData() { return has_data; }
 
 
 private:

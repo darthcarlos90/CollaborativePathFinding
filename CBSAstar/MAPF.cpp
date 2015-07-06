@@ -7,41 +7,46 @@ MAPF::MAPF(string filename){
 
 	//put the file 
 	map = new Map(fr->data);
-	
 	broken = false;
-	
-	//Create the players using the data from the file
-	for (unsigned int i = 0; i < fr->startings.size(); i++){
-		int D = map->CalculateD();
-		//if (i % 2 == 1) D = D / 2;
-		Location l = fr->startings[i];
-		Location d = fr->endings[i];
+	if (map->hasData()){
+		//Create the players using the data from the file
+		for (unsigned int i = 0; i < fr->startings.size(); i++){
+			int D = map->CalculateD();
+			//if (i % 2 == 1) D = D / 2;
+			Location l = fr->startings[i];
+			Location d = fr->endings[i];
 
-		//Check for valid locations
-		if (map->getValueAt(l.x, l.y) == 1){
-			broken = true;
-			map->printData();
-			break;
+			//Check for valid locations
+			if (map->getValueAt(l.x, l.y) == 1){
+				broken = true;
+				map->printData();
+				break;
+			}
+
+			if (map->getValueAt(d.x, d.y) == 1){
+				broken = true;
+				break;
+			}
+
+			Node node_location(0, 0, l.x, l.y);
+			Node destination(0, 0, d.x, d.y);
+			Agent u(node_location, destination, map, l.id, D);
+			players.push_back(u);
 		}
 
-		if (map->getValueAt(d.x, d.y) == 1){
-			broken = true;
-			break;
-		}
+		if (broken)
+			cout << "The data on the file given is incorrect, please try again" << endl;
+		else cout << "Finished loading data from the file" << endl;
 
-		Node node_location(0, 0, l.x, l.y);
-		Node destination(0, 0, d.x, d.y);
-		Agent u(node_location, destination, map, l.id, D);
-		players.push_back(u);
+
+
+		time = 0;
 	}
-
-	if (broken)
-		cout << "The data on the file given is incorrect, please try again" << endl;
-	else cout << "Finished loading data from the file" << endl;
-
+	else {
+		broken = true;
+	}
 	
-
-	time = 0;
+	
 
 }
 
@@ -165,6 +170,7 @@ void MAPF::MoveBySilvers(){
 	bool verify = false;
 	while (!finished){
 		system("cls");
+		map->cleanMap();
 		finished = players[0].finished();
 		for (unsigned int i = 0; i < players.size(); i++){
 			players[i].move(time); // The element at i will be the element at time = i + 1
@@ -228,7 +234,6 @@ void MAPF::RevisePaths(){
 	
 	Blocking();
 	solveConflicts();
-	
 }
 
 
@@ -704,7 +709,7 @@ void MAPF::SolveBlockingComplex(Conflicted c){
 	agents.push_back(agent2);
 
 	//Run the CBS
-	RunCBSUsingPlayers(agents);
+ 	RunCBSUsingPlayers(agents);
 
 	// Once the paths have been calculated, now we can update the paths of the agents (converting them to normal coordinates)
 	vector<Node> new_path;
@@ -747,9 +752,6 @@ void MAPF::SolveBlockingComplex(Conflicted c){
 	//Update the paths
 	paths[indexOther] = otherAgent.getPath();
 	paths[indexToMove] = toMove.getPath();
-
-	// Now lets test it!
-	//TODO: Remove this when the testing is finished FIGERS CROSSED
 }
 
 bool MAPF::existsInList(vector<int> list, int val){

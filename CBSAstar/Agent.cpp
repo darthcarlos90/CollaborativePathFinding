@@ -199,10 +199,11 @@ void Agent::move(unsigned int t){
 	}
 	else {
 		//TODO: Past Node debugging
-		//Node pastNode = actualNode;// for debug
+		//Location pastLocation = actualNode.getLocation();// for debug
 		actualNode = time_route[t - 1];
 		stepsTaken++;
-		//map->setElement(pastNode.getX(), pastNode.getY(), 0); // For debugging
+		//if (map->getValueAt(pastLocation.x, pastLocation.y) == id + 2)
+		//	map->setElement(pastLocation.x, pastLocation.y, 0); // For debugging
 	}
 		
 	map->setElement(actualNode.getX(), actualNode.getY(), id + 2);
@@ -654,21 +655,43 @@ void Agent::ModifyRouteOnConstraints(vector<Constraint> constraints, bool dest_c
 				temp_path.push_back(time_route[index]);
 			}
 			// if
-			if (validMovement(time_route[i - 1].getLocation(), i, constraints) && // waiting is a valid movement
-				i > 0 &&  // and it is not the first element of the path
-				time_route [i - 1] != time_route[i] &&// and the past element is different to the current element
-				!dest_conf){  // and is not a destination conflict
+			bool replan = false;
+			if (i > 0){ // If it isnt the first element
 				
-				// Repeat the last step so the agent waits for some other element to use the other cell
-				temp_path.push_back(temp_path[temp_path.size() - 1]);
-				
-				
+				if (validMovement(time_route[i - 1].getLocation(), i, constraints) && // waiting is a valid movement
+					time_route[i - 1] != time_route[i] && // No replan needed
+					!dest_conf ){  // and is not a destination conflict
+
+					// Repeat the last step so the agent waits for some other element to use the other cell
+					temp_path.push_back(temp_path[temp_path.size() - 1]);
+
+
+					//finish adding the elements of the route
+					for (unsigned int index = i; index < time_route.size(); index++){
+						temp_path.push_back(time_route[index]);
+					}
+				}
+				else replan = true;
+			}
+
+			else if (i == 0){
+				// If it is the first element
+				// Repeat the first step so the agent waits for some other element to use the other cell
+				temp_path.push_back(time_route[0]);
+
+
 				//finish adding the elements of the route
 				for (unsigned int index = i; index < time_route.size(); index++){
 					temp_path.push_back(time_route[index]);
 				}
+
 			}
-			else { // otherwise recalculate path
+			else {
+				replan = true;
+			}
+
+			
+			if(replan) { // otherwise recalculate path
 				clearSpatialLists(true);
 				// If the movement is invalid, we need to replan the path
 				ConstraintAstar(time_route[i - 1].getLocation(), destination.getLocation(), i - 1, constraints);
@@ -1080,8 +1103,7 @@ Node Agent::EscapeAstar(Location start){
 void Agent::MoveToClosestEscapeElement(bool KeepRoute, Location start){
 	
 	//Clear the lists first
-	spatial_openList.clear();
-	spatial_closedList.clear();
+	clearSpatialLists(false);
 	//First, lets get the closest escape Element
 	Node escapeNode = EscapeAstar(start);
 

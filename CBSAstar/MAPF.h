@@ -23,6 +23,8 @@ public:
 	void MoveEntities(int type); //The type thing is temporal
 	//This method will revise the paths in look for any conflict
 	void RevisePaths();
+
+	bool isBroken() { return broken; }
 	
 
 private:
