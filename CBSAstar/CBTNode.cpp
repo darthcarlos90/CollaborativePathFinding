@@ -225,7 +225,7 @@ void CBTNode::RecalculateRoutesOnConstraints(bool dest_conf){
 }
 
 void CBTNode::addConstraint(Constraint c){
-	//TODO: If it is possible, add the same constraint but at time t + 1
+	
 	if (!constraints.empty()){
 		if (std::find(constraints.begin(), constraints.end(), c) != constraints.end()){
 			//The element is found, do nothing
@@ -363,7 +363,6 @@ void CBTNode::SolveDeadLock(){
 	else{
 		partialDestinationElement = true; // A partial destination was found, calculate stuff here
 		// I know , repetition, but I just want to see if it works and then Ill fix this
-		// TODO: Fix this
 		if (agents[agent1]->hasPartialDestination()){
 			highPriority = agents[agent1];
 			hightPriorityIndex = agent1;

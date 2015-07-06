@@ -24,24 +24,6 @@ Agent::~Agent(void){
 	map = NULL;//There is only one map, it is not my job to delete it
 }
 
-/*
-	At the copy constructor, I am only going to add the stuff that I need to use when
-	passing agents as parameters in methods, that way I hope to save some innecesary coding
-	or passing some innecesary elements;
-*/
-//Agent::Agent(const Agent& other){
-//	// For now, I just need the path and the id perhaps
-//	this->id = other.id;
-//	this->time_route = other.time_route;
-//	this->actualNode = other.actualNode;
-//	this->destination = other.destination;
-//
-//	//Things that I dont need
-//	map = NULL;
-//
-//	// TODO: If I need more elements at the copy constructor, just add them
-//}
-
 
 void Agent::ConstraintAstar(Location start, Location finish, int starting_time, vector<Constraint> constraints){
 	
@@ -99,7 +81,7 @@ void Agent::ConstraintAstar(Location start, Location finish, int starting_time, 
 	else inverse_route.push_back(P); //This in case the next node is the answer
 	//For some reason the route is backwards, lets but it on the corect order
 	for (int i = inverse_route.size() - 1; i >= 0; i--){
-		//TODO: Remove if something breaks
+		// Remove if something breaks
 		inverse_route[i].clearParent(); // To save memory
 		spatial_route.push_back(inverse_route[i]);// Save it on the spatial_route
 	}
@@ -166,7 +148,7 @@ void Agent::executeSpatialAstar(Location start, Location finish){
 			specially in really large lists. with this, and with the parent elements, it
 			takes too much time to sort a list of nodes.
 		*/
-		//TODO: Fix if no results are given
+		// If some stuff stops working, go back to the original way
 		//std::sort(spatial_openList.begin(), spatial_openList.end());
 	}
 
@@ -181,7 +163,7 @@ void Agent::executeSpatialAstar(Location start, Location finish){
 	else inverse_route.push_back(P); //This in case the next node is the answer
 	//For some reason the route is backwards, lets but it on the corect order
 	for (int i = inverse_route.size() - 1; i >= 0; i--){
-		//TODO: Remove if something breaks
+		// Remove if something breaks
 		inverse_route[i].clearParent(); // To save memory
 		spatial_route.push_back(inverse_route[i]);
 	}
@@ -198,12 +180,8 @@ void Agent::move(unsigned int t){
 		active = false; //we reached the end of the route 
 	}
 	else {
-		//TODO: Past Node debugging
-		//Location pastLocation = actualNode.getLocation();// for debug
 		actualNode = time_route[t - 1];
 		stepsTaken++;
-		//if (map->getValueAt(pastLocation.x, pastLocation.y) == id + 2)
-		//	map->setElement(pastLocation.x, pastLocation.y, 0); // For debugging
 	}
 		
 	map->setElement(actualNode.getX(), actualNode.getY(), id + 2);
@@ -402,12 +380,10 @@ void Agent::TimeSpaceAstarHelper(Location start, Location finish, int time){
 
 	//get the nodes in order
 	for (int i = temp.size() - 1; i >= 0; i--){
-		//TODO: Fix if something brakes
+		// Fix if something brakes
 		temp[i].clearParent(); //to save memory on copying parents, since parents are not being used anymore
 		time_route.push_back(temp[i]);
 	}
-	// TODO: Updated for now
-	//t = time; //update the value of t	
 }
 
 
@@ -568,23 +544,6 @@ vector<Node> Agent::getTimedAdjacentsWithoutParents(Node location, int time){
 
 	return result;
 }
-
-
-
-//TODO: Commented to see if this will be needed later
-//void Agent::setTime(int time_to_set){
-//	t = time_to_set;
-//
-//	//Why dis??
-//	/*
-//		This was executed so that after the time that was passed, the element
-//		stayed in the same place in the route.
-//	*/
-//	for (int i = 0; i < t; i++){
-//		time_route.push_back(actualNode);
-//	}
-//}
-
 
 
 void Agent::calculateSIC(){
@@ -940,7 +899,7 @@ Node Agent::GetEscapeNodeNotOnRoute(Location start, vector<Node> path, bool lowe
 		spatial_closedList.push_back(P);
 		//spatial_openList.erase(spatial_openList.begin());
 
-		//TODO: Get Adjacents without parent :D
+		// Get Adjacents without parent :D
 		vector<Node> adjacents = getAdjacentsWithoutParents(P);
 		
 

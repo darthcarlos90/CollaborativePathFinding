@@ -88,7 +88,6 @@ private:
 	bool FindDeadLock();
 	void SolveDeadLock();
 
-
 	// This method balances the paths of the agents so a proper check coudld be done
 	void BalancePaths();
 
