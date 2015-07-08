@@ -46,9 +46,12 @@ private:
 	void SolveBlockingComplex(Conflicted c);
 	void DefaultHelper(Conflicted c);
 
+	// Helper functions for the blocking element
+	void SimpleBlocking();
+	void MultipleBlocking();
 	
 	int countCriticalZone(Conflicted c, vector <Node>* criticalZoneNodes = NULL);
-	int GetIndexAtArray(vector<Node> list, Node val); //This searches element by element, so first make sure the element is there
+	int GetIndexAtArray(vector<Node> list, Location val); //This searches element by element, so first make sure the element is there
 
 	void RunCBSUsingPlayers(vector<Agent> agents);
 
@@ -64,6 +67,12 @@ private:
 		situations, that is why the algorithm needs a bit of a help.
 	*/
 	void CBSHelper(bool RunCheck);
+
+	// Helper function to detect blocking elements
+	bool DetectBlockingHelper(unsigned int currentPlayer, unsigned int currentPath, Node destination, unsigned int* timeOc = NULL);
+
+	int AlreadyOnConflict(vector<int> agents);
+	bool IsSubset(vector<int> a, vector<int> b);
 
 	//TODO: Keep adding more elements throught the development of this project.
 	FileReader* fr;

@@ -438,8 +438,6 @@ void MAPF::DefaultHelper(Conflicted c){
 		root->AddPath(players[index].getPath());
 	}
 
-
-
 	// Add the constraints from the reservation table to the root node
 	vector<Constraint> cons = map->GetReservationTableConstraints();
 	for (unsigned int j = 0; j < cons.size(); j++){
@@ -459,41 +457,106 @@ void MAPF::DefaultHelper(Conflicted c){
 }
 #pragma endregion
 
+bool MAPF::IsSubset(vector<int> a, vector<int> b){
+	std::sort(a.begin(), a.end());
+	std::sort(b.begin(), b.end());
+	return std::includes(a.begin(), a.end(), b.begin(), b.end());
+}
+int MAPF::AlreadyOnConflict(vector<int> agents){
+	int index = -1; // Return -1 if not found
+	for (unsigned int i = 0; i < agent_conflicts.size(); i++){
+		if (IsSubset(agents, agent_conflicts[i].agents)){
+			index = i;
+			break;
+		}
+	}
+
+	return index;
+}
+
+
+// This method simply calls the helper methods for blocking
 void MAPF::Blocking(){
+	MultipleBlocking();
+	SimpleBlocking();
+}
+
+// A helper function for the helper functions. Helperfunctionsception. OK bad joke.
+bool MAPF::DetectBlockingHelper(unsigned int currentPlayer, unsigned int currentPath, Node destination, unsigned int* timeOc){
+	bool result = false;
+	if (NodeExistsOnList(paths[currentPath], destination)){
+		// If the destination is on the path, check if the currentPlayer will arrive to the destination before currentPath player
+		unsigned int timeOcurrance = GetIndexAtArray(paths[currentPath], destination.getLocation());
+		if (timeOcurrance >= paths[currentPlayer].size()){
+			/*
+				If the currentPlayer needs to acces currentPath player's destination point after player i is finished,
+				then we have a conflict.
+			*/
+			if (timeOc) *timeOc = timeOcurrance;
+			result = true;
+		}
+	}
+
+	return result;
+}
+
+void MAPF::MultipleBlocking(){
+	for (unsigned int i = 0; i < players.size(); i++){ // This for is to see through the players
+		Node destination = players[i].getDestination();
+		int blockedElements = 0;
+		Conflicted c;
+		for (unsigned int j = 0; j < paths.size(); j++){
+			if (i != j){
+				if (DetectBlockingHelper(i, j, destination)){
+					blockedElements++;
+					c.agents.push_back(j);
+				}
+			}
+		}
+		// If this element is blocking various paths
+		if (blockedElements > 1){
+			c.type = BLOCKING_MULTIPLE;
+			//TODO: Left here
+			/*
+				After a multiple block has been identified, now I need to check if this multiple block is not part of a bigger multiple block.
+				If it is already part of a multiple block, dont add it to the conflicts, otherwise add it.
+			*/
+			agent_conflicts.push_back(c);
+		}
+	}
+}
+
+
+void MAPF::SimpleBlocking(){
 	for (unsigned int i = 0; i < players.size(); i++){ // This is to traverse through the players
 		Node destination = players[i].getDestination();
+		
 		for (unsigned int j = 0; j < paths.size(); j++){ // This is to traverse the paths
 			if (i != j){
-				if (NodeExistsOnList(paths[j], destination)){
-					// If the element is on the list, check if player i will arrive to its destination before player j
-					unsigned int timeOcurrance = GetIndexAtArray(paths[j], destination);
-					if (timeOcurrance >= paths[i].size()){
-						/*
-							If the player j needs to acces players i destination point after player i is finished,
-							then we have a conflict. Now we need to check if it is a simple conflict or a complex conflict.
-							*/
-						Conflicted c;
-						//The first player to be added is the player that needs to move
-						c.agents.push_back(players[i].getId());
-						c.agents.push_back(players[j].getId());
+				unsigned int timeOcurrance = 0;
+				if (DetectBlockingHelper(i, j, destination, &timeOcurrance)){			
+					Conflicted c;
+					//The first player to be added is the player that needs to move
+					c.agents.push_back(players[i].getId());
+					c.agents.push_back(players[j].getId());
 
-						// The locations of the elements that will be needed for the creation of the submap
-						c.locations.push_back(destination.getLocation()); // First the blocking element
-						c.locations.push_back(paths[j][timeOcurrance + 1].getLocation()); // Second the blocked element
-						
-						c.times.push_back(timeOcurrance + 1); /* We add 1 because a node at index i, ocurrs at time i + 1*/
+					// The locations of the elements that will be needed for the creation of the submap
+					c.locations.push_back(destination.getLocation()); // First the blocking element
+					c.locations.push_back(paths[j][timeOcurrance + 1].getLocation()); // Second the blocked element
 
-						if (map->adjacentHelper(destination.getLocation()).size() > 2){
-							// If there are more than 2 adjacents to this node, we have a simple blocking state
-							c.type = BLOCKING_SIMPLE;
-						}
-						else{
-							// Else, we have a narrowpath blocking
-							c.type = BLOCKING_COMPLEX;
-						}
+					c.times.push_back(timeOcurrance + 1); /* We add 1 because a node at index i, ocurrs at time i + 1*/
 
-						agent_conflicts.push_back(c); // Add it to the conflicts that need to be solved
+					if (map->adjacentHelper(destination.getLocation()).size() > 2){
+						// If there are more than 2 adjacents to this node, we have a simple blocking state
+						c.type = BLOCKING_SIMPLE;
 					}
+					else{
+						// Else, we have a narrowpath blocking
+						c.type = BLOCKING_COMPLEX;
+					}
+
+					agent_conflicts.push_back(c); // Add it to the conflicts that need to be solved
+
 				}
 			}
 		}
@@ -766,10 +829,11 @@ bool MAPF::NodeExistsOnList(vector<Node> list, Node val){
 	return false;
 }
 
-int MAPF::GetIndexAtArray(vector<Node> list, Node val){
+// A location was used to save memory
+int MAPF::GetIndexAtArray(vector<Node> list, Location val){
 	int result = -1;
 	for (unsigned int i = 0; i < list.size(); i++){
-		if (val == list[i]){
+		if (val == list[i].getLocation()){
 			result = i;
 			break;
 		}
