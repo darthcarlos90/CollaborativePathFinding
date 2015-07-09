@@ -42,9 +42,10 @@ void Menu::LoadMap(){
 	else {
 
 		//Load the routes for the entities
-		m.Start(1); //hardoced for now
-		m.RevisePaths(); //Revise the paths for any conflict, and solve it
-		m.MoveEntities(1);
+		m.Start(2); //hardoced for now
+		//m.RevisePaths(); //Revise the paths for any conflict, and solve it
+		
+		m.MoveEntities(2);
 	}
 
 	cout << "Finished" << endl;

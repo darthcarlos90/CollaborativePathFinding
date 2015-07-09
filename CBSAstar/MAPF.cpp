@@ -98,6 +98,11 @@ void MAPF::StartCBSPathFinding(){
 	*/
 	
 	RunCBSUsingPlayers(players);
+	
+	for (unsigned int i = 0; i < players.size(); i++){
+		players[i].setPath(tree->getSolution()->getPathAt(i));
+		paths.push_back(players[i].getPath());
+	}
 
 }
 
@@ -201,6 +206,7 @@ void MAPF::MoveByCBS(){
 
 	while (!finished){
 		system("cls");
+		map->cleanMap();
 		for (unsigned int i = 0; i < players.size(); i++){
 			players[i].moveEntity(time);
 			map->setElement(players[i].getX(), players[i].getY(), (players[i].getId() + 2));
@@ -525,7 +531,7 @@ void MAPF::MultipleBlocking(){
 			bool conflictRegistered = false;
 			for (unsigned int i = 0; i < agent_conflicts.size(); i++){
 				if (c.type == BLOCKING_MULTIPLE){
-					if ()
+					//if ()
 				}
 			}
 

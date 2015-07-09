@@ -43,7 +43,7 @@ public:
 	
 	void addConstraint(Constraint c);
 
-	void RecalculateRoutesOnConstraints(bool dest_conf);
+	void RecalculateRoutesOnConstraints(bool dest_conf, int agent_id);
 
 	void UpdateAgentsPaths(); // This method updates the path of their agents
 
@@ -90,7 +90,7 @@ private:
 
 	
 	// This method balances the paths of the agents so a proper check coudld be done
-	void BalancePaths();
+	int BalancePaths();
 
 
 	//Properties

@@ -44,6 +44,7 @@ struct Constraint{
 	A struct that represents the conflict element
 */
 struct Conflict{
+	
 	Conflict(Location v, int t){
 		this->v = v;
 		this->t = t;
@@ -66,6 +67,7 @@ struct Conflict{
 	Location v;
 	unsigned int t;
 	bool empty;
+	// TODO: Eliminate the boolean destination_conflict is unused
 	bool destination_conflict;
 };
 

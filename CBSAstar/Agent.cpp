@@ -606,7 +606,7 @@ void Agent::ModifyRouteOnConstraints(vector<Constraint> constraints, bool dest_c
 		// check each step for an invalid movement
 		if (!validMovement(time_route[i].getLocation(), i, constraints)){
 			// If we found an invalid movement
-			// First we check if it is valid to just wait
+			
 			vector<Node> temp_path;
 
 			// Lets push to the temp_path the elements before the incident
@@ -616,10 +616,8 @@ void Agent::ModifyRouteOnConstraints(vector<Constraint> constraints, bool dest_c
 			// if
 			bool replan = false;
 			if (i > 0){ // If it isnt the first element
-				
-				if (validMovement(time_route[i - 1].getLocation(), i, constraints) && // waiting is a valid movement
-					time_route[i - 1] != time_route[i] && // No replan needed
-					!dest_conf ){  // and is not a destination conflict
+				// If the past step is available to wait on this time
+				if (validMovement(time_route[i - 1].getLocation(), i, constraints)){
 
 					// Repeat the last step so the agent waits for some other element to use the other cell
 					temp_path.push_back(temp_path[temp_path.size() - 1]);
@@ -630,6 +628,7 @@ void Agent::ModifyRouteOnConstraints(vector<Constraint> constraints, bool dest_c
 						temp_path.push_back(time_route[index]);
 					}
 				}
+				// if past element is not available, replan
 				else replan = true;
 			}
 
@@ -1192,21 +1191,19 @@ void Agent::UpdateIndexSmallerTime(){
 
 /*
 	Checks if a movement is valid against the constraint list
+	Fix: when a constraint is on the list of constraints, it means that the element with that id,
+	cant occupy that vertex at the time t.
+	Date: 09/070/2015
+	Why?
+	Misunderstanding of CBS by me, SO SORRY :(
 */
 bool Agent::validMovement(Location location, int time, vector<Constraint> constraints){
 	bool result = true;
 	for (unsigned int i = 0; i < constraints.size(); i++){
-		// If the current constraint is in the same timespan
-		if (constraints[i].t < time_route.size()){
-			// If the constraint is from another element
-			if (id != constraints[i].id){
-				// If the time is the same
-				if (time == constraints[i].t){
-					// If the location is the same
-					if (location == constraints[i].location){
-						// We have an invalid movement
-						result = false;
-					}
+		if (constraints[i].id == id){
+			if (constraints[i].t == time){
+				if (location == constraints[i].location){
+					return false;
 				}
 			}
 		}
