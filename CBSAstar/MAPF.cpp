@@ -462,6 +462,8 @@ bool MAPF::IsSubset(vector<int> a, vector<int> b){
 	std::sort(b.begin(), b.end());
 	return std::includes(a.begin(), a.end(), b.begin(), b.end());
 }
+
+// TODO: Add the type of conflict we are looking for!!!! to the parameters
 int MAPF::AlreadyOnConflict(vector<int> agents){
 	int index = -1; // Return -1 if not found
 	for (unsigned int i = 0; i < agent_conflicts.size(); i++){
@@ -515,12 +517,20 @@ void MAPF::MultipleBlocking(){
 		}
 		// If this element is blocking various paths
 		if (blockedElements > 1){
-			c.type = BLOCKING_MULTIPLE;
 			//TODO: Left here
 			/*
-				After a multiple block has been identified, now I need to check if this multiple block is not part of a bigger multiple block.
-				If it is already part of a multiple block, dont add it to the conflicts, otherwise add it.
+			After a multiple block has been identified, now I need to check if this multiple block is not part of a bigger multiple block.
+			If it is already part of a multiple block, dont add it to the conflicts, otherwise add it.
 			*/
+			bool conflictRegistered = false;
+			for (unsigned int i = 0; i < agent_conflicts.size(); i++){
+				if (c.type == BLOCKING_MULTIPLE){
+					if ()
+				}
+			}
+
+			c.type = BLOCKING_MULTIPLE;
+			
 			agent_conflicts.push_back(c);
 		}
 	}
