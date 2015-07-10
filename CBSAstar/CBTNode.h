@@ -8,7 +8,7 @@
 class CBTNode{
 public:
 	CBTNode(void); // When you are creating a root node
-	CBTNode(vector<Constraint> parent_constraints, vector<Agent*> parents_agents, vector<vector<Node>> parents_paths); // When you are creating a child node, it inherits its dads nodes
+	CBTNode(vector<Constraint> parent_constraints, vector<Agent> parents_agents, vector<vector<Node>> parents_paths); // When you are creating a child node, it inherits its dads nodes
 	CBTNode(const CBTNode& n); //copy constructor
 	~CBTNode(void);
 
@@ -37,8 +37,8 @@ public:
 	bool operator < (const CBTNode& n);
 	bool operator > (const CBTNode& n);
 
-	int addAgent(Agent * a);
-	Agent* getAgent(int index){ return agents[index]; }
+	int addAgent(Agent a);
+	Agent getAgent(int index){ return agents[index]; }
 	void AddPath(vector<Node> value) { paths.push_back(value); } // For precalculated paths
 	
 	void addConstraint(Constraint c);
@@ -78,6 +78,8 @@ public:
 
 	
 
+	
+
 private:
 	//Helper functions
 	//void findConstraint(int i); // Forgot what is this for, Ill coment it until I remember why this is here
@@ -98,7 +100,7 @@ private:
 	vector<CBTNode*> children;
 	int cost;
 	
-	vector<Agent*> agents; // The units
+	vector<Agent> agents; // The units
 	vector<vector<Node>> paths; // The paths
 	/*
 		Note: I wonder if it is ok to save only the units, or to save the whole paths as well.

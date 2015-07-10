@@ -129,13 +129,13 @@ public:
 	
 	bool NeedsPathVerification() { return needsPathVerification; }
 	void SetPathVerificationFlag(bool val){ needsPathVerification = val; }
+	void calculateSIC();
 
 
 private:
 	//Helper functions
 	void TimeSpaceAstarHelper(Location start, Location finish, int time);
 	bool FindNodeAtList(Node n, vector<Node> list); //Find a node at a given list
-	void calculateSIC();
 	void reserveRoute(int starting_time); // To be used in the Silver's Astar
 	void reserveRouteFromIndex(unsigned int index);
 	void addToSpatialOpenList(Node n);

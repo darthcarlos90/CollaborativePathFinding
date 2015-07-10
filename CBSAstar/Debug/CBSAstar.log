@@ -1,21 +1,8 @@
-﻿Build started 09/07/2015 17:54:54.
+﻿Build started 10/07/2015 16:28:12.
      1>Project "H:\Dissertation\Dissertation\example code\cbsastar\CBSAstar\CBSAstar.vcxproj" on node 2 (Build target(s)).
      1>ClCompile:
-         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /sdl /Od /Oy- /D WIN32 /D _DEBUG /D _CONSOLE /D _LIB /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt Agent.cpp CBTNode.cpp ConstraintTree.cpp FileReader.cpp MAPF.cpp Map.cpp Menu.cpp Node.cpp ReservationTable.cpp main.cpp
-         CBTNode.cpp
-     1>h:\dissertation\dissertation\example code\cbsastar\cbsastar\cbtnode.cpp(225): warning C4018: '<' : signed/unsigned mismatch
-     1>h:\dissertation\dissertation\example code\cbsastar\cbsastar\cbtnode.cpp(226): warning C4018: '<' : signed/unsigned mismatch
-         Agent.cpp
-         Generating Code...
-         Skipping... (no relevant changes detected)
-         main.cpp
-         ReservationTable.cpp
-         Node.cpp
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /sdl /Od /Oy- /D WIN32 /D _DEBUG /D _CONSOLE /D _LIB /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt Menu.cpp
          Menu.cpp
-         Map.cpp
-         MAPF.cpp
-         FileReader.cpp
-         ConstraintTree.cpp
        Link:
          C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"H:\Dissertation\Dissertation\example code\cbsastar\Debug\CBSAstar.exe" /INCREMENTAL /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"H:\Dissertation\Dissertation\example code\cbsastar\Debug\CBSAstar.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"H:\Dissertation\Dissertation\example code\cbsastar\Debug\CBSAstar.lib" /MACHINE:X86 Debug\CBTNode.obj
          Debug\ConstraintTree.obj
@@ -33,4 +20,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:08.61
+Time Elapsed 00:00:04.46

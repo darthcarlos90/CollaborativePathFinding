@@ -2,14 +2,15 @@
 
 Menu::Menu(void){
 	cout << "Welcome" << endl;
-	PrintMainMenu();
+	//PrintMainMenu();
+	type = 2;
 }
 Menu::~Menu(void){
 	// Empty for now
 }
 
 void Menu::Execute(){
-	while (type != 3){
+	//while (type != 3){
 		if (type == 1){
 			RunTests();
 			system("cls");
@@ -20,7 +21,7 @@ void Menu::Execute(){
 			system("cls");
 			PrintMainMenu();
 		}
-	}
+	//}
 }
 
 void Menu::RunTests(){
@@ -35,7 +36,7 @@ void Menu::LoadMap(){
 	//cout << "Please write the name of the file to read from: " << endl;
 	//getline(cin, filename);
 	//MAPF m(filename);
-	MAPF m("corridor.txt"); //Just for debugging Ill hardcode the filename
+	MAPF m("testcaseBlocking2.txt"); //Just for debugging Ill hardcode the filename
 	if (m.isBroken()){
 		cout << "There's been an error loading map.\nPlease check the name of the file and try again." << endl;
 	}

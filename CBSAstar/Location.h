@@ -26,6 +26,7 @@ public:
 	bool isLeftOf(Location l);
 
 	bool operator == (const Location& l);
+	bool operator != (const Location& l);
 	bool operator < (const Location& l);
 	bool operator > (const Location& l);
 	Location& operator = (const Location& l);

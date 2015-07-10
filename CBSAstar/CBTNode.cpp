@@ -4,7 +4,7 @@ CBTNode::CBTNode(void){
 	cost = 0;
 }
 
-CBTNode::CBTNode(vector<Constraint> parent_constraints, vector<Agent*> parents_agents,vector<vector<Node>> parents_paths){
+CBTNode::CBTNode(vector<Constraint> parent_constraints, vector<Agent> parents_agents,vector<vector<Node>> parents_paths){
 	this->constraints = parent_constraints;
 	this->agents = parents_agents;
 	this->paths = parents_paths;
@@ -45,10 +45,10 @@ CBTNode* CBTNode::getSmallestChild(){
 void CBTNode::CalculatePaths(){
 	for (unsigned int i = 0; i < agents.size(); i++){
 		//Calculate the paths of each of the agents, as if they where the only element on the grid
-		agents[i]->calculateRoute();
+		agents[i].calculateRoute();
 
 		//Get the path, and push it into the paths vector
-		paths.push_back(agents[i]->getPath());
+		paths.push_back(agents[i].getPath());
 	}
 }
 
@@ -152,24 +152,25 @@ bool CBTNode::isAtList(int element, vector<int> list){
 
 void CBTNode::calculateCost(){
 	for (unsigned int i = 0; i < agents.size(); i++){
-		cost += agents[i]->getSic();
+		cost += agents[i].getSic();
 	}
 }
 
 // Adds and returns the id of the element that was recently added
-int CBTNode::addAgent(Agent* a){
+int CBTNode::addAgent(Agent a){
 	//Set the id of the agent to its index on the list
-	a->setId(agents.size());
+	a.setId(agents.size());
 
 	//Push the agent into the list
 	agents.push_back(a);
 
-	return a->getId();
+	return a.getId();
 }
 
 void CBTNode::RecalculateRoutesOnConstraints(bool dest_conf, int agent_id){
-	agents[agent_id]->ModifyRouteOnConstraints(constraints, dest_conf);// Update the paths on the agent
-	paths[agent_id] = agents[agent_id]->getPath(); // Let the node know the new paths
+	agents[agent_id].ModifyRouteOnConstraints(constraints, dest_conf);// Update the paths on the agent
+	paths[agent_id] = agents[agent_id].getPath(); // Let the node know the new paths
+	agents[agent_id].calculateSIC();
 }
 
 void CBTNode::addConstraint(Constraint c){
@@ -191,21 +192,21 @@ void CBTNode::addConstraint(Constraint c){
 
 void CBTNode::UpdateAgentsPaths(){
 	for (unsigned int i = 0; i < agents.size(); i++){
-		agents[i]->setPath(paths[i]);
+		agents[i].setPath(paths[i]);
 	}
 }
 
 int CBTNode::ReplanAgentFromLastIndex(int agentId){
-	int result = agents[agentId]->getPath().size() - 1;
-	agents[agentId]->ReroutePathUsingCBS();
-	paths[agentId] = agents[agentId]->getPath(); // Update the path in the tree
+	int result = agents[agentId].getPath().size() - 1;
+	agents[agentId].ReroutePathUsingCBS();
+	paths[agentId] = agents[agentId].getPath(); // Update the path in the tree
 	return result;
 
 }
 
 void CBTNode::WaitAtIndex(int id, int index, int times){
-	agents[id]->RepeatStepAtIndex(index, times);
-	paths[id] = agents[id]->getPath(); // Update the paths otherwise they will get overriden
+	agents[id].RepeatStepAtIndex(index, times);
+	paths[id] = agents[id].getPath(); // Update the paths otherwise they will get overriden
 }
 
 vector <Node> CBTNode::getPathAt(unsigned int index){
@@ -271,37 +272,37 @@ void CBTNode::SolveDeadLock(){
 	Agent* lowPriority = NULL;
 
 	// If both have partial destination or if none has partial destination
-	if ((agents[agent1]->hasPartialDestination() && agents[agent2]->hasPartialDestination()) || 
-		(!agents[agent1]->hasPartialDestination() && !agents[agent2]->hasPartialDestination())){
+	if ((agents[agent1].hasPartialDestination() && agents[agent2].hasPartialDestination()) || 
+		(!agents[agent1].hasPartialDestination() && !agents[agent2].hasPartialDestination())){
 
 		int difference = abs(static_cast<int>(paths[agent1].size()) - static_cast<int>(paths[agent2].size()));
 		// Making waiting priority by size, the agent with smallest path waits ...
 		if (difference > 5){
 			if (paths[agent1] < paths[agent2]){
-				highPriority = agents[agent2];
-				lowPriority = agents[agent1];
+				highPriority = &agents[agent2];
+				lowPriority = &agents[agent1];
 				hightPriorityIndex = agent2;
 				lowPriorityIndex = agent1;
 			}
 			else {
-				highPriority = agents[agent1];
+				highPriority = &agents[agent1];
 				hightPriorityIndex = agent1;
-				lowPriority = agents[agent2];
+				lowPriority = &agents[agent2];
 				lowPriorityIndex = agent2;
 			}
 
 		}
 		else {
 			// Else priority is dictated by the position of their starting position
-			if (LocationAtNodeList(agents[agent1]->getLocation(), paths[agent2])){
-				highPriority = agents[agent1];
+			if (LocationAtNodeList(agents[agent1].getLocation(), paths[agent2])){
+				highPriority = &agents[agent1];
 				hightPriorityIndex = agent1;
-				lowPriority = agents[agent2];
+				lowPriority = &agents[agent2];
 				lowPriorityIndex = agent2;
 			}
 			else{
-				highPriority = agents[agent2];
-				lowPriority = agents[agent1];
+				highPriority = &agents[agent2];
+				lowPriority = &agents[agent1];
 				hightPriorityIndex = agent2;
 				lowPriorityIndex = agent1;
 			}
@@ -311,15 +312,15 @@ void CBTNode::SolveDeadLock(){
 	else{
 		partialDestinationElement = true; // A partial destination was found, calculate stuff here
 		// I know , repetition, but I just want to see if it works and then Ill fix this
-		if (agents[agent1]->hasPartialDestination()){
-			highPriority = agents[agent1];
+		if (agents[agent1].hasPartialDestination()){
+			highPriority = &agents[agent1];
 			hightPriorityIndex = agent1;
-			lowPriority = agents[agent2];
+			lowPriority = &agents[agent2];
 			lowPriorityIndex = agent2;
 		}
 		else{
-			highPriority = agents[agent2];
-			lowPriority = agents[agent1];
+			highPriority = &agents[agent2];
+			lowPriority = &agents[agent1];
 			hightPriorityIndex = agent2;
 			lowPriorityIndex = agent1;
 		}
@@ -406,21 +407,24 @@ int CBTNode::BalancePaths(){
 	unsigned int largestSize = 0;
 	// Get the largest pathsize
 	for (unsigned int i = 0; i < agents.size(); i++){
-		if (agents[i]->pathSize() > largestSize) 
-			largestSize = agents[i]->pathSize();
+		if (agents[i].pathSize() > largestSize) 
+			largestSize = agents[i].pathSize();
 	}
 
 	// Update all the paths so they are all the same size
 	for (unsigned int i = 0; i < agents.size(); i++){
-		if (agents[i]->pathSize() != largestSize){
-			int difference = largestSize - agents[i]->pathSize();
+		if (agents[i].pathSize() != largestSize){
+			int difference = largestSize - agents[i].pathSize();
 			for (int j = 0; j < difference; j++){
 				// Push to the back of the route the element of the last index
-				agents[i]->PushElementAtTheBackOfRoute(
-					agents[i]->getPath()[agents[i]->pathSize()-1]);
+				// First calculate the correct values in case of need
+				Node toAdd = agents[i].getPath()[agents[i].pathSize() - 1];
+				toAdd.setG(agents[i].getPath()[agents[i].pathSize() - 1].getG() + 10);
+				toAdd.calculateF();
+				agents[i].PushElementAtTheBackOfRoute(toAdd);
 			}
 			// Update the paths vector
-			paths[i] = agents[i]->getPath();
+			paths[i] = agents[i].getPath();
 		}
 	}
 

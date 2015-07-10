@@ -30,6 +30,10 @@ bool Location::operator == (const Location& l){
 	return (this->x == l.x && this->y == l.y);
 }
 
+bool Location::operator!= (const Location& l){
+	return (this->x != l.x && this->y != l.y);
+}
+
 bool Location::operator < (const Location &l){
 	return (this->x < l.x && this->y < l.y);
 }

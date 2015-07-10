@@ -26,34 +26,31 @@ Agent::~Agent(void){
 
 
 void Agent::ConstraintAstar(Location start, Location finish, int starting_time, vector<Constraint> constraints){
-	
-	
-	bool pathFound = false;
-	//Let A be the starting point
+	// Since start is at time starting_time - 1, get nodes for starting_time
 	Node A(0, start);
-	// Assign f, g and h values to A
-	A.setG(0);
-	A.calculateManhattanHeuristic(finish);
-	A.calculateF();
+	bool pathFound = false;
+	
+	vector<Node> adjacents = getAdjacents(A, finish);
 
-	//Add A to the open list, At this point, A shoul be the only node on the open list
-	spatial_openList.push_back(A);
-
+	// Add them to the adjacent list
+	for (unsigned int i = 0; i < adjacents.size(); i++){
+		spatial_openList.push_back(adjacents[i]);
+	}
+	
+	// Start with those nodes
 	Node P;
 	//If the goal was found, break
 	while (!pathFound){
 
 		// If the open list is empty, no path was found, break
-		if (spatial_openList.size() == 0) break;
+		if (spatial_openList.size() == 0) 
+			break;
 
 		//let p be the best node in the open list
-		/*	Since the openList is sorted every time an item is added, then the best
-		option to select is the first item
-		*/
 		P = GetSmallestNodeFromSpatialOpenList();
 
 		// If P is a valid movement, it will be processed, otherwise, it will be discarded
-		if (validMovement(P.getLocation(), P.getDepth() + starting_time, constraints)){
+		if (validMovement(P.getLocation(), (P.getDepth() - 1) + starting_time, constraints)){
 			spatial_closedList.push_back(P);
 
 
@@ -79,6 +76,7 @@ void Agent::ConstraintAstar(Location start, Location finish, int starting_time, 
 		}
 	}
 	else inverse_route.push_back(P); //This in case the next node is the answer
+
 	//For some reason the route is backwards, lets but it on the corect order
 	for (int i = inverse_route.size() - 1; i >= 0; i--){
 		// Remove if something breaks
@@ -154,6 +152,7 @@ void Agent::executeSpatialAstar(Location start, Location finish){
 
 	vector<Node> inverse_route;
 	//Once the path has been found, retrace your steps
+	//This is not addding the first element of the route
 	if (P.hasParent()){
 		while (P.hasParent()){
 			inverse_route.push_back(P);
@@ -161,6 +160,9 @@ void Agent::executeSpatialAstar(Location start, Location finish){
 		}
 	}
 	else inverse_route.push_back(P); //This in case the next node is the answer
+	// That is why here, we will add the very first element of the route to the inverse route
+	inverse_route.push_back(A);
+
 	//For some reason the route is backwards, lets but it on the corect order
 	for (int i = inverse_route.size() - 1; i >= 0; i--){
 		// Remove if something breaks
@@ -377,6 +379,8 @@ void Agent::TimeSpaceAstarHelper(Location start, Location finish, int time){
 		}
 	}
 	else temp.push_back(P);
+	// The first element of the route
+	temp.push_back(A);
 
 	//get the nodes in order
 	for (int i = temp.size() - 1; i >= 0; i--){
@@ -620,12 +624,19 @@ void Agent::ModifyRouteOnConstraints(vector<Constraint> constraints, bool dest_c
 				if (validMovement(time_route[i - 1].getLocation(), i, constraints)){
 
 					// Repeat the last step so the agent waits for some other element to use the other cell
-					temp_path.push_back(temp_path[temp_path.size() - 1]);
+					Node toAdd = temp_path[temp_path.size() - 1];
+					toAdd.setG(toAdd.getG() + 10);
+					toAdd.calculateF();
+					temp_path.push_back(toAdd);
 
 
 					//finish adding the elements of the route
 					for (unsigned int index = i; index < time_route.size(); index++){
-						temp_path.push_back(time_route[index]);
+						// Staying has a value of 10, so the values must be recalculated
+						Node toAdd = time_route[index];
+						toAdd.setG(toAdd.getG() + 10);
+						toAdd.calculateF();
+						temp_path.push_back(toAdd);
 					}
 				}
 				// if past element is not available, replan
@@ -635,11 +646,17 @@ void Agent::ModifyRouteOnConstraints(vector<Constraint> constraints, bool dest_c
 			else if (i == 0){
 				// If it is the first element
 				// Repeat the first step so the agent waits for some other element to use the other cell
-				temp_path.push_back(time_route[0]);
+				Node toAdd = time_route[0];
+				toAdd.setG(toAdd.getG() + 10);
+				toAdd.calculateF();
+				temp_path.push_back(toAdd);
 
 
 				//finish adding the elements of the route
 				for (unsigned int index = i; index < time_route.size(); index++){
+					// An extra step was added, so an extra cost should be added
+					time_route[index].setG(time_route[index].getG() + 10);
+					time_route[index].calculateF();
 					temp_path.push_back(time_route[index]);
 				}
 
@@ -652,7 +669,7 @@ void Agent::ModifyRouteOnConstraints(vector<Constraint> constraints, bool dest_c
 			if(replan) { // otherwise recalculate path
 				clearSpatialLists(true);
 				// If the movement is invalid, we need to replan the path
-				ConstraintAstar(time_route[i - 1].getLocation(), destination.getLocation(), i - 1, constraints);
+				ConstraintAstar(time_route[i - 1].getLocation(), destination.getLocation(), i, constraints);
 
 				 //After a recalculation is done, add the new steps to the path
 				for (unsigned int i = 0; i < spatial_route.size(); i++){

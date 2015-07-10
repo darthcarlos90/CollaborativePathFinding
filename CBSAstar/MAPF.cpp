@@ -142,7 +142,7 @@ void MAPF::RunCBSUsingPlayers(vector<Agent> agents){
 
 	//Add the agents to the root node
 	for (unsigned int i = 0; i < agents.size(); i++){
-		root->addAgent(&agents[i]);
+		root->addAgent(agents[i]);
 	}
 
 	//find the individual paths of the elements
@@ -402,9 +402,9 @@ void MAPF::SolveDeadLock(Conflicted c){
 		root = new CBTNode();
 		// Create the elements of the tree and assign them the necesary information
 		// Add the agents and pre-calculated paths
-		int id = root->addAgent(&players[index]); // For later use
+		int id = root->addAgent(players[index]); // For later use
 		root->AddPath(players[index].getPath());
-		root->addAgent(&players[c.agents[1]]);
+		root->addAgent(players[c.agents[1]]);
 		root->AddPath(players[c.agents[1]].getPath());
 
 		//Now we can actually recalculate the path
@@ -440,7 +440,7 @@ void MAPF::DefaultHelper(Conflicted c){
 	// Add the agents and pre-calculated paths
 	for (unsigned int j = 0; j < c.agents.size(); j++){
 		int index = getIndexOfAgent(c.agents[j]);
-		root->addAgent(&players[index]);
+		root->addAgent(players[index]);
 		root->AddPath(players[index].getPath());
 	}
 
