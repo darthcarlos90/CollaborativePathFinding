@@ -41,20 +41,26 @@ struct Constraint{
 
 
 /*
-	A struct that represents the conflict element
+	A struct that represents the conflict element used in the CBS algorithm.
 */
 struct Conflict{
 	
 	Conflict(Location v, int t){
 		this->v = v;
-		this->t = t;
+		times.push_back(t);
+		empty = false;
+		destination_conflict = false;
+	}
+
+	Conflict(Location v, std::vector<unsigned int> ts){
+		this->v = v;
+		this->times = ts;
 		empty = false;
 		destination_conflict = false;
 	}
 
 	//Empty constructor, literally
 	Conflict(){
-		t = -1;
 		empty = true;
 		destination_conflict = false;
 	}
@@ -65,14 +71,15 @@ struct Conflict{
 
 	std::vector<int> users;
 	Location v;
-	unsigned int t;
+	std::vector<unsigned int> times;
 	bool empty;
 	// TODO: Eliminate the boolean destination_conflict is unused
 	bool destination_conflict;
 };
 
 /*
-	This struct represents 2 or more conflicted entities 
+	This struct represents 2 or more conflicted entities, used for
+	the detection of special conflicts that Silver's algorithm is unable to solve.
 */
 
 struct Conflicted{

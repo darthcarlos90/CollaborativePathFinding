@@ -87,6 +87,7 @@ private:
 	bool isAtList(int element, vector<int> list); //Looks for a int on a list of ints, if it is there, returns true
 	bool LocationAtNodeList(Location location, vector<Node> list, int* index = NULL);
 	void CreateConflict(unsigned int time_ocurrence, Location location, vector<int> users, bool dest_con);
+	void CreateSpecialConflict(vector<unsigned int> times, Location location, vector<int> users);
 	bool FindDeadLock();
 	void SolveDeadLock();
 
@@ -108,6 +109,7 @@ private:
 
 	vector<Constraint> constraints;
 	Conflict conflict;
+	
 
 	Conflicted deadlock; // Any deadlock detected will be stored here
 

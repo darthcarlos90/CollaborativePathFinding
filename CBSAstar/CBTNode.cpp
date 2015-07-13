@@ -59,7 +59,7 @@ void CBTNode::ExpandNode(){
 	}
 
 	for (unsigned int i = 0; i < conflict.users.size(); i++){
-		Constraint cnst(conflict.users[i], conflict.v, conflict.t);
+		Constraint cnst(conflict.users[i], conflict.v, conflict.times[i]);
 		CBTNode* child = new CBTNode(constraints, agents, paths);
 		bool dest_conf = conflict.destination_conflict;
 		child->addConstraint(cnst);
@@ -93,9 +93,17 @@ void CBTNode::validatePaths(){
 
 void CBTNode::CreateConflict(unsigned int time_ocurrence, Location location, vector<int> users, bool dest_con){
 	conflict.v = location;
-	conflict.t = time_ocurrence;
+	conflict.times.push_back(time_ocurrence);
+	conflict.times.push_back(time_ocurrence);
 	conflict.users = users;
 	conflict.destination_conflict = dest_con;
+	conflict.empty = false;
+}
+
+void CBTNode::CreateSpecialConflict(vector<unsigned int> times, Location location, vector<int> users){
+	conflict.v = location;
+	conflict.times = times;
+	conflict.users = users;
 	conflict.empty = false;
 }
 
@@ -124,6 +132,20 @@ bool CBTNode::findConstraintsConflicts(unsigned int t){
 						foundConflict = true;
 						break;
 
+					}
+					else if (t + 1 < paths[i].size()){
+						if (toCompare == paths[i][t + 1].getLocation()){
+							// We have another type of conflict, an invalid movement!
+							vector<int> users;
+							users.push_back(toCompareId);
+							users.push_back(i);
+							vector<unsigned int> times;
+							times.push_back(t);
+							times.push_back(t + 1);
+							CreateSpecialConflict(times, toCompare, users);
+							foundConflict = true;
+							break;
+						}
 					}
 				}
 			}
