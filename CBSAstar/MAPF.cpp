@@ -66,12 +66,16 @@ MAPF::~MAPF(void){
 void MAPF::Start(int type){
 	cout << "Number of players: " << players.size() << endl;
 	if (!broken){
+		cout << "Calculating Routes" << endl;
 		switch (type){
-		case 1:
+		case 1: // 1 means normal silvers calculations
 			StartSilversPathFinding();
 			break;
-		case 2:
+		case 2: // 2 means cbs calculation
 			StartCBSPathFinding();
+			break;
+		case 3: // 3 means hybrid
+			StartHybridPathFinding();
 			break;
 		}
 	}
@@ -81,7 +85,6 @@ void MAPF::Start(int type){
 }
 
 void MAPF::StartSilversPathFinding(){
-	cout << "Calculating Routes" << endl;
 	for (unsigned int i = 0; i < players.size(); i++){
 		players[i].executeTimeSpaceAstar(time);
 		paths.push_back(players[i].getPath());
@@ -106,6 +109,12 @@ void MAPF::StartCBSPathFinding(){
 
 }
 
+void MAPF::StartHybridPathFinding(){
+	// Do pathfinding as silvers would do
+	StartSilversPathFinding();
+	// Now check for any inconsistency
+	RevisePaths();
+}
 
 void MAPF::CBSHelper(bool RunCheck){
 	bool solutionFound = false;
@@ -161,15 +170,20 @@ void MAPF::RunCBSUsingPlayers(vector<Agent> agents){
 void MAPF::MoveEntities(int type){
 	switch (type){
 	case 1:
-		MoveBySilvers();
+		MoveBySilvers(false);
 		break;
 	case 2:
 		MoveByCBS();
 		break;
+	case 3:
+		MoveBySilvers(true);
+		break;
 	}
 }
 
-void MAPF::MoveBySilvers(){
+
+
+void MAPF::MoveBySilvers(bool hybrid){
 	time++;
 	bool finished = false;
 	bool verify = false;
@@ -190,8 +204,8 @@ void MAPF::MoveBySilvers(){
 				paths[i] = players[i].getPath();
 				players[i].SetPathVerificationFlag(false);
 			}
-			//Now revise the paths
-			RevisePaths();
+			//Now revise the paths if hybrid movement
+			if(hybrid)RevisePaths();
 		}
 
 		time++;
@@ -218,9 +232,6 @@ void MAPF::MoveByCBS(){
 			finished = finished && players[i].finished(); 
 		}
 		map->printData();
-		
-		//TODO: Add the dynamic change of path either by d steps, or because of the dynamic change of obstacles
-		//TODO: Update the constraints at the node
 		
 		system("pause");
 	}
@@ -304,6 +315,9 @@ void MAPF::solveConflicts(){
 			break;
 		case BLOCKING_SIMPLE:
 			SolveBlockingSimple(c);
+			break;
+		case BLOCKING_MULTIPLE:
+			SolveBlockingMultiple(c);
 			break;
 		default:
 			DefaultHelper(c);
@@ -469,17 +483,19 @@ bool MAPF::IsSubset(vector<int> a, vector<int> b){
 	return std::includes(a.begin(), a.end(), b.begin(), b.end());
 }
 
-// TODO: Add the type of conflict we are looking for!!!! to the parameters
-int MAPF::AlreadyOnConflict(vector<int> agents){
-	int index = -1; // Return -1 if not found
+bool MAPF::AlreadyOnConflict(vector<int> agents, int type){
+	bool result = false;
 	for (unsigned int i = 0; i < agent_conflicts.size(); i++){
-		if (IsSubset(agents, agent_conflicts[i].agents)){
-			index = i;
-			break;
+		if (agent_conflicts[i].type == type){
+			if (IsSubset(agents, agent_conflicts[i].agents)){
+				result = true;
+				break;
+			}
 		}
+		
 	}
 
-	return index;
+	return result;
 }
 
 
@@ -489,7 +505,7 @@ void MAPF::Blocking(){
 	SimpleBlocking();
 }
 
-// A helper function for the helper functions. Helperfunctionsception. OK bad joke.
+// A helper function for the helper functions. 
 bool MAPF::DetectBlockingHelper(unsigned int currentPlayer, unsigned int currentPath, Node destination, unsigned int* timeOc){
 	bool result = false;
 	if (NodeExistsOnList(paths[currentPath], destination)){
@@ -509,6 +525,7 @@ bool MAPF::DetectBlockingHelper(unsigned int currentPlayer, unsigned int current
 }
 
 void MAPF::MultipleBlocking(){
+	// TODO: Debug this
 	for (unsigned int i = 0; i < players.size(); i++){ // This for is to see through the players
 		Node destination = players[i].getDestination();
 		int blockedElements = 0;
@@ -523,21 +540,15 @@ void MAPF::MultipleBlocking(){
 		}
 		// If this element is blocking various paths
 		if (blockedElements > 1){
-			//TODO: Left here
 			/*
 			After a multiple block has been identified, now I need to check if this multiple block is not part of a bigger multiple block.
 			If it is already part of a multiple block, dont add it to the conflicts, otherwise add it.
 			*/
 			bool conflictRegistered = false;
-			for (unsigned int i = 0; i < agent_conflicts.size(); i++){
-				if (c.type == BLOCKING_MULTIPLE){
-					//if ()
-				}
+			if (!AlreadyOnConflict(c.agents, BLOCKING_MULTIPLE)){
+				c.type = BLOCKING_MULTIPLE;
+				agent_conflicts.push_back(c);
 			}
-
-			c.type = BLOCKING_MULTIPLE;
-			
-			agent_conflicts.push_back(c);
 		}
 	}
 }
@@ -550,29 +561,39 @@ void MAPF::SimpleBlocking(){
 		for (unsigned int j = 0; j < paths.size(); j++){ // This is to traverse the paths
 			if (i != j){
 				unsigned int timeOcurrance = 0;
-				if (DetectBlockingHelper(i, j, destination, &timeOcurrance)){			
+				if (DetectBlockingHelper(i, j, destination, &timeOcurrance)){		
+					
 					Conflicted c;
 					//The first player to be added is the player that needs to move
 					c.agents.push_back(players[i].getId());
 					c.agents.push_back(players[j].getId());
 
-					// The locations of the elements that will be needed for the creation of the submap
-					c.locations.push_back(destination.getLocation()); // First the blocking element
-					c.locations.push_back(paths[j][timeOcurrance + 1].getLocation()); // Second the blocked element
+					// Now, check if this simple blocking is not just part of a multiple blocking
+					if (!AlreadyOnConflict(c.agents, BLOCKING_MULTIPLE)){
+						// The locations of the elements that will be needed for the creation of the submap
+						c.locations.push_back(destination.getLocation()); // First the blocking element
+						if (timeOcurrance + 1 < paths[j].size()){
+							c.locations.push_back(paths[j][timeOcurrance + 1].getLocation()); // Second the blocked element
+						}
+						else c.locations.push_back(destination.getLocation());
 
-					c.times.push_back(timeOcurrance + 1); /* We add 1 because a node at index i, ocurrs at time i + 1*/
 
-					if (map->adjacentHelper(destination.getLocation()).size() > 2){
-						// If there are more than 2 adjacents to this node, we have a simple blocking state
-						c.type = BLOCKING_SIMPLE;
+
+
+						c.times.push_back(timeOcurrance + 1); /* We add 1 because a node at index i, ocurrs at time i + 1*/
+
+						if (map->adjacentHelper(destination.getLocation()).size() > 2){
+							// If there are more than 2 adjacents to this node, we have a simple blocking state
+							c.type = BLOCKING_SIMPLE;
+						}
+						else{
+							// Else, we have a narrowpath blocking
+							c.type = BLOCKING_COMPLEX;
+						}
+
+
+						agent_conflicts.push_back(c); // Add it to the conflicts that need to be solved
 					}
-					else{
-						// Else, we have a narrowpath blocking
-						c.type = BLOCKING_COMPLEX;
-					}
-
-					agent_conflicts.push_back(c); // Add it to the conflicts that need to be solved
-
 				}
 			}
 		}
@@ -831,6 +852,10 @@ void MAPF::SolveBlockingComplex(Conflicted c){
 	//Update the paths
 	paths[indexOther] = otherAgent.getPath();
 	paths[indexToMove] = toMove.getPath();
+}
+
+void MAPF::SolveBlockingMultiple(Conflicted c){
+	// Pending
 }
 
 bool MAPF::existsInList(vector<int> list, int val){

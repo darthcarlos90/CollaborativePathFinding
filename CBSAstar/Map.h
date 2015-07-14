@@ -1,6 +1,7 @@
 #pragma once
 #include "Matrix.h"
 #include "ReservationTable.h"
+#include <algorithm>
 
 class Map{
 public:

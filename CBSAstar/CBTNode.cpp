@@ -77,8 +77,9 @@ void CBTNode::validatePaths(){
 		if (paths[i].size() > largest_size) largest_size = paths[i].size();
 	}*/
 	/*
-		We use the index i as the time, since the first elements of the path will be executed on 
-		t = 0, the second element on t = 1 and so on
+		We use the index i as the time, the first element, the one located at 
+		t = 0, is the starting point, so that element cant be checked for
+		obvious reasons, that is why the checking starts at 1. NOT
 	*/
 	for (unsigned int i = 0; i < largest_size; i++){
 		if (findConstraintsConflicts(i)){
@@ -133,20 +134,26 @@ bool CBTNode::findConstraintsConflicts(unsigned int t){
 						break;
 
 					}
-					else if (t + 1 < paths[i].size()){
-						if (toCompare == paths[i][t + 1].getLocation()){
-							// We have another type of conflict, an invalid movement!
-							vector<int> users;
-							users.push_back(toCompareId);
-							users.push_back(i);
-							vector<unsigned int> times;
-							times.push_back(t);
-							times.push_back(t + 1);
-							CreateSpecialConflict(times, toCompare, users);
-							foundConflict = true;
-							break;
-						}
-					}
+					/*
+						Explanation:
+						The next chunk of code contains code to a more realistic CBS.
+						This will lead to the explotion of more weaknesses of the algorithm.
+						This element will stay, but commented, in case of needed in the future.
+					*/
+					//else if (t + 1 < paths[i].size()){
+					//	if (toCompare == paths[i][t + 1].getLocation()){
+					//		// We have another type of conflict, an invalid movement!
+					//		vector<int> users;
+					//		users.push_back(toCompareId);
+					//		users.push_back(i);
+					//		vector<unsigned int> times;
+					//		times.push_back(t);
+					//		times.push_back(t + 1);
+					//		CreateSpecialConflict(times, toCompare, users);
+					//		foundConflict = true;
+					//		break;
+					//	}
+					//}
 				}
 			}
 		}

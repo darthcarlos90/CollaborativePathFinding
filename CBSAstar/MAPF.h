@@ -30,8 +30,9 @@ public:
 private:
 	void StartCBSPathFinding();
 	void StartSilversPathFinding();
+	void StartHybridPathFinding();
 
-	void MoveBySilvers();
+	void MoveBySilvers(bool hybrid);
 	void MoveByCBS();
 
 	bool existsInList(vector<int> list, int val);
@@ -45,6 +46,7 @@ private:
 	void SolveBlockingSimple( Conflicted c); // Solves the blocking 
 	void SolveBlockingComplex(Conflicted c);
 	void DefaultHelper(Conflicted c);
+	void SolveBlockingMultiple(Conflicted c);
 
 	// Helper functions for the blocking element
 	void SimpleBlocking();
@@ -71,7 +73,7 @@ private:
 	// Helper function to detect blocking elements
 	bool DetectBlockingHelper(unsigned int currentPlayer, unsigned int currentPath, Node destination, unsigned int* timeOc = NULL);
 
-	int AlreadyOnConflict(vector<int> agents);
+	bool AlreadyOnConflict(vector<int> agents, int type);
 	bool IsSubset(vector<int> a, vector<int> b);
 
 	//TODO: Keep adding more elements throught the development of this project.

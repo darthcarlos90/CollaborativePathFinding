@@ -643,24 +643,24 @@ void Agent::ModifyRouteOnConstraints(vector<Constraint> constraints, bool dest_c
 				else replan = true;
 			}
 
-			else if (i == 0){
-				// If it is the first element
-				// Repeat the first step so the agent waits for some other element to use the other cell
-				Node toAdd = time_route[0];
-				toAdd.setG(toAdd.getG() + 10);
-				toAdd.calculateF();
-				temp_path.push_back(toAdd);
+			//else if (i == 0){
+			//	// If it is the first element
+			//	// Repeat the first step so the agent waits for some other element to use the other cell
+			//	Node toAdd = time_route[0];
+			//	toAdd.setG(toAdd.getG() + 10);
+			//	toAdd.calculateF();
+			//	temp_path.push_back(toAdd);
 
 
-				//finish adding the elements of the route
-				for (unsigned int index = i; index < time_route.size(); index++){
-					// An extra step was added, so an extra cost should be added
-					time_route[index].setG(time_route[index].getG() + 10);
-					time_route[index].calculateF();
-					temp_path.push_back(time_route[index]);
-				}
+			//	//finish adding the elements of the route
+			//	for (unsigned int index = i; index < time_route.size(); index++){
+			//		// An extra step was added, so an extra cost should be added
+			//		time_route[index].setG(time_route[index].getG() + 10);
+			//		time_route[index].calculateF();
+			//		temp_path.push_back(time_route[index]);
+			//	}
 
-			}
+			//}
 			else {
 				replan = true;
 			}
@@ -1217,10 +1217,12 @@ void Agent::UpdateIndexSmallerTime(){
 bool Agent::validMovement(Location location, int time, vector<Constraint> constraints){
 	bool result = true;
 	for (unsigned int i = 0; i < constraints.size(); i++){
-		if (constraints[i].id == id){
-			if (constraints[i].t == time){
-				if (location == constraints[i].location){
-					return false;
+		if (constraints[i].t != 0){ // It is ridiculous to have a constraint on time 0 ...
+			if (constraints[i].id == id){
+				if (constraints[i].t == time){
+					if (location == constraints[i].location){
+						return false;
+					}
 				}
 			}
 		}
