@@ -14,8 +14,10 @@ private:
 	void RunTests();
 	void LoadMap();
 	void PrintMainMenu();
+	void PrintAlgorithmMenu();
 
 
 	// private variables
-	int type;
+	int type; 
+	int algorithm_type;
 };

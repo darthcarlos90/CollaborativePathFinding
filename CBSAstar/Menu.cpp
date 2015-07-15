@@ -26,6 +26,13 @@ void Menu::Execute(){
 void Menu::RunTests(){
 	system("pause");
 	MAPF m(8, 8);
+	PrintAlgorithmMenu();
+
+	//Load the routes for the entities
+	m.Start(algorithm_type);
+	m.MoveEntities(algorithm_type);
+	cout << "Finished" << endl;
+	system("pause");
 }
 
 void Menu::LoadMap(){
@@ -105,12 +112,8 @@ void Menu::LoadMap(){
 		cout << "There's been an error loading map.\n" << filename << " file doesn't exist.\nPlease check the name of the file and try again." << endl;
 	}
 	else {
-		int algorithm_type;
-		cout << "Select the algorithm that you want to run:" << endl;
-		cout << "1) Silver's algorithm." << endl;
-		cout << "2) CBS algorithm." << endl;
-		cout << "3) Hybrid algorithm." << endl;
-		cin >> algorithm_type;
+		
+		PrintAlgorithmMenu();
 		
 		//Load the routes for the entities
 		m.Start(algorithm_type);
@@ -129,4 +132,12 @@ void Menu::PrintMainMenu(){
 	cout << "3) Exit" << endl;
 
 	cin >> type;
+}
+
+void Menu::PrintAlgorithmMenu(){
+	cout << "Select the algorithm that you want to run:" << endl;
+	cout << "1) Silver's algorithm." << endl;
+	cout << "2) CBS algorithm." << endl;
+	cout << "3) Hybrid algorithm." << endl;
+	cin >> algorithm_type;
 }

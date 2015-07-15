@@ -6,6 +6,7 @@
 class Map{
 public:
 	Map(Matrix<int>* mat);
+	Map(unsigned int size_x, unsigned int size_y);
 	Map(void);
 	Map(const Map& m);
 	~Map(void);
@@ -13,10 +14,11 @@ public:
 	int getRows() { return data->get_x_size(); }
 	int getColumns() { return data->get_y_size(); }
 	void setElement(int x, int y, int val);
+	void setElement(Location l, int val);
 	void printData();
 	int getValueAt(int x, int y);
 	int getValueAt(Location loc);
-	void setValue(int x, int y, int val);
+	
 
 	//Another fix, this changes to public, and getAdjacents and get timed Adjacents go to unit
 	vector<Node> adjacentHelper(Location element);//Adjacent helper function that returns adjacents
@@ -24,7 +26,9 @@ public:
 	
 	void reserve(int t, Node n, int id);
 	bool isReserved(Node n, int t, int id);
+	
 	void cleanMap();
+	void cleanObstacles();
 
 	/*
 		Helper function that returns a suggested D for hte Silvers
@@ -52,6 +56,9 @@ public:
 	Map createSubMap(Location blocking, Location escape, Location blocked, Location* difference = NULL);
 
 	bool hasData() { return has_data; }
+
+	int getXValue() { return data->get_x_size(); }
+	int getYValue() { return data->get_y_size(); }
 
 
 private:

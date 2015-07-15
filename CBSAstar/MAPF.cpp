@@ -51,8 +51,49 @@ MAPF::MAPF(string filename){
 }
 
 //Constructor that asks the user what are the specifications of the grid and randomly creates it
-MAPF::MAPF(int size_x, int size_y){
+MAPF::MAPF(int size_x, int size_y, int max_players){
+	// Create the map of the size selected
+	map = new Map(size_x, size_y);
+	broken = false;
+	int D = map->CalculateD();
 	
+	int n_players = 2;
+	if (max_players > 2) n_players = std::rand() % 2 + max_players;
+
+	// We now have an emty map, next step is create the agents and set them goals
+	for (int i = 0; i < n_players; i++){
+		
+		Location start_location(std::rand() % size_x, std::rand() % size_y);
+		while (map->getValueAt(start_location) != 0){
+			start_location = Location(std::rand() % size_x, std::rand() % size_y);
+		}
+		Location end_location(std::rand() % size_x, std::rand() % size_y);
+		while (map->getValueAt(end_location) != 0){
+			end_location = Location(std::rand() % size_x, std::rand() % size_y);
+		}
+		
+		Node start_node(i + 2, start_location);
+		Node goal_node(i + 2, end_location);
+
+		Agent agent(start_node, goal_node, map, i + 2, D);
+
+		map->setElement(start_location, i + 2);
+		map->setElement(end_location, i + 2);
+		
+		players.push_back(agent);
+	}
+	cout << "Number of players: " << n_players << endl;
+	// Once that the random players where created, it is time to create a random number of obstacles
+	do{
+		// Add obstacles to the map
+		AddMapObstacles();
+		// if it is an invalid map, create a new one
+	} while (!ValidMap());
+	
+	
+
+	time = 0;
+
 }
 
 
@@ -895,6 +936,52 @@ int MAPF::getIndexOfAgent(int id){
 			result = i;
 			break;
 		}
+	}
+
+	return result;
+}
+
+void MAPF::AddMapObstacles(){
+	int size_x = map->getXValue();
+	int size_y = map->getYValue();
+	
+	map->cleanObstacles();
+
+	int upperObstacleLimit = (size_x * size_y) - players.size();
+	int obstacleNumber = std::rand() % upperObstacleLimit;
+
+	for (int i = 0; i < obstacleNumber; i++){
+		// Get a random location
+		Location obstacleLocation(std::rand() % size_x, std::rand() % size_y);
+
+		// See if it is a valuable location
+		while (map->getValueAt(obstacleLocation) != 0){
+			// If not, change it until a valuable location is found
+			obstacleLocation = Location(std::rand() % size_x, std::rand() % size_y);
+		}
+
+		// Set that location to an obstacle
+		map->setElement(obstacleLocation, 1);
+	}
+
+}
+
+/*
+	This mehod checks if it is a valid map.
+	It checks if it's elements can reach it's destination.
+	If they can't, then there is an invalid map.
+*/
+bool MAPF::ValidMap(){
+	// Calculate the sime route of an element
+	for (unsigned int i = 0; i < players.size(); i++){
+		players[i].calculateRoute();
+	}
+
+	// Check if all the elements reached their destination
+	bool result = (players[0].getDestination() == players[0].getPath()[players[0].pathSize() -1]);
+	for (unsigned int i = 1; i < players.size(); i++){
+		if (!result) break;
+		result = (players[i].getDestination() == players[i].getPath()[players[i].pathSize() - 1]);
 	}
 
 	return result;

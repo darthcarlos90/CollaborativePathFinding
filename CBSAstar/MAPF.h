@@ -11,7 +11,7 @@
 class MAPF{
 public:
 	MAPF(string filename); // inputs information from a map (for static maps)
-	MAPF(int size_x, int size_y); //inputs for random generation of map (for dynamic maps)
+	MAPF(int size_x, int size_y, int max_players = 2); //inputs for random generation of map (for dynamic maps)
 	~MAPF(void); //Destructor
 	
 	/*
@@ -75,6 +75,11 @@ private:
 
 	bool AlreadyOnConflict(vector<int> agents, int type);
 	bool IsSubset(vector<int> a, vector<int> b);
+
+	// Helper functions to create a random map
+	void AddMapObstacles();
+	bool ValidMap();
+
 
 	//TODO: Keep adding more elements throught the development of this project.
 	FileReader* fr;

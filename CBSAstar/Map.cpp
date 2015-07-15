@@ -12,6 +12,11 @@ Map::Map(Matrix<int>* mat){
 	}
 }
 
+Map::Map(unsigned int size_x, unsigned int size_y){
+	data = new Matrix<int>(size_x, size_y);
+	has_data = true;
+}
+
 //Empty constructor for several purposes
 Map::Map(void){
 	data = NULL; //Make the data pointer null
@@ -121,6 +126,10 @@ void Map::setElement(int x, int y, int val){
 	data->set_element(x, y, val);
 }
 
+void Map::setElement(Location l, int val){
+	data->set_element(l.x, l.y, val);
+}
+
 void Map::printData(){
 	cout << *data << endl;
 }
@@ -142,10 +151,6 @@ int Map::getValueAt(Location loc){
 	return data->get_element(loc.x, loc.y);
 }
 
-void Map::setValue(int x, int y, int val){
-	data->set_element(x, y, val);
-}
-
 void Map::cleanMap(){
 	for (int i = 0; i < data->get_x_size(); i++){
 		for (int j = 0; j < data->get_y_size(); j++){
@@ -156,6 +161,18 @@ void Map::cleanMap(){
 	}
 }
 
+// Set all the obstacle elements to 0
+void Map::cleanObstacles(){
+	for (int i = 0; i < data->get_x_size(); i++){
+		for (int j = 0; j < data->get_y_size(); j++){
+			if (data->get_element(i, j) == 1){
+				data->set_element(i, j, 0);
+			}
+		}
+	}
+}
+
+// TODO: Improve this
 int Map::CalculateD(){
 	return ((data->get_x_size() * data->get_y_size()) / 4);
 }
