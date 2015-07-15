@@ -52,7 +52,7 @@ MAPF::MAPF(string filename){
 
 //Constructor that asks the user what are the specifications of the grid and randomly creates it
 MAPF::MAPF(int size_x, int size_y){
-	//TODO: DO this when the rest is finished
+	
 }
 
 
@@ -477,6 +477,9 @@ void MAPF::DefaultHelper(Conflicted c){
 }
 #pragma endregion
 
+/*
+	Method that looks if vector b is a subset of vector a.
+*/
 bool MAPF::IsSubset(vector<int> a, vector<int> b){
 	std::sort(a.begin(), a.end());
 	std::sort(b.begin(), b.end());
@@ -487,7 +490,7 @@ bool MAPF::AlreadyOnConflict(vector<int> agents, int type){
 	bool result = false;
 	for (unsigned int i = 0; i < agent_conflicts.size(); i++){
 		if (agent_conflicts[i].type == type){
-			if (IsSubset(agents, agent_conflicts[i].agents)){
+			if (IsSubset(agent_conflicts[i].agents, agents)){
 				result = true;
 				break;
 			}
@@ -534,7 +537,7 @@ void MAPF::MultipleBlocking(){
 			if (i != j){
 				if (DetectBlockingHelper(i, j, destination)){
 					blockedElements++;
-					c.agents.push_back(j);
+					c.agents.push_back(players[j].getId());
 				}
 			}
 		}
@@ -547,6 +550,7 @@ void MAPF::MultipleBlocking(){
 			bool conflictRegistered = false;
 			if (!AlreadyOnConflict(c.agents, BLOCKING_MULTIPLE)){
 				c.type = BLOCKING_MULTIPLE;
+				c.agents.push_back(players[i].getId());
 				agent_conflicts.push_back(c);
 			}
 		}
