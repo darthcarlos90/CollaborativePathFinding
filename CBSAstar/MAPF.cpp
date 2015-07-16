@@ -3,7 +3,7 @@
 //Constructor that loads data from the file
 MAPF::MAPF(string filename){
 	//Loading data from the file
-	fr = new FileReader(filename, true);
+	fr = new FileManager(filename, true);
 
 	//put the file 
 	map = new Map(fr->data);
@@ -46,6 +46,7 @@ MAPF::MAPF(string filename){
 		broken = true;
 	}
 	
+	algorithm_type = 0;
 	
 
 }
@@ -90,9 +91,11 @@ MAPF::MAPF(int size_x, int size_y, int max_players){
 		// if it is an invalid map, create a new one
 	} while (!ValidMap());
 	
-	
+	system("cls"); 
+	map->printData();
 
 	time = 0;
+	algorithm_type = 0;
 
 }
 
@@ -105,6 +108,7 @@ MAPF::~MAPF(void){
 }
 
 void MAPF::Start(int type){
+	algorithm_type = type;
 	cout << "Number of players: " << players.size() << endl;
 	if (!broken){
 		cout << "Calculating Routes" << endl;
@@ -208,23 +212,23 @@ void MAPF::RunCBSUsingPlayers(vector<Agent> agents){
 
 }
 
-void MAPF::MoveEntities(int type){
-	switch (type){
+void MAPF::MoveEntities( bool automatic){
+	switch (algorithm_type){
 	case 1:
-		MoveBySilvers(false);
+		MoveBySilvers(false, automatic);
 		break;
 	case 2:
-		MoveByCBS();
+		MoveByCBS(automatic);
 		break;
 	case 3:
-		MoveBySilvers(true);
+		MoveBySilvers(true, automatic);
 		break;
 	}
 }
 
 
 
-void MAPF::MoveBySilvers(bool hybrid){
+void MAPF::MoveBySilvers(bool hybrid, bool automatic){
 	time++;
 	bool finished = false;
 	bool verify = false;
@@ -251,17 +255,17 @@ void MAPF::MoveBySilvers(bool hybrid){
 
 		time++;
 		map->printData();
-		system("pause");
+		if(!automatic)system("pause");
 	}
 
 }
 
-void MAPF::MoveByCBS(){
+void MAPF::MoveByCBS(bool automatic){
 	bool finished = false;
 
 	while (!finished){
-		system("cls");
-		map->cleanMap();
+		//system("cls");
+		//map->cleanMap();
 		for (unsigned int i = 0; i < players.size(); i++){
 			players[i].moveEntity(time);
 			map->setElement(players[i].getX(), players[i].getY(), (players[i].getId() + 2));
@@ -272,10 +276,18 @@ void MAPF::MoveByCBS(){
 		for (unsigned int i = 1; i < players.size(); i++){
 			finished = finished && players[i].finished(); 
 		}
-		map->printData();
+		//map->printData();
 		
-		system("pause");
+		if (!automatic)system("pause");
 	}
+
+	/*for (unsigned int i = 0; i < players.size(); i++){
+		cout << "Path of agent " << players[i].getId() << endl;
+		for (unsigned int j = 0; j < paths[i].size(); j++){
+			cout << "t" << j << ": ";
+			paths[i][j].printValue();
+		}
+	}*/
 
 }
 
@@ -985,4 +997,23 @@ bool MAPF::ValidMap(){
 	}
 
 	return result;
+}
+
+void MAPF::printCosts(ostream& out){
+	for (unsigned int i = 0; i < players.size(); i++){
+		out << "Player " << players[i].getId() << " cost: " << players[i].getSic() << endl;
+	}
+	int total_cost = 0;
+	switch (algorithm_type){
+	case 1:
+	case 3:
+		for(unsigned int i = 0; i < players.size(); i++){
+			total_cost += players[i].getSic();
+		}
+		out << "Total cost: " << total_cost << endl;
+		break;
+	case 2:
+		out << "Total cost: " << tree->getSolution()->getCost() << endl;
+		break;
+	}
 }

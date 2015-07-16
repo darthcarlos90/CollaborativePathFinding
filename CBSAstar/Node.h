@@ -48,6 +48,7 @@ public:
 	bool operator == (const Node& n)const;
 	bool operator != (const Node& n)const;
 	Node& operator = (const Node& n);
+	
 
 	void setParent(Node value);
 	bool hasParent() const;
@@ -56,6 +57,8 @@ public:
 	void clearParent(); //Method used so that the parent is forgotten
 
 	Location getLocation() const { return my_location; }
+	
+	void printValue();
 
 
 private:

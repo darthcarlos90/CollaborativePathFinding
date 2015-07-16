@@ -79,7 +79,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="CBTNode.h" />
-    <ClInclude Include="FileReader.h" />
+    <ClInclude Include="FileManager.h" />
     <ClInclude Include="Location.h" />
     <ClInclude Include="Map.h" />
     <ClInclude Include="MAPF.h" />
@@ -94,7 +94,7 @@
   <ItemGroup>
     <ClCompile Include="CBTNode.cpp" />
     <ClCompile Include="ConstraintTree.cpp" />
-    <ClCompile Include="FileReader.cpp" />
+    <ClCompile Include="FileManager.cpp" />
     <ClCompile Include="Location.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Map.cpp" />

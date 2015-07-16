@@ -688,7 +688,7 @@ void Agent::moveEntity(unsigned int t){
 	
 	if (t < time_route.size()){
 		actualNode = time_route[t];
-		cout << "Unit: " << id + 2 << " at location: " << actualNode.getX() << " , " << actualNode.getY() << endl;
+		//cout << "Unit: " << id + 2 << " at location: " << actualNode.getX() << " , " << actualNode.getY() << endl;
 	} else if (t > time_route.size()){ // If the time overpasses the amount of steps available
 		//Just checking if the acual node is the destination
 		if (actualNode == destination){
@@ -1229,4 +1229,24 @@ bool Agent::validMovement(Location location, int time, vector<Constraint> constr
 	}
 
 	return result;
+}
+
+void Agent::SanitizePath(){
+	// If the last element is in fact, the destination
+	if (time_route[time_route.size() - 1] == destination){
+		int counter = 0; // counter to see how many repetitions we have
+		for (int i = time_route.size() - 1; i >= 0; i--){
+			// If the element is the destination, count
+			if (time_route[i] == destination) counter++;
+			// else, escape the for loop
+			else break;
+		}
+		// If we have more than 1 repetition
+		while (counter > 1){
+			// remove the last repetition
+			time_route.pop_back();
+			// decrease counter
+			counter--;
+		}
+	}
 }

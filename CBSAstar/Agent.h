@@ -130,6 +130,8 @@ public:
 	bool NeedsPathVerification() { return needsPathVerification; }
 	void SetPathVerificationFlag(bool val){ needsPathVerification = val; }
 	void calculateSIC();
+	// Clears the path of repeated useless elements at the end of the path
+	void SanitizePath();
 
 
 private:

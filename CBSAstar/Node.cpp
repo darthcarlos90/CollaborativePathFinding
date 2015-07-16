@@ -188,3 +188,7 @@ void Node::ConvertToMapCoordinates(Location exchange){
 	x = x + exchange.x;
 	y = y + exchange.y;
 }
+
+void Node::printValue(){
+	std::cout << "(" << x << ", " << y << ")" << std::endl;
+}

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "MAPF.h"
+#include <time.h>
 
 class Menu{
 public:
@@ -20,4 +21,7 @@ private:
 	// private variables
 	int type; 
 	int algorithm_type;
+
+	// File Administration
+	FileManager *fileManager;
 };

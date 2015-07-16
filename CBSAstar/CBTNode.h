@@ -94,6 +94,8 @@ private:
 	
 	// This method balances the paths of the agents so a proper check coudld be done
 	int BalancePaths();
+	// The oposite of the above
+	void SanitizePaths();
 
 
 	//Properties

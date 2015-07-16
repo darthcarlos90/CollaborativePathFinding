@@ -223,6 +223,8 @@ void CBTNode::UpdateAgentsPaths(){
 	for (unsigned int i = 0; i < agents.size(); i++){
 		agents[i].setPath(paths[i]);
 	}
+	SanitizePaths();
+	
 }
 
 int CBTNode::ReplanAgentFromLastIndex(int agentId){
@@ -458,4 +460,15 @@ int CBTNode::BalancePaths(){
 	}
 
 	return largestSize;
+}
+
+void CBTNode::SanitizePaths(){
+	for (unsigned int i = 0; i < agents.size(); i++){
+		// Sanitize the path at agent level
+		agents[i].SanitizePath();
+		// calculate the cost of this agent
+		agents[i].calculateSIC();
+		// save the path
+		paths[i] = agents[i].getPath();
+	}
 }

@@ -6,6 +6,10 @@ Menu::Menu(void){
 }
 Menu::~Menu(void){
 	// Empty for now
+	if (fileManager){
+		delete fileManager;
+		fileManager = NULL;
+	}
 }
 
 void Menu::Execute(){
@@ -24,14 +28,36 @@ void Menu::Execute(){
 }
 
 void Menu::RunTests(){
-	system("pause");
+	fileManager = new FileManager("test.txt");
 	MAPF m(8, 8);
 	PrintAlgorithmMenu();
 
 	//Load the routes for the entities
+	const clock_t begin_time = clock();
 	m.Start(algorithm_type);
-	m.MoveEntities(algorithm_type);
+	fileManager->myfile << "Number of players " << m.numberPlayers() << endl;
+	fileManager->myfile << m.getMatrix() << endl;
+	float calculation_time = float(clock() - begin_time) / CLOCKS_PER_SEC;
+	const clock_t progress_time = clock();
+	m.MoveEntities(true);
+	float moving_time = float(clock() - progress_time) / CLOCKS_PER_SEC;
+	
 	cout << "Finished" << endl;
+	cout << "Saving information into file" << endl;
+	
+	vector<vector<Node>> paths = m.getPaths();
+	for (unsigned int i = 0; i < paths.size(); i++){
+		fileManager->myfile << "Agent's " << i << " path:" << endl;
+		for (unsigned int j = 0; j < paths[i].size(); j++){
+			fileManager->myfile << "t" << j <<": ( " << paths[i][j].getX() << ", " << paths[i][j].getY() << ")" << endl;
+		}
+		fileManager->myfile << endl;
+	}
+	fileManager->myfile << "Time taken to calculate paths: " << calculation_time << "s" << endl;
+	fileManager->myfile << "Time taken to progress through the path " << moving_time << "s" << endl;
+	fileManager->myfile << "Total time of execution for this map " << calculation_time + moving_time << "s" << endl;
+	m.printCosts(fileManager->myfile);
+	fileManager->closeFile();
 	system("pause");
 }
 
@@ -117,7 +143,7 @@ void Menu::LoadMap(){
 		
 		//Load the routes for the entities
 		m.Start(algorithm_type);
-		m.MoveEntities(algorithm_type);
+		m.MoveEntities(false);
 	}
 
 	cout << "Finished" << endl;

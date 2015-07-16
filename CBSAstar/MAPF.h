@@ -1,5 +1,5 @@
 #pragma once
-#include "FileReader.h"
+#include "FileManager.h"
 #include "ConstraintTree.h"
 
 /*
@@ -20,20 +20,26 @@ public:
 		2 - Represents CBS for pathfinding, and Silvers for conflict resolution
 	*/
 	void Start(int type);
-	void MoveEntities(int type); //The type thing is temporal
+	void MoveEntities(bool automatic); //The type thing is temporal
 	//This method will revise the paths in look for any conflict
 	void RevisePaths();
 
 	bool isBroken() { return broken; }
+	void printCosts(ostream& out);
+
+	Matrix<int> getMatrix() { return *map->getData(); }
+	vector<vector<Node>> getPaths() { return paths; }
+	int numberPlayers() { return players.size(); }
 	
 
-private:
+private://
 	void StartCBSPathFinding();
 	void StartSilversPathFinding();
 	void StartHybridPathFinding();
 
-	void MoveBySilvers(bool hybrid);
-	void MoveByCBS();
+	void MoveBySilvers(bool hybrid, bool automatic);
+	void MoveByCBS(bool automatic);
+	
 
 	bool existsInList(vector<int> list, int val);
 	bool NodeExistsOnList(vector<Node> list, Node val);
@@ -82,7 +88,7 @@ private:
 
 
 	//TODO: Keep adding more elements throught the development of this project.
-	FileReader* fr;
+	FileManager* fr;
 	Map* map;
 	ConstraintTree* tree;
 	vector<Agent> players;
@@ -95,4 +101,6 @@ private:
 
 	vector<Conflicted> agent_conflicts;
 	vector<vector<Node>> paths; // This is used to analyze the paths looking for conflicts
+
+	int algorithm_type;
 };
