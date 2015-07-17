@@ -30,6 +30,8 @@ public:
 	Matrix<int> getMatrix() { return *map->getData(); }
 	vector<vector<Node>> getPaths() { return paths; }
 	int numberPlayers() { return players.size(); }
+
+	void resetEntities();
 	
 
 private://

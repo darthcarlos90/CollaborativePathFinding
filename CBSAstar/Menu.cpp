@@ -71,6 +71,7 @@ void Menu::RunTests(){
 		fileManager->myfile << "Total time of execution for this map " << calculation_time + moving_time << "s" << endl;
 		m.printCosts(fileManager->myfile);
 		fileManager->myfile << endl;
+		m.resetEntities();
 	}
 	fileManager->closeFile();
 	system("pause");

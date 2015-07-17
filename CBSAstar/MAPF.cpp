@@ -1017,3 +1017,15 @@ void MAPF::printCosts(ostream& out){
 		break;
 	}
 }
+
+/*
+	Takes all the agents back to their starting position, and
+	clears the paths.
+*/
+void MAPF::resetEntities(){
+	paths.clear();
+	for (unsigned int i = 0; i < players.size(); i++){
+		players[i].resetElement();
+	}
+	time = 0;
+}

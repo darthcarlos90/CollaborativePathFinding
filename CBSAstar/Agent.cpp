@@ -2,7 +2,7 @@
 
 
 Agent::Agent(Node location,Node destination, Map* m, int id, unsigned int D):
-actualNode(location)
+actualNode(location), startingPoint(location)
 {
 	map = m;
 	active = true;
@@ -224,6 +224,7 @@ void Agent::move(unsigned int t){
 						in the route of the element will be time + 1
 */
 void Agent::executeTimeSpaceAstar(int starting_time){
+	// TODO: Check why Astar is calculating paths twice
 	/*
 		Steps 1 and 2 are described in the function that will execute.
 	*/
@@ -568,6 +569,13 @@ void Agent::clearSpatialLists(bool clearSpatialRoute){
 	spatial_closedList.clear();
 	index_lower_spatial_openList = 0;
 	if (clearSpatialRoute) spatial_route.clear();
+}
+
+void Agent::clearTimeLists(bool clearTimeRoute){
+	time_openList.clear();
+	time_closedList.clear();
+	index_lower_time_openList = 0;
+	if (clearTimeRoute) time_route.clear();
 }
 
 void Agent::calculateRoute(){
@@ -1249,4 +1257,10 @@ void Agent::SanitizePath(){
 			counter--;
 		}
 	}
+}
+
+void Agent::resetElement(){
+	actualNode = startingPoint;
+	clearSpatialLists(true);
+	clearTimeLists(true);
 }

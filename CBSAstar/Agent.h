@@ -91,6 +91,8 @@ public:
 	Location getLocation() { return actualNode.getLocation(); }
 	Node getDestination() { return destination; }
 	Location getDestinationLocation() { return destination.getLocation(); }
+	Node getSartNode() { return startingPoint; }
+	Location getStartLocation() { return startingPoint.getLocation(); }
 
 	bool isOnMyRoute(Node n);
 	void AddNodeToPathAtTimeT(Node n, unsigned int t);
@@ -133,6 +135,9 @@ public:
 	// Clears the path of repeated useless elements at the end of the path
 	void SanitizePath();
 
+	// This method takes the agent back to it's starting position, and eliminates the path
+	void resetElement();
+
 
 private:
 	//Helper functions
@@ -144,6 +149,7 @@ private:
 	void addToTimeOpenList(Node n);
 	int GetIndexOfElement(vector<Node> list, Node element);
 	void clearSpatialLists(bool clearSpatialRoute);
+	void clearTimeLists(bool clearTimeRoute);
 	
 	Node GetSmallestNodeFromSpatialOpenList();
 	Node GetSmallestNodeFromTimeOpenList();
@@ -163,6 +169,7 @@ private:
 	
 	int id;
 
+	Node startingPoint;
 	Node actualNode;
 	Node destination;
 	Node partialDestination;
