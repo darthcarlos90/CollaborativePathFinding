@@ -224,7 +224,7 @@ void Agent::move(unsigned int t){
 						in the route of the element will be time + 1
 */
 void Agent::executeTimeSpaceAstar(int starting_time){
-	// TODO: Check why Astar is calculating paths twice
+	
 	/*
 		Steps 1 and 2 are described in the function that will execute.
 	*/
@@ -252,6 +252,9 @@ void Agent::TimeSpaceAstarHelper(Location start, Location finish, int time){
 	// In case they're not empty
 	time_closedList.clear();
 	time_openList.clear();
+
+	// The time at which the pathfinding started
+	int starting_time = time;
 	/*
 	Step 1: Calculate the route.
 	- Calculate the route using regular Astar, BUT the H used on every node will be
@@ -280,11 +283,13 @@ void Agent::TimeSpaceAstarHelper(Location start, Location finish, int time){
 	
 	
 
-	int counter = steps_limit; //This counter will help us find a partial path
+	int step_counter = 0; //This counter will help us find a partial path
 	
 	//if the open list is empty, or the goal was found, quit
 	while (!pathFound){
-		if (time_openList.empty()) break; // If the open list is empty, no path found
+		if (time_openList.empty()) 
+			break; // If the open list is empty, no path found
+		
 		//let p be the best node in the open list
 		/*	Since the openList is sorted every time an item is added, then the best
 			option to select is the first item
@@ -302,16 +307,16 @@ void Agent::TimeSpaceAstarHelper(Location start, Location finish, int time){
 
 		//otherwise
 		// Get the adjacents of node P
-		vector<Node> adjacents = getTimedAdjacents(P, time);
+		vector<Node> adjacents = getTimedAdjacents(P, P.getDepth() + starting_time);
 
 		for (unsigned int i = 0; i < adjacents.size(); i++){
 			addToTimeOpenList(adjacents[i]);
 		}
 		
 		//std::sort(time_openList.begin(), time_openList.end());
-		time++; //Increase time
-		counter--; // Decrease the counter
-		if (counter == 0){ //If the counter reached 0
+		
+		step_counter = P.getDepth() + 1;
+		if (step_counter == steps_limit){ //If the counter reached 0
 			//Check for any partial path
 			for (unsigned int i = 0; i < time_closedList.size(); i++){
 				if (time_closedList[i].getDepth() >= steps_limit){
@@ -487,6 +492,9 @@ vector<Node> Agent::getAdjacentsWithoutParents(Node element){
 }
 
 //Basically remove all the reserved adjacent nodes
+// TODO: Add destination parameter
+// TODO: Check if the values given are correct
+// TODO: when you add the repeated element, you must add a parent to that element
 std::vector<Node> Agent::getTimedAdjacents(Node element, int res_time){
 	//First, get the adjacents of the node
 	std::vector<Node> temp = map->adjacentHelper(element.getLocation());
@@ -988,15 +996,16 @@ void Agent::addToSpatialOpenList(Node n){
 }
 
 void Agent::addToTimeOpenList(Node n){
-	if (!FindNodeAtList(n, time_openList)){
-		if (time_openList.size() > 0){
-			if (n < time_openList[index_lower_time_openList])
-				index_lower_time_openList = time_openList.size();
+	if (!FindNodeAtList(n, time_openList)){ // If it is not on the open list
+		if (time_openList.size() > 0){ // if the list already has elements
+			if (n < time_openList[index_lower_time_openList])// if this element is smaller then the smallest element
+				index_lower_time_openList = time_openList.size(); // update the index
 		}
-		time_openList.push_back(n);
+		time_openList.push_back(n); // Finally, add the element to the list
 	}
-		else {
-			int index = GetIndexOfElement(time_openList, n);
+		else {// if the element is already on the open list
+			int index = GetIndexOfElement(time_openList, n); // get its index
+			// if the element on the list has a bigger value, then update the values
 			if (time_openList[index].getG() > n.getG()){
 				time_openList.erase(time_openList.begin() + index);
 				time_openList.push_back(n);

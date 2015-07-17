@@ -90,7 +90,7 @@ MAPF::MAPF(int size_x, int size_y, int max_players){
 		AddMapObstacles();
 		// if it is an invalid map, create a new one
 	} while (!ValidMap());
-	
+	resetEntities(); // to clear all the paths
 	system("cls"); 
 	map->printData();
 
@@ -131,7 +131,7 @@ void MAPF::Start(int type){
 
 void MAPF::StartSilversPathFinding(){
 	for (unsigned int i = 0; i < players.size(); i++){
-		players[i].executeTimeSpaceAstar(time);
+		players[i].executeTimeSpaceAstar(1); // because element 0 is the starting position
 		paths.push_back(players[i].getPath());
 	}
 }
