@@ -32,6 +32,8 @@ public:
 	int numberPlayers() { return players.size(); }
 
 	void resetEntities();
+	void addRandomPlayer();
+	void PrintPlayers(ostream& out);
 	
 
 private://
@@ -85,7 +87,7 @@ private://
 	bool IsSubset(vector<int> a, vector<int> b);
 
 	// Helper functions to create a random map
-	void AddMapObstacles();
+	void AddMapObstacles(int limit);
 	bool ValidMap();
 
 

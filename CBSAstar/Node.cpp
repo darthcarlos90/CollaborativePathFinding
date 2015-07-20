@@ -158,11 +158,22 @@ bool Node::hasParent() const{
 //This is a method of the node, because it needs to acces its parents
 void Node::calculateG(){
 	//This method will recursively go to each parent and calculate its g
-	g = tempg;
-	if (has_parent){
-		parent->calculateG();
-		g += parent->getG();
+	// If g hasnt been calculated, calculate it
+	if (g == 0){
+		g = tempg;
 	}
+	
+	if (has_parent){
+		g += parent->getIndividualGRecursive();
+	}
+}
+
+int Node::getIndividualGRecursive(){
+	int result = tempg;
+	if (has_parent){
+		result += parent->getIndividualGRecursive();
+	}
+	return result;
 }
 
 void Node::clearParent(){

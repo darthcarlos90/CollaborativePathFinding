@@ -63,16 +63,15 @@ MAPF::MAPF(int size_x, int size_y, int max_players){
 
 	// We now have an emty map, next step is create the agents and set them goals
 	for (int i = 0; i < n_players; i++){
-		
 		Location start_location(std::rand() % size_x, std::rand() % size_y);
 		while (map->getValueAt(start_location) != 0){
 			start_location = Location(std::rand() % size_x, std::rand() % size_y);
 		}
 		Location end_location(std::rand() % size_x, std::rand() % size_y);
-		while (map->getValueAt(end_location) != 0){
+		while (map->getValueAt(end_location) != 0 || end_location == start_location){
 			end_location = Location(std::rand() % size_x, std::rand() % size_y);
 		}
-		
+
 		Node start_node(i + 2, start_location);
 		Node goal_node(i + 2, end_location);
 
@@ -80,14 +79,20 @@ MAPF::MAPF(int size_x, int size_y, int max_players){
 
 		map->setElement(start_location, i + 2);
 		map->setElement(end_location, i + 2);
-		
+
 		players.push_back(agent);
+		
+	}
+	int biggerManhattan = 0;
+	for (unsigned int i = 0; i < players.size(); i++){
+		if (players[i].getManhattanBetweenNodes() > biggerManhattan)
+			biggerManhattan = players[i].getManhattanBetweenNodes();
 	}
 	cout << "Number of players: " << n_players << endl;
 	// Once that the random players where created, it is time to create a random number of obstacles
 	do{
 		// Add obstacles to the map
-		AddMapObstacles();
+		AddMapObstacles(biggerManhattan);
 		// if it is an invalid map, create a new one
 	} while (!ValidMap());
 	resetEntities(); // to clear all the paths
@@ -105,6 +110,37 @@ MAPF::~MAPF(void){
 	delete map;
 	//Dont delete the nodes, thats the tree's job
 	delete tree;
+}
+
+
+void MAPF::addRandomPlayer(){
+	Location start_location(std::rand() % map->getXValue(), std::rand() % map->getYValue());
+	while (map->getValueAt(start_location) != 0){
+		start_location = Location(std::rand() % map->getXValue(), std::rand() % map->getYValue());
+	}
+	Location end_location(std::rand() % map->getXValue(), std::rand() % map->getYValue());
+	while (map->getValueAt(end_location) != 0){
+		end_location = Location(std::rand() % map->getXValue(), std::rand() % map->getYValue());
+	}
+
+	Node start_node(players.size() + 1, start_location);
+	Node goal_node(players.size() + 1, end_location);
+
+	Agent agent(start_node, goal_node, map, players.size() + 1, map->CalculateD());
+
+	map->setElement(start_location, players.size() + 1);
+	map->setElement(end_location, players.size() + 1);
+
+	players.push_back(agent);
+}
+
+void MAPF::PrintPlayers(ostream &out){
+	for (unsigned int i = 0; i < players.size(); i++){
+		out << "Player " << players[i].getId() << ": " << endl;
+		out << "Start Location: (" << players[i].getStartLocation().x << ", " << players[i].getStartLocation().y << ")" << endl;
+		out << "Destination: (" << players[i].getDestinationLocation().x << ", " << players[i].getDestinationLocation().y << ")" << endl;
+	}
+	out << endl;
 }
 
 void MAPF::Start(int type){
@@ -953,13 +989,13 @@ int MAPF::getIndexOfAgent(int id){
 	return result;
 }
 
-void MAPF::AddMapObstacles(){
+void MAPF::AddMapObstacles(int limit){
 	int size_x = map->getXValue();
 	int size_y = map->getYValue();
 	
 	map->cleanObstacles();
 
-	int upperObstacleLimit = (size_x * size_y) - players.size();
+	int upperObstacleLimit = (size_x * size_y) - limit;
 	int obstacleNumber = std::rand() % upperObstacleLimit;
 
 	for (int i = 0; i < obstacleNumber; i++){

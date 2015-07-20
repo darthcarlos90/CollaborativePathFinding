@@ -1,6 +1,7 @@
 #pragma once
 #include <cmath>
 #include <vector>
+
 #include "Utils.h"
 
 
@@ -17,6 +18,8 @@ public:
 
 	void setIndividualG(int val) { tempg = val; }
 	int getIndividualG() const{ return tempg; }
+	int getIndividualGRecursive();
+
 	void calculateG();
 	void setG(int val) { g = val; }
 	int getG() const { return g; }

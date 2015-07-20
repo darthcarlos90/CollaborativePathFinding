@@ -29,50 +29,57 @@ void Menu::Execute(){
 
 void Menu::RunTests(){
 	fileManager = new FileManager("test.txt");
-	MAPF m(8, 8);
-	//PrintAlgorithmMenu();
-	// Run same test for different algorithms
-	fileManager->myfile << "Number of players " << m.numberPlayers() << endl;
-	fileManager->myfile << m.getMatrix() << endl;
-	for (int index = 1; index <= 3; index++){
-		// TODO: Change so that after the paths have been calculated, go back to starting position and recalculate route.
-		//Load the routes for the entities
-		fileManager->myfile << "< ======================================================================== >" << endl;
-		switch (index){
-		case 1:
-			fileManager->myfile << "Silver's Algorith Results:" << endl;
-			break;
-		case 2:
-			fileManager->myfile << "CBS Results:" << endl;
-			break;
-		case 3:
-			fileManager->myfile << "Hybrid results:" << endl;
-		}
-		const clock_t begin_time = clock();
-		m.Start(index);
-		float calculation_time = float(clock() - begin_time) / CLOCKS_PER_SEC;
-		const clock_t progress_time = clock();
-		m.MoveEntities(true);
-		float moving_time = float(clock() - progress_time) / CLOCKS_PER_SEC;
-
-		cout << "Finished" << endl;
-		cout << "Saving information into file" << endl;
-
-		vector<vector<Node>> paths = m.getPaths();
-		for (unsigned int i = 0; i < paths.size(); i++){
-			fileManager->myfile << "Agent's " << i << " path:" << endl;
-			for (unsigned int j = 0; j < paths[i].size(); j++){
-				fileManager->myfile << "t" << j << ": ( " << paths[i][j].getX() << ", " << paths[i][j].getY() << ")" << endl;
+	
+	for (int i = 2; i <= 13; i++){
+		MAPF m(8, 8, i);
+		//PrintAlgorithmMenu();
+		// Run same test for different algorithms
+		fileManager->myfile << "Map: " << endl;
+		fileManager->myfile << m.getMatrix() << endl;
+		fileManager->myfile << "Number of players " << m.numberPlayers() << endl;
+		m.PrintPlayers(fileManager->myfile);
+		for (int index = 1; index <= 3; index++){
+			// TODO: Change so that after the paths have been calculated, go back to starting position and recalculate route.
+			//Load the routes for the entities
+			fileManager->myfile << "< ======================================================================== >" << endl;
+			switch (index){
+			case 1:
+				fileManager->myfile << "Silver's Algorith Results:" << endl;
+				break;
+			case 2:
+				fileManager->myfile << "CBS Results:" << endl;
+				break;
+			case 3:
+				fileManager->myfile << "Hybrid results:" << endl;
 			}
+			const clock_t begin_time = clock();
+			m.Start(index);
+			float calculation_time = float(clock() - begin_time) / CLOCKS_PER_SEC;
+			const clock_t progress_time = clock();
+			m.MoveEntities(true);
+			float moving_time = float(clock() - progress_time) / CLOCKS_PER_SEC;
+
+			cout << "Finished" << endl;
+			cout << "Saving information into file" << endl;
+
+			vector<vector<Node>> paths = m.getPaths();
+			for (unsigned int i = 0; i < paths.size(); i++){
+				fileManager->myfile << "Agent's " << i + 2 << " path:" << endl;
+				for (unsigned int j = 0; j < paths[i].size(); j++){
+					fileManager->myfile << "t" << j << ": ( " << paths[i][j].getX() << ", " << paths[i][j].getY() << ")" << endl;
+				}
+				fileManager->myfile << endl;
+			}
+			fileManager->myfile << "Time taken to calculate paths: " << calculation_time << "s" << endl;
+			fileManager->myfile << "Time taken to progress through the path " << moving_time << "s" << endl;
+			fileManager->myfile << "Total time of execution for this map " << calculation_time + moving_time << "s" << endl;
+			m.printCosts(fileManager->myfile);
 			fileManager->myfile << endl;
+			m.resetEntities();
+			// TODO: Reset also reservation table/ constraint table
 		}
-		fileManager->myfile << "Time taken to calculate paths: " << calculation_time << "s" << endl;
-		fileManager->myfile << "Time taken to progress through the path " << moving_time << "s" << endl;
-		fileManager->myfile << "Total time of execution for this map " << calculation_time + moving_time << "s" << endl;
-		m.printCosts(fileManager->myfile);
-		fileManager->myfile << endl;
-		m.resetEntities();
 	}
+	
 	fileManager->closeFile();
 	system("pause");
 }

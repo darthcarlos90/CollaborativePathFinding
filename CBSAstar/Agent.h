@@ -140,6 +140,8 @@ public:
 	// This method takes the agent back to it's starting position, and eliminates the path
 	void resetElement();
 
+	int getManhattanBetweenNodes();
+
 
 private:
 	//Helper functions

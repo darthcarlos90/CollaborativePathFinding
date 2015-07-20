@@ -300,7 +300,9 @@ void Agent::TimeSpaceAstarHelper(Location start, Location finish, int time){
 	// In case they're not empty
 	time_closedList.clear();
 	time_openList.clear();
-
+	if (id == 6){
+		cout << "breaking " << endl;
+	}
 	// The time at which the pathfinding started
 	int starting_time = time;
 	/*
@@ -576,7 +578,7 @@ std::vector<Node> Agent::getTimedAdjacents(Node element, int res_time, Location 
 			repeatedNode.setParent(element);
 			repeatedNode.calculateG();
 			repeatedNode.calculateF();
-			result.push_back(element);
+			result.push_back(repeatedNode);
 		}
 	}
 
@@ -1049,13 +1051,28 @@ void Agent::addToSpatialOpenList(Node n){
 }
 
 void Agent::addToTimeOpenList(Node n){
-	if (!FindNodeAtList(n, time_openList)){ // If it is not on the open list
-		if (time_openList.size() > 0){ // if the list already has elements
-			if (n < time_openList[index_lower_time_openList])// if this element is smaller then the smallest element
-				index_lower_time_openList = time_openList.size(); // update the index
+	bool atClosedList = FindNodeAtList(n, time_closedList);// check if it is in the closed list
+	if (atClosedList){// if it is at the closed list
+		atClosedList = true;
+		/*
+			The only way to repeat an element in the closed list is, add it only
+			if you are a repeated step, otherwise dont add it.
+		*/
+		if (n.hasParent()){
+			if (n == n.getParent()){
+				atClosedList = false;
+			}
 		}
-		time_openList.push_back(n); // Finally, add the element to the list
 	}
+
+	if (!atClosedList){ // if it isnt at the closed list
+		if (!FindNodeAtList(n, time_openList)){ // If it is not on the open list
+			if (time_openList.size() > 0){ // if the list already has elements
+				if (n < time_openList[index_lower_time_openList])// if this element is smaller then the smallest element
+					index_lower_time_openList = time_openList.size(); // update the index
+			}
+			time_openList.push_back(n); // Finally, add the element to the list
+		}
 		else {// if the element is already on the open list
 			int index = GetIndexOfElement(time_openList, n); // get its index
 			// if the element on the list has a bigger value, then update the values
@@ -1066,6 +1083,8 @@ void Agent::addToTimeOpenList(Node n){
 
 			}
 		}
+	}
+	
 	
 }
 
@@ -1325,4 +1344,9 @@ void Agent::resetElement(){
 	actualNode = startingPoint;
 	clearSpatialLists(true);
 	clearTimeLists(true);
+}
+
+int Agent::getManhattanBetweenNodes(){
+	return abs(startingPoint.getLocation().x - destination.getLocation().x) + 
+		abs(startingPoint.getLocation().y - destination.getLocation().y);
 }
