@@ -54,6 +54,8 @@ public:
 
 	void calculateRealHeuristic(Node* toCalculate, Location finish);
 
+	void executebacksearchAstar(Location start, Location finish);
+
 	
 	int getSic();
 
@@ -77,7 +79,7 @@ public:
 	*/
 	std::vector<Node> getAdjacents(Node element, Location ending);
 	std::vector<Node> getTimedAdjacentsWithoutParents(Node location, int time);
-	std::vector<Node> getTimedAdjacents(Node element, int res_time);
+	std::vector<Node> getTimedAdjacents(Node element, int res_time, Location ending);
 	std::vector<Node> getAdjacentsWithoutParents(Node element);
 	std::vector<Node> getAdjacentsonConstraints(Node element, Location endint, vector<Constraint> constraints, int time);
 

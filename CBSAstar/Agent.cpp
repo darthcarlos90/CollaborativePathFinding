@@ -103,13 +103,15 @@ void Agent::executeSpatialAstar(Location start, Location finish){
 
 	//Add A to the open list, At this point, A shoul be the only node on the open list
 	spatial_openList.push_back(A);
+	index_lower_spatial_openList = 0;
 
 	Node P;
 	//If the goal was found, break
 	while (!pathFound){
 
 		// If the open list is empty, no path was found, break
-		if (spatial_openList.size() == 0) break;
+		if (spatial_openList.size() == 0)
+			break;
 
 		//let p be the best node in the open list
 		/*	Since the openList is sorted every time an item is added, then the best
@@ -171,6 +173,52 @@ void Agent::executeSpatialAstar(Location start, Location finish){
 	}
 }
 
+void Agent::executebacksearchAstar(Location start, Location finish){
+	bool pathFound = false;
+	// Add the first element to the list, our destination
+	Node A(0, start);
+	spatial_openList.push_back(A);
+	
+	Node P;
+	//If the goal was found, break
+	while (!pathFound){
+
+		// If the open list is empty, no path was found, break
+		if (spatial_openList.size() == 0)
+			break;
+
+		// Get the best node of the open list
+		P = spatial_openList[0];
+		spatial_openList.erase(spatial_openList.begin());
+		
+		// If the element is not on the closed list, add it
+		if (!FindNodeAtList(P, spatial_closedList))
+			spatial_closedList.push_back(P);
+		
+		// If this is the node we are looking for, break
+		if (P.getLocation() == finish){
+			pathFound = true;
+			break;
+		}
+
+		// Get the adjacents of the node
+		vector<Node> adjacents = getAdjacents(P, finish);
+
+		// Add the elements to the open list
+		for (unsigned int i = 0; i < adjacents.size(); i++){
+			if (!FindNodeAtList(adjacents[i], spatial_openList))
+				spatial_openList.push_back(adjacents[i]);
+		}
+		// Sort open list
+		std::sort(spatial_openList.begin(), spatial_openList.end());
+	}
+
+	//Once finish, clear open list
+	spatial_openList.clear();
+
+	
+}
+
 void Agent::move(unsigned int t){
 	/*
 	Step 3: Every t, advance one spot in the road.
@@ -186,12 +234,12 @@ void Agent::move(unsigned int t){
 		stepsTaken++;
 	}
 		
-	map->setElement(actualNode.getX(), actualNode.getY(), id + 2);
+	//map->setElement(actualNode.getX(), actualNode.getY(), id + 2);
 	
 
-	cout << "Unit: " << id + 2 << " at location: " << actualNode.getX() << " , " << actualNode.getY();
-	if (!active) cout << " This element is finished.";
-	cout << endl;
+	//cout << "Unit: " << id + 2 << " at location: " << actualNode.getX() << " , " << actualNode.getY();
+	//if (!active) cout << " This element is finished.";
+	//cout << endl;
 	
 	/*
 		Step 4: If the d/2 has been reached, and the last step doesn't arrives to the destination,
@@ -275,10 +323,11 @@ void Agent::TimeSpaceAstarHelper(Location start, Location finish, int time){
 		Because this could lead to other elements illegally moving to the starting point
 		in a given time.
 	*/
-	map->reserve(time, A, id);
+	map->reserve(time - 1, A, id); // Because starting point is can only be at time 0, or time t - 1
 	
 	time_openList.push_back(A); //We put it on the open list
 	index_lower_time_openList = 0;
+
 	Node P;
 	
 	
@@ -307,7 +356,7 @@ void Agent::TimeSpaceAstarHelper(Location start, Location finish, int time){
 
 		//otherwise
 		// Get the adjacents of node P
-		vector<Node> adjacents = getTimedAdjacents(P, P.getDepth() + starting_time);
+		vector<Node> adjacents = getTimedAdjacents(P, P.getDepth() + starting_time, finish);
 
 		for (unsigned int i = 0; i < adjacents.size(); i++){
 			addToTimeOpenList(adjacents[i]);
@@ -345,7 +394,7 @@ void Agent::TimeSpaceAstarHelper(Location start, Location finish, int time){
 			int smaller_value = 0;
 			//Get the element with the smallest value from d + 1 till the end
 			for (unsigned int i = 0; i < partial_path_nodes.size(); i++){
-				vector<Node> around = getTimedAdjacents(partial_path_nodes[i], time); // get the adjacents
+				vector<Node> around = getTimedAdjacents(partial_path_nodes[i], time, finish); // get the adjacents
 				std::sort(around.begin(), around.end()); //sort so the first element is the smaller
 				clearSpatialLists(true);
 				executeSpatialAstar(around[0].getLocation(), destination.getLocation());
@@ -399,7 +448,9 @@ void Agent::TimeSpaceAstarHelper(Location start, Location finish, int time){
 
 void Agent::executeSpatialAstarUntilFound(Location start, Node toFind){
 	if (!FindNodeAtList(toFind, spatial_closedList)){
-		executeSpatialAstar(start, toFind.getLocation());
+		// If the node we are looking for is not on the closed list
+		// look for it
+		executebacksearchAstar(start, toFind.getLocation());
 	}
 }
 
@@ -408,6 +459,8 @@ void Agent::calculateRealHeuristic(Node* toCalculate, Location finish){
 	for (unsigned int i = 0; i < spatial_closedList.size(); i++){
 		if (spatial_closedList[i] == *toCalculate){
 			toCalculate->setH(spatial_closedList[i].getG());
+			spatial_openList.clear();// That way the search can restart
+			index_lower_spatial_openList = 0;
 			break;
 		}
 	}
@@ -492,10 +545,8 @@ vector<Node> Agent::getAdjacentsWithoutParents(Node element){
 }
 
 //Basically remove all the reserved adjacent nodes
-// TODO: Add destination parameter
 // TODO: Check if the values given are correct
-// TODO: when you add the repeated element, you must add a parent to that element
-std::vector<Node> Agent::getTimedAdjacents(Node element, int res_time){
+std::vector<Node> Agent::getTimedAdjacents(Node element, int res_time, Location ending){
 	//First, get the adjacents of the node
 	std::vector<Node> temp = map->adjacentHelper(element.getLocation());
 	bool reservedElement = false;
@@ -511,7 +562,7 @@ std::vector<Node> Agent::getTimedAdjacents(Node element, int res_time){
 	//Now that we have all the available nodes, we calculate their real heuristic value
 	for (unsigned int i = 0; i < result.size(); i++){
 		
-		calculateRealHeuristic(&result[i], destination.getLocation());
+		calculateRealHeuristic(&result[i], ending);
 		//calculate the rest
 		result[i].setParent(element);
 		result[i].calculateG();
@@ -520,9 +571,11 @@ std::vector<Node> Agent::getTimedAdjacents(Node element, int res_time){
 	//If a reserved element was found, give the option of stay on your place (Only if it is available)
 	if (reservedElement){
 		if (!map->isReserved(element, res_time, id)){
-			element.setG(10);
-			calculateRealHeuristic(&element, destination.getLocation());
-			element.calculateF();
+			Node repeatedNode(0, 10, element.getX(), element.getY());
+			calculateRealHeuristic(&repeatedNode, ending);
+			repeatedNode.setParent(element);
+			repeatedNode.calculateG();
+			repeatedNode.calculateF();
 			result.push_back(element);
 		}
 	}

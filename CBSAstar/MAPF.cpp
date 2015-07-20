@@ -234,7 +234,7 @@ void MAPF::MoveBySilvers(bool hybrid, bool automatic){
 	bool verify = false;
 	while (!finished){
 		system("cls");
-		map->cleanMap();
+		//map->cleanMap();
 		finished = players[0].finished();
 		for (unsigned int i = 0; i < players.size(); i++){
 			players[i].move(time); // The element at i will be the element at time = i + 1
@@ -254,7 +254,7 @@ void MAPF::MoveBySilvers(bool hybrid, bool automatic){
 		}
 
 		time++;
-		map->printData();
+		//map->printData();
 		if(!automatic)system("pause");
 	}
 
@@ -995,6 +995,8 @@ bool MAPF::ValidMap(){
 		if (!result) break;
 		result = (players[i].getDestination() == players[i].getPath()[players[i].pathSize() - 1]);
 	}
+
+	
 
 	return result;
 }
