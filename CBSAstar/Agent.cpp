@@ -178,7 +178,7 @@ void Agent::executeSpatialAstar(Location start, Location finish){
 
 void Agent::executebacksearchAstar(Location start, Location finish){
 	spatial_openList.clear(); // Just in case
-	
+	// TODO: This is not fucking working
 	bool pathFound = false;
 	// Add the first element to the list, our destination
 	Node A(0, start);
