@@ -15,6 +15,7 @@ public:
 	void updateConstraint(int t, int userId, Node n);
 	std::vector<Constraint> getConstraintList(int t);
 	std::vector<Constraint> getFullConstraints() { return constraints; }
+	void clean();
 
 
 private:

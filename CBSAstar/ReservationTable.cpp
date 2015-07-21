@@ -84,3 +84,8 @@ void ReservationTable::updateConstraint(int t, int userId, Node n){
 std::vector<Constraint> ReservationTable::getConstraintList(int t){
 	return reservations[t];
 }
+
+void ReservationTable::clean(){
+	constraints.clear();
+	reservations.clear();
+}

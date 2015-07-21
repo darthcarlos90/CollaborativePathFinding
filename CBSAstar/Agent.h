@@ -139,8 +139,10 @@ public:
 
 	// This method takes the agent back to it's starting position, and eliminates the path
 	void resetElement();
+	void setValidPath(bool val) { validSolution = val; }
 
 	int getManhattanBetweenNodes();
+	bool hasValidSolution() { return validSolution; }
 
 
 private:
@@ -201,4 +203,6 @@ private:
 	unsigned int index_lower_time_openList;
 
 	std::vector<Node> partial_path_nodes;
+
+	bool validSolution;
 };

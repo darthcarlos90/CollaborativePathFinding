@@ -29,6 +29,7 @@ public:
 	
 	void cleanMap();
 	void cleanObstacles();
+	void cleanConstraintsReservations();
 
 	/*
 		Helper function that returns a suggested D for hte Silvers

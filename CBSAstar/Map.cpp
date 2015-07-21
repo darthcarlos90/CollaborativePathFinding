@@ -287,3 +287,7 @@ Map Map::createSubMap(Location blocking, Location escape, Location blocked, Loca
 	//return the result
 	return submap;
 }
+
+void Map::cleanConstraintsReservations(){
+	reservationTable.clean();
+}

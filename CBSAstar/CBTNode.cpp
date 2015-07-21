@@ -222,6 +222,7 @@ void CBTNode::addConstraint(Constraint c){
 void CBTNode::UpdateAgentsPaths(){
 	for (unsigned int i = 0; i < agents.size(); i++){
 		agents[i].setPath(paths[i]);
+		agents[i].setValidPath(true);
 	}
 	SanitizePaths();
 	

@@ -29,8 +29,9 @@ void Menu::Execute(){
 
 void Menu::RunTests(){
 	fileManager = new FileManager("test.txt");
-	
+	const clock_t total_time = clock();
 	for (int i = 2; i <= 13; i++){
+	
 		MAPF m(8, 8, i);
 		//PrintAlgorithmMenu();
 		// Run same test for different algorithms
@@ -62,24 +63,19 @@ void Menu::RunTests(){
 			cout << "Finished" << endl;
 			cout << "Saving information into file" << endl;
 
-			vector<vector<Node>> paths = m.getPaths();
-			for (unsigned int i = 0; i < paths.size(); i++){
-				fileManager->myfile << "Agent's " << i + 2 << " path:" << endl;
-				for (unsigned int j = 0; j < paths[i].size(); j++){
-					fileManager->myfile << "t" << j << ": ( " << paths[i][j].getX() << ", " << paths[i][j].getY() << ")" << endl;
-				}
-				fileManager->myfile << endl;
-			}
+			m.PrintPaths(fileManager->myfile);
+			
 			fileManager->myfile << "Time taken to calculate paths: " << calculation_time << "s" << endl;
 			fileManager->myfile << "Time taken to progress through the path " << moving_time << "s" << endl;
 			fileManager->myfile << "Total time of execution for this map " << calculation_time + moving_time << "s" << endl;
 			m.printCosts(fileManager->myfile);
 			fileManager->myfile << endl;
 			m.resetEntities();
-			// TODO: Reset also reservation table/ constraint table
+			m.cleanReservationsConstraints();
 		}
 	}
-	
+	float total_running_time = float(clock() - total_time) / CLOCKS_PER_SEC;
+	fileManager->myfile << "Total running time: " << total_running_time << endl;
 	fileManager->closeFile();
 	system("pause");
 }

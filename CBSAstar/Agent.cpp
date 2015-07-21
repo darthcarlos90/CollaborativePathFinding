@@ -18,6 +18,7 @@ actualNode(location), startingPoint(location)
 	needsPathVerification = false;
 	index_lower_spatial_openList = 0;
 	index_lower_time_openList = 0;
+	validSolution = false;
 }
 
 Agent::~Agent(void){
@@ -171,13 +172,18 @@ void Agent::executeSpatialAstar(Location start, Location finish){
 		inverse_route[i].clearParent(); // To save memory
 		spatial_route.push_back(inverse_route[i]);
 	}
+
+	validSolution = pathFound;
 }
 
 void Agent::executebacksearchAstar(Location start, Location finish){
+	spatial_openList.clear(); // Just in case
+	
 	bool pathFound = false;
 	// Add the first element to the list, our destination
 	Node A(0, start);
 	spatial_openList.push_back(A);
+	index_lower_spatial_openList = 0;
 	
 	Node P;
 	//If the goal was found, break
@@ -188,8 +194,7 @@ void Agent::executebacksearchAstar(Location start, Location finish){
 			break;
 
 		// Get the best node of the open list
-		P = spatial_openList[0];
-		spatial_openList.erase(spatial_openList.begin());
+		P = GetSmallestNodeFromSpatialOpenList();
 		
 		// If the element is not on the closed list, add it
 		if (!FindNodeAtList(P, spatial_closedList))
@@ -210,7 +215,7 @@ void Agent::executebacksearchAstar(Location start, Location finish){
 				spatial_openList.push_back(adjacents[i]);
 		}
 		// Sort open list
-		std::sort(spatial_openList.begin(), spatial_openList.end());
+		UpdateIndexSmallerSpatial();
 	}
 
 	//Once finish, clear open list
@@ -230,7 +235,7 @@ void Agent::move(unsigned int t){
 		active = false; //we reached the end of the route 
 	}
 	else {
-		actualNode = time_route[t - 1];
+		actualNode = time_route[t];
 		stepsTaken++;
 	}
 		
@@ -274,12 +279,17 @@ void Agent::move(unsigned int t){
 void Agent::executeTimeSpaceAstar(int starting_time){
 	
 	/*
-		Steps 1 and 2 are described in the function that will execute.
+		Step 1 is described in the function that will execute.
 	*/
 	TimeSpaceAstarHelper(actualNode.getLocation(), destination.getLocation(), starting_time);
 	
+	/* 
+		Step 2: Once the route has been found, reserve your path.
+			- Only reserve the blocks of your path where nPath <= steps
+	*/
 	// Now that we have a route, reserve it
-	reserveRoute(starting_time + 1);
+	// If we dont have a valid solution, dont reserve it
+	if (validSolution) reserveRoute(starting_time);
 }
 
 /*
@@ -300,9 +310,7 @@ void Agent::TimeSpaceAstarHelper(Location start, Location finish, int time){
 	// In case they're not empty
 	time_closedList.clear();
 	time_openList.clear();
-	if (id == 6){
-		cout << "breaking " << endl;
-	}
+	
 	// The time at which the pathfinding started
 	int starting_time = time;
 	/*
@@ -313,44 +321,41 @@ void Agent::TimeSpaceAstarHelper(Location start, Location finish, int time){
 	for some time t, otherwise, it will not be used.
 	*/
 	bool pathFound = false;
+	bool emtyOpenList = false; // flag for partial path empty list
 	Node A(0, start); //Let A be the starting point
 
 	A.setG(10);
 	calculateRealHeuristic(&A, finish);
 	A.calculateF();
-	/*
-		Fix: We need to also reserve the starting node of each of the agents.
-		Date: 01/06/2015
-		Why?
-		Because this could lead to other elements illegally moving to the starting point
-		in a given time.
-	*/
-	map->reserve(time - 1, A, id); // Because starting point is can only be at time 0, or time t - 1
 	
 	time_openList.push_back(A); //We put it on the open list
 	index_lower_time_openList = 0;
 
 	Node P;
 	
-	
 
 	int step_counter = 0; //This counter will help us find a partial path
 	
-	//if the open list is empty, or the goal was found, quit
+	// While the path hasn't been found
 	while (!pathFound){
-		if (time_openList.empty()) 
-			break; // If the open list is empty, no path found
+
+		/*
+			If the list is empty, means that a path couldn be found for now,
+			so lets get a partial path
+		*/
+		if (time_openList.empty()){
+			// invalid solution, break
+			break;
+		}
+			
+		
+			 
 		
 		//let p be the best node in the open list
-		/*	Since the openList is sorted every time an item is added, then the best
-			option to select is the first item
-		*/
-		//P = time_openList[0];
 		P = GetSmallestNodeFromTimeOpenList();
 		time_closedList.push_back(P);
-		//time_openList.erase(time_openList.begin()); 
 
-		// If P is the goal node, then finished this 
+		// If P is the goal node, then we finished
 		if (P.getLocation() == finish){
 			pathFound = true;
 			break;
@@ -358,16 +363,27 @@ void Agent::TimeSpaceAstarHelper(Location start, Location finish, int time){
 
 		//otherwise
 		// Get the adjacents of node P
-		vector<Node> adjacents = getTimedAdjacents(P, P.getDepth() + starting_time, finish);
+		/*
+			Explanation:
+			The time_span variable is telling us in what time span look for the adjacents.
+			We add 3 variables, the depth() of P, which gives us at what time is the node P
+			being used, starting_time, in case the starting time is not 0, in this case, if P 
+			has a depth of 0, and the starting time is 7, the time of P is 7, not 0. Finally
+			we add 1, since we are looking for nodes to be the next step after P.
+		*/
+		int time_span = P.getDepth() + starting_time + 1;
+		vector<Node> adjacents = getTimedAdjacents(P, time_span, finish);
 
+		// Add the adjacents to the open list
 		for (unsigned int i = 0; i < adjacents.size(); i++){
 			addToTimeOpenList(adjacents[i]);
 		}
 		
-		//std::sort(time_openList.begin(), time_openList.end());
-		
+		// Save in what step whe currently are
 		step_counter = P.getDepth() + 1;
-		if (step_counter == steps_limit){ //If the counter reached 0
+		
+		// If we reached the step limit
+		if ((step_counter == steps_limit) || emtyOpenList){ 
 			//Check for any partial path
 			for (unsigned int i = 0; i < time_closedList.size(); i++){
 				if (time_closedList[i].getDepth() >= steps_limit){
@@ -379,27 +395,27 @@ void Agent::TimeSpaceAstarHelper(Location start, Location finish, int time){
 				pathFound = true;
 				break;
 			}
-			//Reset the counter in case no partial paths where found
-			//counter = d/2; //but make it smaller
 		}
 	}
-
-	/* Step 2: Once the route has been found, reserve your path.
-		- Only reserve the blocks of your path where nPath <= steps
-	*/
 		
 	//If we have a partial path, populate the route with the path
 	if (partial_path_nodes.size() > 0){
-		//If we have more than 1 partial path, lets decide
+		//If we have more than 1 partial path, lets decide using terminal node
 		if (partial_path_nodes.size() > 1){
 			int smaller_index =  0;
 			int smaller_value = 0;
+
 			//Get the element with the smallest value from d + 1 till the end
 			for (unsigned int i = 0; i < partial_path_nodes.size(); i++){
-				vector<Node> around = getTimedAdjacents(partial_path_nodes[i], time, finish); // get the adjacents
+				// Get the adjacents of the last node
+				vector<Node> around = getTimedAdjacents(partial_path_nodes[i], 
+					partial_path_nodes[i].getDepth() + 1, finish); // get the adjacents
+				// Sort it to get the best option
 				std::sort(around.begin(), around.end()); //sort so the first element is the smaller
 				clearSpatialLists(true);
+				// This option is our terminal node, calculate route from terminal node to end
 				executeSpatialAstar(around[0].getLocation(), destination.getLocation());
+				
 				int route_value = 0;
 					
 				//Get the value of the route
@@ -407,7 +423,7 @@ void Agent::TimeSpaceAstarHelper(Location start, Location finish, int time){
 					route_value += spatial_route[j].getF();
 				}
 				
-				//see which route has the smaller value
+				// save to compare smaller value
 				if (i == 0){
 					smaller_value = route_value;
 				}
@@ -425,26 +441,33 @@ void Agent::TimeSpaceAstarHelper(Location start, Location finish, int time){
 			partial_path_nodes.clear(); // Eliminate this one so it doesn't gets stuck in an infinite loop
 		}
 	}
+	// If we have a valid solution
+	if (pathFound){
+		// Now, lets populate the path vector
+		vector<Node> temp;
 
-	//First populate the path
-	vector<Node> temp;
+		if (P.hasParent()){
+			while (P.hasParent()){
+				temp.push_back(P);
+				P = P.getParent();
+			}
+		}
+		else temp.push_back(P);
 
-	if (P.hasParent()){
-		while (P.hasParent()){
-			temp.push_back(P);
-			P = P.getParent();
+		// The first element of the route
+		temp.push_back(A);
+
+		//get the nodes in order
+		for (int i = temp.size() - 1; i >= 0; i--){
+			// Fix if something brakes
+			temp[i].clearParent(); //to save memory on copying parents, since parents are not being used anymore
+			time_route.push_back(temp[i]);
 		}
 	}
-	else temp.push_back(P);
-	// The first element of the route
-	temp.push_back(A);
 
-	//get the nodes in order
-	for (int i = temp.size() - 1; i >= 0; i--){
-		// Fix if something brakes
-		temp[i].clearParent(); //to save memory on copying parents, since parents are not being used anymore
-		time_route.push_back(temp[i]);
-	}
+	validSolution = pathFound;
+
+	
 }
 
 
@@ -552,9 +575,10 @@ std::vector<Node> Agent::getTimedAdjacents(Node element, int res_time, Location 
 	//First, get the adjacents of the node
 	std::vector<Node> temp = map->adjacentHelper(element.getLocation());
 	bool reservedElement = false;
-	//Then, check if they where reserved
+	//Then, check if they are reserved at the given time
 	std::vector<Node> result;
 	for (unsigned int i = 0; i < temp.size(); i++){
+		// If it is not reserved, let it be an adjacent
 		if (!map->isReserved(temp[i], res_time, id)){
 			result.push_back(temp[i]);
 		}
@@ -774,7 +798,7 @@ void Agent::reserveRoute(int starting_time){
 	/*
 		We are going to reserve d nodes, since after d, we are going to replan our route.
 	*/
-	bool reserved = false; // Flag that means you need to rerote
+	bool reserved = false; // Flag that means you need to re-route
 	unsigned int reserved_index = 0; // Until what element you need to reroute
 
 	// The limit states how many steps we are going to add to the route
@@ -1233,15 +1257,14 @@ void Agent::PushElementAtTheBackOfRoute(Node val){
 	end of the route.
 */
 void Agent::reserveRouteFromIndex(unsigned int index){
-	int time = index + 1;
+	
 	for (unsigned int i = index; i < time_route.size(); i++){
-		if (!map->isReserved(time_route[i], time, id)){
-			map->reserve(time, time_route[i], id);
-			time++;
+		if (!map->isReserved(time_route[i], i, id)){
+			map->reserve(i, time_route[i], id);
 		}
 		else {
 			//Just to test if timed adjacents is failing
-			cout << "Breaking" << endl;
+			cout << "Breaking reserve route from index" << endl;
 		}
 	}
 }
@@ -1344,6 +1367,7 @@ void Agent::resetElement(){
 	actualNode = startingPoint;
 	clearSpatialLists(true);
 	clearTimeLists(true);
+	validSolution = false;
 }
 
 int Agent::getManhattanBetweenNodes(){

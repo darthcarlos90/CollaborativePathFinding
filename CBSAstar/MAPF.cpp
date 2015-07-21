@@ -58,8 +58,8 @@ MAPF::MAPF(int size_x, int size_y, int max_players){
 	broken = false;
 	int D = map->CalculateD();
 	
-	int n_players = 2;
-	if (max_players > 2) n_players = std::rand() % 2 + max_players;
+	int n_players = max_players;
+	//if (max_players > 2) n_players = std::rand() % 2 + max_players;
 
 	// We now have an emty map, next step is create the agents and set them goals
 	for (int i = 0; i < n_players; i++){
@@ -143,6 +143,26 @@ void MAPF::PrintPlayers(ostream &out){
 	out << endl;
 }
 
+void MAPF::PrintPaths(ostream& out){
+	for (unsigned int i = 0; i < players.size(); i++){
+		if (players[i].hasValidSolution()){
+			out << "Agent's " << players[i].getId() << " path:" << endl;
+			for (unsigned int j = 0; j <players[i].pathSize(); j++){
+				out << "t" << j << ": ( " << 
+					players[i].getPath()[j].getX() << ", " << 
+					players[i].getPath()[j].getY() << ")" << endl;
+			}
+			
+		}
+		else {
+			out << "Agent " << players[i].getId() << " has an invalid path" << endl;
+		}
+
+		out << endl;
+		
+	}
+}
+
 void MAPF::Start(int type){
 	algorithm_type = type;
 	cout << "Number of players: " << players.size() << endl;
@@ -167,7 +187,7 @@ void MAPF::Start(int type){
 
 void MAPF::StartSilversPathFinding(){
 	for (unsigned int i = 0; i < players.size(); i++){
-		players[i].executeTimeSpaceAstar(1); // because element 0 is the starting position
+		players[i].executeTimeSpaceAstar(0); // because element 0 is the starting position
 		paths.push_back(players[i].getPath());
 	}
 }
@@ -186,6 +206,7 @@ void MAPF::StartCBSPathFinding(){
 	for (unsigned int i = 0; i < players.size(); i++){
 		players[i].setPath(tree->getSolution()->getPathAt(i));
 		paths.push_back(players[i].getPath());
+		players[i].setValidPath(true);
 	}
 
 }
@@ -265,7 +286,7 @@ void MAPF::MoveEntities( bool automatic){
 
 
 void MAPF::MoveBySilvers(bool hybrid, bool automatic){
-	time++;
+	time = 1;
 	bool finished = false;
 	bool verify = false;
 	while (!finished){
@@ -273,9 +294,12 @@ void MAPF::MoveBySilvers(bool hybrid, bool automatic){
 		//map->cleanMap();
 		finished = players[0].finished();
 		for (unsigned int i = 0; i < players.size(); i++){
-			players[i].move(time); // The element at i will be the element at time = i + 1
-			if (i > 0) finished = finished && players[i].finished();
-			verify = verify || players[i].NeedsPathVerification(); // When An element just updated its path
+			if (players[i].hasValidSolution()){
+				players[i].move(time); // The element at i will be the element at time = i + 1
+				if (i > 0) finished = finished && players[i].finished();
+				verify = verify || players[i].NeedsPathVerification(); // When An element just updated its path
+			}
+			
 		}
 		// If an element just changed it's path, verify it
 		if (verify){
@@ -1066,4 +1090,8 @@ void MAPF::resetEntities(){
 		players[i].resetElement();
 	}
 	time = 0;
+}
+
+void MAPF::cleanReservationsConstraints(){
+	map->cleanConstraintsReservations();
 }

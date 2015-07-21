@@ -28,12 +28,14 @@ public:
 	void printCosts(ostream& out);
 
 	Matrix<int> getMatrix() { return *map->getData(); }
-	vector<vector<Node>> getPaths() { return paths; }
 	int numberPlayers() { return players.size(); }
 
 	void resetEntities();
 	void addRandomPlayer();
 	void PrintPlayers(ostream& out);
+	void PrintPaths(ostream& out);
+
+	void cleanReservationsConstraints();
 	
 
 private://
