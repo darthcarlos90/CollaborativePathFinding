@@ -37,9 +37,9 @@ t5: ( 6, 4)
 t6: ( 6, 5)
 t7: ( 6, 6)
 
-Time taken to calculate paths: 0.405s
-Time taken to progress through the path 0.507s
-Total time of execution for this map 0.912s
+Time taken to calculate paths: 0.398s
+Time taken to progress through the path 0.166s
+Total time of execution for this map 0.564s
 Player 2 cost: 420
 Player 3 cost: 560
 Total cost: 980
@@ -65,9 +65,9 @@ t5: ( 6, 4)
 t6: ( 6, 5)
 t7: ( 6, 6)
 
-Time taken to calculate paths: 0.024s
+Time taken to calculate paths: 0.034s
 Time taken to progress through the path 0s
-Total time of execution for this map 0.024s
+Total time of execution for this map 0.034s
 Player 2 cost: 420
 Player 3 cost: 560
 Total cost: 1960
@@ -93,9 +93,9 @@ t5: ( 6, 4)
 t6: ( 6, 5)
 t7: ( 6, 6)
 
-Time taken to calculate paths: 0.501s
-Time taken to progress through the path 0.038s
-Total time of execution for this map 0.539s
+Time taken to calculate paths: 0.379s
+Time taken to progress through the path 0.023s
+Total time of execution for this map 0.402s
 Player 2 cost: 420
 Player 3 cost: 560
 Total cost: 980
@@ -142,9 +142,9 @@ Agent's 4 path:
 t0: ( 7, 4)
 t1: ( 6, 4)
 
-Time taken to calculate paths: 0.035s
-Time taken to progress through the path 0.417s
-Total time of execution for this map 0.452s
+Time taken to calculate paths: 0.05s
+Time taken to progress through the path 0.131s
+Total time of execution for this map 0.181s
 Player 2 cost: 240
 Player 3 cost: 340
 Player 4 cost: 40
@@ -171,9 +171,9 @@ Agent's 4 path:
 t0: ( 7, 4)
 t1: ( 6, 4)
 
-Time taken to calculate paths: 0.013s
+Time taken to calculate paths: 0.01s
 Time taken to progress through the path 0s
-Total time of execution for this map 0.013s
+Total time of execution for this map 0.01s
 Player 2 cost: 240
 Player 3 cost: 340
 Player 4 cost: 40
@@ -200,9 +200,9 @@ Agent's 4 path:
 t0: ( 7, 4)
 t1: ( 6, 4)
 
-Time taken to calculate paths: 0.136s
-Time taken to progress through the path 0.052s
-Total time of execution for this map 0.188s
+Time taken to calculate paths: 0.056s
+Time taken to progress through the path 0.021s
+Total time of execution for this map 0.077s
 Player 2 cost: 240
 Player 3 cost: 340
 Player 4 cost: 40
@@ -264,9 +264,9 @@ t4: ( 3, 4)
 t5: ( 3, 5)
 t6: ( 3, 6)
 
-Time taken to calculate paths: 0.406s
-Time taken to progress through the path 0.566s
-Total time of execution for this map 0.972s
+Time taken to calculate paths: 0.38s
+Time taken to progress through the path 0.194s
+Total time of execution for this map 0.574s
 Player 2 cost: 2590
 Player 3 cost: 3240
 Player 4 cost: 780
@@ -306,9 +306,9 @@ t4: ( 3, 4)
 t5: ( 3, 5)
 t6: ( 3, 6)
 
-Time taken to calculate paths: 0.042s
+Time taken to calculate paths: 0.044s
 Time taken to progress through the path 0s
-Total time of execution for this map 0.042s
+Total time of execution for this map 0.044s
 Player 2 cost: 2590
 Player 3 cost: 3240
 Player 4 cost: 780
@@ -347,9 +347,9 @@ t4: ( 3, 4)
 t5: ( 3, 5)
 t6: ( 3, 6)
 
-Time taken to calculate paths: 0.335s
-Time taken to progress through the path 0.034s
-Total time of execution for this map 0.369s
+Time taken to calculate paths: 0.391s
+Time taken to progress through the path 0.021s
+Total time of execution for this map 0.412s
 Player 2 cost: 2590
 Player 3 cost: 3240
 Player 4 cost: 780
@@ -418,9 +418,9 @@ t4: ( 1, 6)
 
 Agent 6 has an invalid path
 
-Time taken to calculate paths: 7.215s
-Time taken to progress through the path 0.418s
-Total time of execution for this map 7.633s
+Time taken to calculate paths: 9.772s
+Time taken to progress through the path 0.212s
+Total time of execution for this map 9.984s
 Player 2 cost: 960
 Player 3 cost: 900
 Player 4 cost: 840
@@ -485,9 +485,9 @@ t8: ( 3, 2)
 t9: ( 3, 1)
 t10: ( 4, 1)
 
-Time taken to calculate paths: 0.362s
+Time taken to calculate paths: 0.515s
 Time taken to progress through the path 0s
-Total time of execution for this map 0.362s
+Total time of execution for this map 0.515s
 Player 2 cost: 960
 Player 3 cost: 900
 Player 4 cost: 840
@@ -530,9 +530,9 @@ t4: ( 1, 6)
 
 Agent 6 has an invalid path
 
-Time taken to calculate paths: 7.114s
-Time taken to progress through the path 0.042s
-Total time of execution for this map 7.156s
+Time taken to calculate paths: 10.105s
+Time taken to progress through the path 0.021s
+Total time of execution for this map 10.126s
 Player 2 cost: 960
 Player 3 cost: 900
 Player 4 cost: 840
@@ -631,9 +631,9 @@ t2: ( 6, 4)
 t3: ( 6, 5)
 t4: ( 6, 6)
 
-Time taken to calculate paths: 1.138s
-Time taken to progress through the path 0.395s
-Total time of execution for this map 1.533s
+Time taken to calculate paths: 1.627s
+Time taken to progress through the path 0.205s
+Total time of execution for this map 1.832s
 Player 2 cost: 660
 Player 3 cost: 880
 Player 4 cost: 460
@@ -703,9 +703,9 @@ t2: ( 6, 4)
 t3: ( 6, 5)
 t4: ( 6, 6)
 
-Time taken to calculate paths: 0.184s
+Time taken to calculate paths: 0.25s
 Time taken to progress through the path 0s
-Total time of execution for this map 0.184s
+Total time of execution for this map 0.25s
 Player 2 cost: 660
 Player 3 cost: 880
 Player 4 cost: 460
@@ -775,9 +775,9 @@ t2: ( 6, 4)
 t3: ( 6, 5)
 t4: ( 6, 6)
 
-Time taken to calculate paths: 1.175s
-Time taken to progress through the path 0.037s
-Total time of execution for this map 1.212s
+Time taken to calculate paths: 1.697s
+Time taken to progress through the path 0.02s
+Total time of execution for this map 1.717s
 Player 2 cost: 660
 Player 3 cost: 880
 Player 4 cost: 460
@@ -786,3 +786,38 @@ Player 6 cost: 1780
 Player 7 cost: 420
 Total cost: 5000
 
+Map: 
+3,0,6,1,1,0,1,1,
+1,1,2,1,3,0,0,1,
+2,0,0,1,1,0,0,4,
+0,8,1,1,1,0,0,0,
+0,6,1,0,1,1,1,0,
+0,0,1,1,1,0,0,5,
+4,0,0,0,5,0,1,0,
+7,8,1,0,7,1,0,0,
+
+Number of players 7
+Player 2: 
+Start Location: (1, 2)
+Destination: (2, 0)
+Player 3: 
+Start Location: (0, 0)
+Destination: (1, 4)
+Player 4: 
+Start Location: (6, 0)
+Destination: (2, 7)
+Player 5: 
+Start Location: (5, 7)
+Destination: (6, 4)
+Player 6: 
+Start Location: (4, 1)
+Destination: (0, 2)
+Player 7: 
+Start Location: (7, 4)
+Destination: (7, 0)
+Player 8: 
+Start Location: (3, 1)
+Destination: (7, 1)
+
+< ======================================================================== >
+Silver's Algorith Results:

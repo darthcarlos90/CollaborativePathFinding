@@ -1042,6 +1042,9 @@ Node Agent::GetEscapeNodeNotOnRoute(Location start, vector<Node> path, bool lowe
 	return P;
 }
 
+// TODO: Copy constructors are to expensive for the list sizes we manage, that is why
+// there must be directly a method called search in open list, and search in closed list
+
 void Agent::addToSpatialOpenList(Node n){
 	if (!FindNodeAtList(n, spatial_closedList)){
 		//If it is at the open list
