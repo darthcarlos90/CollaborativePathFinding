@@ -197,7 +197,7 @@ void Agent::executebacksearchAstar(Location start, Location finish){
 		P = GetSmallestNodeFromSpatialOpenList();
 		
 		// If the element is not on the closed list, add it
-		if (!FindNodeAtList(P, spatial_closedList))
+		if (!FindNodeAtSpatialClosedList(P))
 			spatial_closedList.push_back(P);
 		
 		// If this is the node we are looking for, break
@@ -211,7 +211,7 @@ void Agent::executebacksearchAstar(Location start, Location finish){
 
 		// Add the elements to the open list
 		for (unsigned int i = 0; i < adjacents.size(); i++){
-			if (!FindNodeAtList(adjacents[i], spatial_openList))
+			if (!FindNodeAtSpatialOpenList(adjacents[i]))
 				spatial_openList.push_back(adjacents[i]);
 		}
 		// Sort open list
@@ -472,7 +472,7 @@ void Agent::TimeSpaceAstarHelper(Location start, Location finish, int time){
 
 
 void Agent::executeSpatialAstarUntilFound(Location start, Node toFind){
-	if (!FindNodeAtList(toFind, spatial_closedList)){
+	if (!FindNodeAtSpatialClosedList(toFind)){
 		// If the node we are looking for is not on the closed list
 		// look for it
 		executebacksearchAstar(start, toFind.getLocation());
@@ -897,6 +897,37 @@ bool Agent::FindNodeAtList(Node n, vector<Node> list){
 	return false;
 }
 
+bool Agent::FindNodeAtSpatialOpenList(Node n){
+	if (std::find(spatial_openList.begin(), spatial_openList.end(), n) != spatial_openList.end()){
+		return true;
+	}
+	return false;
+}
+
+bool Agent::FindNodeAtSpatialClosedList(Node n){
+	if (std::find(spatial_closedList.begin(), spatial_closedList.end(), n) != spatial_closedList.end()){
+		return true;
+	}
+	return false;
+}
+
+bool Agent::FindNodeAtTimeOpenList(Node n){
+	//return std::binary_search(list.begin(), list.end(), n);
+	if (std::find(time_openList.begin(), time_openList.end(), n) != time_openList.end()){
+		return true;
+	}
+	return false;
+}
+bool Agent::FindNodeAtTimeClosedList(Node n){
+	//return std::binary_search(list.begin(), list.end(), n);
+	if (std::find(time_closedList.begin(), time_closedList.end(), n) != time_closedList.end()){
+		return true;
+	}
+	return false;
+}
+
+
+
 bool Agent::isOnMyRoute(Node n){
 	return FindNodeAtList(n, time_route);
 }
@@ -1046,9 +1077,9 @@ Node Agent::GetEscapeNodeNotOnRoute(Location start, vector<Node> path, bool lowe
 // there must be directly a method called search in open list, and search in closed list
 
 void Agent::addToSpatialOpenList(Node n){
-	if (!FindNodeAtList(n, spatial_closedList)){
+	if (!FindNodeAtSpatialClosedList(n)){
 		//If it is at the open list
-		if (!FindNodeAtList(n, spatial_openList)){
+		if (!FindNodeAtSpatialOpenList(n)){
 			if (spatial_openList.size() > 0){
 				if (n < spatial_openList[index_lower_spatial_openList])
 					index_lower_spatial_openList = spatial_openList.size();
@@ -1078,7 +1109,7 @@ void Agent::addToSpatialOpenList(Node n){
 }
 
 void Agent::addToTimeOpenList(Node n){
-	bool atClosedList = FindNodeAtList(n, time_closedList);// check if it is in the closed list
+	bool atClosedList = FindNodeAtTimeClosedList(n);// check if it is in the closed list
 	if (atClosedList){// if it is at the closed list
 		atClosedList = true;
 		/*
@@ -1093,7 +1124,7 @@ void Agent::addToTimeOpenList(Node n){
 	}
 
 	if (!atClosedList){ // if it isnt at the closed list
-		if (!FindNodeAtList(n, time_openList)){ // If it is not on the open list
+		if (!FindNodeAtTimeOpenList(n)){ // If it is not on the open list
 			if (time_openList.size() > 0){ // if the list already has elements
 				if (n < time_openList[index_lower_time_openList])// if this element is smaller then the smallest element
 					index_lower_time_openList = time_openList.size(); // update the index

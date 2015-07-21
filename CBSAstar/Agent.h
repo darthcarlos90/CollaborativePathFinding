@@ -148,7 +148,12 @@ public:
 private:
 	//Helper functions
 	void TimeSpaceAstarHelper(Location start, Location finish, int time);
-	bool FindNodeAtList(Node n, vector<Node> list); //Find a node at a given list
+	bool FindNodeAtList(Node n, vector<Node> list); 
+	// Finder methods
+	bool FindNodeAtSpatialOpenList(Node n);
+	bool FindNodeAtSpatialClosedList(Node n);
+	bool FindNodeAtTimeOpenList(Node n);
+	bool FindNodeAtTimeClosedList(Node n);
 	void reserveRoute(int starting_time); // To be used in the Silver's Astar
 	void reserveRouteFromIndex(unsigned int index);
 	void addToSpatialOpenList(Node n);

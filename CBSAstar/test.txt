@@ -37,9 +37,9 @@ t5: ( 6, 4)
 t6: ( 6, 5)
 t7: ( 6, 6)
 
-Time taken to calculate paths: 0.398s
-Time taken to progress through the path 0.166s
-Total time of execution for this map 0.564s
+Time taken to calculate paths: 0.113s
+Time taken to progress through the path 0.335s
+Total time of execution for this map 0.448s
 Player 2 cost: 420
 Player 3 cost: 560
 Total cost: 980
@@ -65,9 +65,9 @@ t5: ( 6, 4)
 t6: ( 6, 5)
 t7: ( 6, 6)
 
-Time taken to calculate paths: 0.034s
+Time taken to calculate paths: 0.027s
 Time taken to progress through the path 0s
-Total time of execution for this map 0.034s
+Total time of execution for this map 0.027s
 Player 2 cost: 420
 Player 3 cost: 560
 Total cost: 1960
@@ -93,9 +93,9 @@ t5: ( 6, 4)
 t6: ( 6, 5)
 t7: ( 6, 6)
 
-Time taken to calculate paths: 0.379s
-Time taken to progress through the path 0.023s
-Total time of execution for this map 0.402s
+Time taken to calculate paths: 0.107s
+Time taken to progress through the path 0.021s
+Total time of execution for this map 0.128s
 Player 2 cost: 420
 Player 3 cost: 560
 Total cost: 980
@@ -142,9 +142,9 @@ Agent's 4 path:
 t0: ( 7, 4)
 t1: ( 6, 4)
 
-Time taken to calculate paths: 0.05s
-Time taken to progress through the path 0.131s
-Total time of execution for this map 0.181s
+Time taken to calculate paths: 0.065s
+Time taken to progress through the path 0.348s
+Total time of execution for this map 0.413s
 Player 2 cost: 240
 Player 3 cost: 340
 Player 4 cost: 40
@@ -171,9 +171,9 @@ Agent's 4 path:
 t0: ( 7, 4)
 t1: ( 6, 4)
 
-Time taken to calculate paths: 0.01s
+Time taken to calculate paths: 0.008s
 Time taken to progress through the path 0s
-Total time of execution for this map 0.01s
+Total time of execution for this map 0.008s
 Player 2 cost: 240
 Player 3 cost: 340
 Player 4 cost: 40
@@ -200,9 +200,9 @@ Agent's 4 path:
 t0: ( 7, 4)
 t1: ( 6, 4)
 
-Time taken to calculate paths: 0.056s
-Time taken to progress through the path 0.021s
-Total time of execution for this map 0.077s
+Time taken to calculate paths: 0.029s
+Time taken to progress through the path 0.121s
+Total time of execution for this map 0.15s
 Player 2 cost: 240
 Player 3 cost: 340
 Player 4 cost: 40
@@ -264,9 +264,9 @@ t4: ( 3, 4)
 t5: ( 3, 5)
 t6: ( 3, 6)
 
-Time taken to calculate paths: 0.38s
-Time taken to progress through the path 0.194s
-Total time of execution for this map 0.574s
+Time taken to calculate paths: 0.133s
+Time taken to progress through the path 0.263s
+Total time of execution for this map 0.396s
 Player 2 cost: 2590
 Player 3 cost: 3240
 Player 4 cost: 780
@@ -306,9 +306,9 @@ t4: ( 3, 4)
 t5: ( 3, 5)
 t6: ( 3, 6)
 
-Time taken to calculate paths: 0.044s
+Time taken to calculate paths: 0.047s
 Time taken to progress through the path 0s
-Total time of execution for this map 0.044s
+Total time of execution for this map 0.047s
 Player 2 cost: 2590
 Player 3 cost: 3240
 Player 4 cost: 780
@@ -347,9 +347,9 @@ t4: ( 3, 4)
 t5: ( 3, 5)
 t6: ( 3, 6)
 
-Time taken to calculate paths: 0.391s
+Time taken to calculate paths: 0.12s
 Time taken to progress through the path 0.021s
-Total time of execution for this map 0.412s
+Total time of execution for this map 0.141s
 Player 2 cost: 2590
 Player 3 cost: 3240
 Player 4 cost: 780
@@ -418,9 +418,9 @@ t4: ( 1, 6)
 
 Agent 6 has an invalid path
 
-Time taken to calculate paths: 9.772s
-Time taken to progress through the path 0.212s
-Total time of execution for this map 9.984s
+Time taken to calculate paths: 1.781s
+Time taken to progress through the path 0.257s
+Total time of execution for this map 2.038s
 Player 2 cost: 960
 Player 3 cost: 900
 Player 4 cost: 840
@@ -485,9 +485,9 @@ t8: ( 3, 2)
 t9: ( 3, 1)
 t10: ( 4, 1)
 
-Time taken to calculate paths: 0.515s
+Time taken to calculate paths: 0.442s
 Time taken to progress through the path 0s
-Total time of execution for this map 0.515s
+Total time of execution for this map 0.442s
 Player 2 cost: 960
 Player 3 cost: 900
 Player 4 cost: 840
@@ -530,9 +530,9 @@ t4: ( 1, 6)
 
 Agent 6 has an invalid path
 
-Time taken to calculate paths: 10.105s
-Time taken to progress through the path 0.021s
-Total time of execution for this map 10.126s
+Time taken to calculate paths: 1.854s
+Time taken to progress through the path 0.034s
+Total time of execution for this map 1.888s
 Player 2 cost: 960
 Player 3 cost: 900
 Player 4 cost: 840
@@ -631,9 +631,9 @@ t2: ( 6, 4)
 t3: ( 6, 5)
 t4: ( 6, 6)
 
-Time taken to calculate paths: 1.627s
-Time taken to progress through the path 0.205s
-Total time of execution for this map 1.832s
+Time taken to calculate paths: 0.496s
+Time taken to progress through the path 0.249s
+Total time of execution for this map 0.745s
 Player 2 cost: 660
 Player 3 cost: 880
 Player 4 cost: 460
@@ -703,9 +703,9 @@ t2: ( 6, 4)
 t3: ( 6, 5)
 t4: ( 6, 6)
 
-Time taken to calculate paths: 0.25s
+Time taken to calculate paths: 0.206s
 Time taken to progress through the path 0s
-Total time of execution for this map 0.25s
+Total time of execution for this map 0.206s
 Player 2 cost: 660
 Player 3 cost: 880
 Player 4 cost: 460
@@ -775,9 +775,9 @@ t2: ( 6, 4)
 t3: ( 6, 5)
 t4: ( 6, 6)
 
-Time taken to calculate paths: 1.697s
-Time taken to progress through the path 0.02s
-Total time of execution for this map 1.717s
+Time taken to calculate paths: 0.456s
+Time taken to progress through the path 0.022s
+Total time of execution for this map 0.478s
 Player 2 cost: 660
 Player 3 cost: 880
 Player 4 cost: 460
