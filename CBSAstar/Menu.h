@@ -14,6 +14,7 @@ private:
 	// Private Methos
 	void RunTests();
 	void LoadMap();
+	void LoadManualMap();
 	void PrintMainMenu();
 	void PrintAlgorithmMenu();
 

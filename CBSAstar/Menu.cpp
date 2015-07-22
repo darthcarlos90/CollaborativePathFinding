@@ -13,7 +13,7 @@ Menu::~Menu(void){
 }
 
 void Menu::Execute(){
-	while (type != 3){
+	while (type != 4){
 		if (type == 1){
 			RunTests();
 			system("cls");
@@ -21,6 +21,11 @@ void Menu::Execute(){
 		}
 		else if (type == 2){
 			LoadMap();
+			system("cls");
+			PrintMainMenu();
+		}
+		else if (type == 3){
+			LoadManualMap();
 			system("cls");
 			PrintMainMenu();
 		}
@@ -169,12 +174,17 @@ void Menu::LoadMap(){
 	system("pause");
 }
 
+void Menu::LoadManualMap(){
+	//TODO: Code this for later use
+}
+
 void Menu::PrintMainMenu(){
 	cout << "Please select the type of tests you want to run: " << endl;
 	cout << "(Write the number of the option you choose)" << endl;
 	cout << "1) Algorithm Comparison Tests" << endl;
 	cout << "2) Load a pre-generated testcase" << endl;
-	cout << "3) Exit" << endl;
+	cout << "3) Load manually a testcase file" << endl;
+	cout << "4) Exit" << endl;
 
 	cin >> type;
 }

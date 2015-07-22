@@ -94,7 +94,8 @@ void CBTNode::validatePaths(){
 
 void CBTNode::CreateConflict(unsigned int time_ocurrence, Location location, vector<int> users, bool dest_con){
 	conflict.v = location;
-	conflict.times.push_back(time_ocurrence);
+	for (unsigned int i = 0; i < users.size(); i++)
+		conflict.times.push_back(time_ocurrence);
 	conflict.times.push_back(time_ocurrence);
 	conflict.users = users;
 	conflict.destination_conflict = dest_con;
@@ -125,6 +126,7 @@ bool CBTNode::findConstraintsConflicts(unsigned int t){
 						for (unsigned int j = i + 1; j < paths.size(); j++){
 							if (toCompare == paths[j][t].getLocation())
 								users.push_back(j);
+								
 						}
 
 						// create the conflict with the information
@@ -134,26 +136,42 @@ bool CBTNode::findConstraintsConflicts(unsigned int t){
 						break;
 
 					}
-					/*
-						Explanation:
-						The next chunk of code contains code to a more realistic CBS.
-						This will lead to the explotion of more weaknesses of the algorithm.
-						This element will stay, but commented, in case of needed in the future.
-					*/
-					//else if (t + 1 < paths[i].size()){
-					//	if (toCompare == paths[i][t + 1].getLocation()){
-					//		// We have another type of conflict, an invalid movement!
-					//		vector<int> users;
-					//		users.push_back(toCompareId);
-					//		users.push_back(i);
-					//		vector<unsigned int> times;
-					//		times.push_back(t);
-					//		times.push_back(t + 1);
-					//		CreateSpecialConflict(times, toCompare, users);
-					//		foundConflict = true;
-					//		break;
-					//	}
-					//}
+					
+					else if (t + 1 < paths[i].size()){
+						/*
+							Fix: Can't explain this in english. Antes, detectabamos si un agente
+							queria ocupar un nodo n en el tiempo t + 1, cuando n estaba siendo ocupado
+							en el tiempo t. Este movimiento es valido, sin embargo aqui lo marcamos como
+							invalido, lo cual lleva a que ciertos elementos fallen. Por esa razon, se 
+							cambiara a la deteccion total de dos elementos colisionando frente a frente.
+							Date: 22/07/2015
+							Why? Google translate the above.
+						*/
+						if (toCompare == paths[i][t + 1].getLocation()){
+							// We probably have a new conflict, lets test the other elments
+							if (paths[toCompareId][t + 1] == paths[i][t]){
+								// We have another type of conflict, an invalid movement!
+								/*
+									Little hack: Since when deploying the expansion of nodes, the
+									algorithm dictates that the leftmost node must be selected in the
+									case when both nodes have the same value. This leads to a infinite
+									loop sort of thing. So, to make things work, Im gonna change the
+									order of the elements added to the list, so the best option is selected.
+								*/
+								vector<int> users;
+								users.push_back(i);
+								users.push_back(toCompareId);
+								vector<unsigned int> times;
+								times.push_back(t + 1);
+								times.push_back(t);
+								CreateSpecialConflict(times, toCompare, users);
+								foundConflict = true;
+								break;
+							}
+							
+							
+						}
+					}
 				}
 			}
 		}

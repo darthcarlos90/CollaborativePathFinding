@@ -238,9 +238,9 @@ void Agent::move(unsigned int t){
 	//map->setElement(actualNode.getX(), actualNode.getY(), id + 2);
 	
 
-	//cout << "Unit: " << id + 2 << " at location: " << actualNode.getX() << " , " << actualNode.getY();
-	//if (!active) cout << " This element is finished.";
-	//cout << endl;
+	cout << "Unit: " << id + 2 << " at location: " << actualNode.getX() << " , " << actualNode.getY();
+	if (!active) cout << " This element is finished.";
+	cout << endl;
 	
 	/*
 		Step 4: If the d/2 has been reached, and the last step doesn't arrives to the destination,
@@ -780,6 +780,10 @@ void Agent::moveEntity(unsigned int t){
 			active = false;
 		}
 	}
+
+	cout << "Unit: " << id + 2 << " at location: " << actualNode.getX() << " , " << actualNode.getY();
+	if (!active) cout << " This element is finished.";
+	cout << endl;
 }
 
 // The starting time means the time t where the agent will start moving

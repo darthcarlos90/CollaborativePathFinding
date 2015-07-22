@@ -291,7 +291,7 @@ void MAPF::MoveBySilvers(bool hybrid, bool automatic){
 	bool verify = false;
 	while (!finished){
 		system("cls");
-		//map->cleanMap();
+		if (!automatic) map->cleanMap();
 		finished = players[0].finished();
 		for (unsigned int i = 0; i < players.size(); i++){
 			if (players[i].hasValidSolution()){
@@ -314,7 +314,7 @@ void MAPF::MoveBySilvers(bool hybrid, bool automatic){
 		}
 
 		time++;
-		//map->printData();
+		if (!automatic)map->printData();
 		if(!automatic)system("pause");
 	}
 
@@ -324,8 +324,8 @@ void MAPF::MoveByCBS(bool automatic){
 	bool finished = false;
 
 	while (!finished){
-		//system("cls");
-		//map->cleanMap();
+		if (!automatic)system("cls");
+		if (!automatic)map->cleanMap();
 		for (unsigned int i = 0; i < players.size(); i++){
 			players[i].moveEntity(time);
 			map->setElement(players[i].getX(), players[i].getY(), (players[i].getId() + 2));
@@ -336,19 +336,20 @@ void MAPF::MoveByCBS(bool automatic){
 		for (unsigned int i = 1; i < players.size(); i++){
 			finished = finished && players[i].finished(); 
 		}
-		//map->printData();
+		if (!automatic)map->printData();
 		
 		if (!automatic)system("pause");
 	}
 
-	/*for (unsigned int i = 0; i < players.size(); i++){
-		cout << "Path of agent " << players[i].getId() << endl;
-		for (unsigned int j = 0; j < paths[i].size(); j++){
-			cout << "t" << j << ": ";
-			paths[i][j].printValue();
+	if (!automatic){
+		for (unsigned int i = 0; i < players.size(); i++){
+			cout << "Path of agent " << players[i].getId() << endl;
+			for (unsigned int j = 0; j < paths[i].size(); j++){
+				cout << "t" << j << ": ";
+				paths[i][j].printValue();
+			}
 		}
-	}*/
-
+	}
 }
 
 //This method will check for any conflicts with the paths of the agents
@@ -555,40 +556,239 @@ void MAPF::SolveDeadLock(Conflicted c){
 
 	}
 }
+#pragma endregion
 
 void MAPF::DefaultHelper(Conflicted c){
-	//Create the constraint tree
-	tree = new ConstraintTree();
+	// The type of blocking element is detected, now lets solve it
+	int indexToMove = getIndexOfAgent(c.agents[0]);
+	int indexOther = getIndexOfAgent(c.agents[1]);
 
-	//Create the root node
-	root = new CBTNode();
-	// Create the elements of the tree and assign them the necesary information
 
-	// Add the agents and pre-calculated paths
-	for (unsigned int j = 0; j < c.agents.size(); j++){
-		int index = getIndexOfAgent(c.agents[j]);
-		root->addAgent(players[index]);
-		root->AddPath(players[index].getPath());
+	// References to make life easier
+	Agent &toMove = players[indexToMove];
+	Agent &otherAgent = players[indexOther];
+
+	Location exchange_rate;
+	/*
+	Let's use the escape Astar v2 to get the closest element to move, but that doesn´t take part of the
+	other elements route.
+	Firstly, let's compare both the locations of the elements in order to see where is the other element going
+	in relationship to the blocking element.
+	*/
+	Location blockingLocation = toMove.getDestination().getLocation();
+	Location otherLocation = otherAgent.getActualLocation().getLocation();
+
+	/*
+	Lets see if it is lower than or bigger than the element
+	*/
+	bool lowerThan = false;
+	if (otherLocation < blockingLocation) lowerThan = true;
+
+	// We pass that parameter so that the method can bring up the correct escape element
+	Node escape = toMove.GetEscapeNodeNotOnRoute(toMove.getDestinationLocation(), otherAgent.getPath(), lowerThan);
+
+	// Now build the submap
+	Map submap = map->createSubMap(c.locations[0], escape.getLocation(), c.locations[1], &exchange_rate);
+
+
+	/*
+	Fix: We are going to revise the actual value of time, so if it is bigger than 0,
+	it means the pathfinding already started, and that we need to modify some parts of the route
+	after the time that has passed.
+	Date: 22/06/2015
+	Why?
+	Because if we keep modifying it when the element enters the critical zone, we will modify elements
+	on time that already passed, and that is wrong. Very wrong.
+	*/
+	// Get at what time does the element enters the submap (And the location)
+	int time_index = -1;
+
+	if (time > 0){
+		// The for loop will start at the current time
+		for (unsigned int i = time - 1; i < paths[indexOther].size(); i++){
+			// If the element of the map at that location is -1, we find the danger zone
+			if (map->getValueAt(paths[indexOther][i].getLocation()) == -1){
+				time_index = i;
+				break;
+			}
+		}
+
+		if (time_index == -1){
+			time_index = time - 1;
+		}
+	}
+	else {
+		for (unsigned int i = 0; i < paths[indexOther].size(); i++){
+			// If the element of the map at that location is -1, we find the danger zone
+			if (map->getValueAt(paths[indexOther][i].getLocation()) == -1){
+				time_index = i;
+				break;
+			}
+		}
+
+		/*
+		If the time index is still -1, it means that the submap covers the whole map!
+		Therefore the starting index will be 0
+		*/
+		if (time_index == -1){
+			time_index = 0;
+		}
+
+		/*
+		If the route of the element that is about to move is less than the route of the other element,
+		let's make it wait until the element reaches the critical zone
+		*/
+
+		if (toMove.pathSize() < time_index + 1){
+			while (toMove.pathSize() < time_index + 1){
+				toMove.PushElementAtTheBackOfRoute(toMove.getDestination());
+			}
+
+			paths[indexToMove] = toMove.getPath();
+		}
 	}
 
-	// Add the constraints from the reservation table to the root node
-	vector<Constraint> cons = map->GetReservationTableConstraints();
-	for (unsigned int j = 0; j < cons.size(); j++){
-		root->addConstraint(cons[j]);
+	// The rest of this code is the same for both types of corrections
+
+	// Now we need to get the index where the element is out of the danger zone
+	int exit_index = -1;
+	for (unsigned int i = time_index; i < paths[indexOther].size(); i++){
+		if (map->getValueAt(paths[indexOther][i].getLocation()) != -1){
+			exit_index = i - 1;
+			break;
+		}
+	}
+	/*
+	Again, if the exit index is -1 it means that the submap is the whole map,
+	or the destination of the entity is part of the submap, that is why the exit index
+	will be the last element of the path
+	*/
+	if (exit_index == -1){
+		exit_index = paths[indexOther].size() - 1;
 	}
 
-	//Set the cost of the node
-	root->calculateCost();
+	//clean the map of the -1
+	map->cleanMap();
 
-	//Insert the root to the tree
-	tree->insertRoot(root);
+	//Now we need to change from normal map coordinates, to submap coordinates
+	Location agentLocation1 = paths[indexOther][time_index].getLocation();
+	agentLocation1.x = agentLocation1.x - exchange_rate.x;
+	agentLocation1.y = agentLocation1.y - exchange_rate.y;
+
+	Location agentExitLocation = paths[indexOther][exit_index].getLocation();
+	agentExitLocation.x = agentExitLocation.x - exchange_rate.x;
+	agentExitLocation.y = agentExitLocation.y - exchange_rate.y;
+
+	Location agentLocation2 = c.locations[0];
+	agentLocation2.x = agentLocation2.x - exchange_rate.x;
+	agentLocation2.y = agentLocation2.y - exchange_rate.y;
+
+	/*
+	Fix: To avoid any class of head to head collisions, first we are going to calculate the route of one of the elements
+	to its escape node, and the other element will just wait on its place. Afterwards, we will use CBS to pathfind to the destination
+	of both elements.
+	Date: 05/07/2015
+	Why?
+	Because CBS doesnt has the ability to solve head to head collisions. This will be done in parts to help solve that. If there are no head to
+	head collisions, still it will 'look' like an agent is 'waiting' for the other one to finish moving.
+	*/
+
+	//Create a CBS with agents
+	//First change the escape node to the new location
+	escape.ConvertToSubmapCoordinates(exchange_rate);
+	Agent partialAgent1(Node(0, 0, agentLocation1.x, agentLocation1.y), Node(0, 0, agentLocation1.x, agentLocation1.y), &submap, 0, 5); // Let that element stay where it is
+	Agent partialAgent2(Node(0, 0, agentLocation2.x, agentLocation2.y), escape, &submap, 1, 5);// Escape node is the final destination for this CBS
+
+	// Run the CBS only for these agents
+	vector<Agent> agents;
+	agents.push_back(partialAgent1);
+	agents.push_back(partialAgent2);
+
+	//Run the CBS for these situation
+	RunCBSUsingPlayers(agents);
+
+	// Get the partial paths
+	vector<Node> escapePath1 = tree->getSolution()->getPathAt(0);
+	vector<Node> escapePath2 = tree->getSolution()->getPathAt(1);
+
+	/*
+	There is one path that only contains one element (since the starting is also the finish destination),
+	for this element, we will repeat this step the amount of times the other agent takes to reach its final destination.
+	*/
+	if (escapePath1.size() < escapePath2.size()){
+		for (unsigned int i = 0; i < escapePath2.size(); i++){
+			escapePath1.push_back(escapePath1[0]);
+		}
+	}
+	else if (escapePath1.size() > escapePath2.size()){
+		while (escapePath1.size() > escapePath2.size()){
+			escapePath1.pop_back();
+		}
+	}
 
 
-	CBSHelper(false);
+	// Both routes are supposed to be of the same size, so we will transform the coordinates to correct coordinates
+	for (unsigned int i = 0; i < escapePath1.size(); i++){
+		escapePath1[i].ConvertToMapCoordinates(exchange_rate);
+		escapePath2[i].ConvertToMapCoordinates(exchange_rate);
+	}
+	Location partialLocation1 = escapePath1[escapePath1.size() - 1].getLocation();
+	Location partialLocation2 = escapePath2[escapePath2.size() - 1].getLocation();
 
-	agent_conflicts.clear();
+	// Now we have 2 partial routes, it is time to calculate the routes from their partial destination, to their actual destination
+	//Now we can create a CBS with agents
+	//This will be calculated from partial location to their actual destination (or exit stuff)
+	Agent agent1(Node(0, partialLocation1), Node(0, 0, agentExitLocation.x, agentExitLocation.y), &submap, 0, 5);
+	Agent agent2(Node(0, partialLocation2), Node(0, 0, agentLocation2.x, agentLocation2.y), &submap, 1, 5);
+	agents.clear(); // Clear from the old agents
+	agents.push_back(agent1);
+	agents.push_back(agent2);
+
+	//Run the CBS
+	RunCBSUsingPlayers(agents);
+
+	// Once the paths have been calculated, now we can update the paths of the agents (converting them to normal coordinates)
+	vector<Node> new_path;
+	// First get all the elements before the agent got into the danger zone
+	for (int i = 0; i <= time_index; i++){
+		new_path.push_back(paths[indexOther][i]);
+	}
+
+	// Now, get the elements calculated by CBS
+	vector<Node> path1 = tree->getSolution()->getPathAt(0);
+	vector<Node> path2 = tree->getSolution()->getPathAt(1);
+
+	// Now, update paths with the elements of the escape routes
+	for (unsigned int i = 0; i < escapePath1.size(); i++){
+		new_path.push_back(escapePath1[i]);
+		toMove.PushElementAtTheBackOfRoute(escapePath2[i]);
+	}
+
+	/*
+	Now we transform the elements of the path from submap coordinates, to global coordinates
+	And we update the paths of the other elements
+	*/
+	for (unsigned int i = 0; i < path1.size(); i++){
+		path1[i].ConvertToMapCoordinates(exchange_rate);
+		new_path.push_back(path1[i]);
+	}
+
+	for (unsigned int i = 0; i < path2.size(); i++){
+		path2[i].ConvertToMapCoordinates(exchange_rate);
+		toMove.PushElementAtTheBackOfRoute(path2[i]);
+	}
+
+	// Finish updating the path of the element that is fololowing its path
+	for (unsigned int i = exit_index; i < otherAgent.pathSize(); i++){
+		new_path.push_back(paths[indexOther][i]);
+	}
+
+	otherAgent.setPath(new_path); //Update the path directly to the agent
+
+	//Update the paths
+	paths[indexOther] = otherAgent.getPath();
+	paths[indexToMove] = toMove.getPath();
 }
-#pragma endregion
 
 /*
 	Method that looks if vector b is a subset of vector a.
