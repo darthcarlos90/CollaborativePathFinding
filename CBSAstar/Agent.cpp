@@ -35,7 +35,7 @@ void Agent::ConstraintAstar(Location start, Location finish, int starting_time, 
 
 	// Add them to the adjacent list
 	for (unsigned int i = 0; i < adjacents.size(); i++){
-		spatial_openList.push_back(adjacents[i]);
+		addToSpatialOpenList(adjacents[i]);
 	}
 	
 	// Start with those nodes
@@ -48,7 +48,8 @@ void Agent::ConstraintAstar(Location start, Location finish, int starting_time, 
 			break;
 
 		//let p be the best node in the open list
-		P = GetSmallestNodeFromSpatialOpenList();
+		P = spatial_openList[index_lower_spatial_openList];
+		UpdateSpatialOpenList();
 
 		// If P is a valid movement, it will be processed, otherwise, it will be discarded
 		if (validMovement(P.getLocation(), (P.getDepth() - 1) + starting_time, constraints)){
@@ -118,10 +119,9 @@ void Agent::executeSpatialAstar(Location start, Location finish){
 		/*	Since the openList is sorted every time an item is added, then the best
 			option to select is the first item
 		*/
-		P = GetSmallestNodeFromSpatialOpenList();
-		//P = spatial_openList[0];
+		P = spatial_openList[index_lower_spatial_openList];
 		spatial_closedList.push_back(P);
-		//spatial_openList.erase(spatial_openList.begin());
+		UpdateSpatialOpenList();
 
 		/*
 			Fix:The comparison here was changed, instead to see if the type is of 3, we compare against
@@ -176,51 +176,47 @@ void Agent::executeSpatialAstar(Location start, Location finish){
 	validSolution = pathFound;
 }
 
-void Agent::executebacksearchAstar(Location start, Location finish){
-	spatial_openList.clear(); // Just in case
-	// TODO: This is not fucking working
-	bool pathFound = false;
-	// Add the first element to the list, our destination
+int Agent::executebacksearchAstar(Location start, Location finish){
+	// clear open list
+	spatial_openList.clear();
+	
+	bool nodeFound = false;
+	//Let A be the starting point
 	Node A(0, start);
+	// Assign f, g and h values to A
+	A.setG(0);
+	A.calculateManhattanHeuristic(finish);
+	A.calculateF();
+
+	//Add A to the open list, At this point, A shoul be the only node on the open list
 	spatial_openList.push_back(A);
 	index_lower_spatial_openList = 0;
-	
+
 	Node P;
 	//If the goal was found, break
-	while (!pathFound){
+	while (!nodeFound){
 
 		// If the open list is empty, no path was found, break
 		if (spatial_openList.size() == 0)
 			break;
 
-		// Get the best node of the open list
-		P = GetSmallestNodeFromSpatialOpenList();
-		
-		// If the element is not on the closed list, add it
-		if (!FindNodeAtSpatialClosedList(P))
-			spatial_closedList.push_back(P);
-		
-		// If this is the node we are looking for, break
+		//let p be the best node in the open list
+		P = spatial_openList[index_lower_spatial_openList];
+		spatial_closedList.push_back(P);
+		UpdateSpatialOpenList();
+
 		if (P.getLocation() == finish){
-			pathFound = true;
+			nodeFound = true;
 			break;
 		}
 
-		// Get the adjacents of the node
 		vector<Node> adjacents = getAdjacents(P, finish);
-
-		// Add the elements to the open list
 		for (unsigned int i = 0; i < adjacents.size(); i++){
-			if (!FindNodeAtSpatialOpenList(adjacents[i]))
-				spatial_openList.push_back(adjacents[i]);
+			addToSpatialOpenList(adjacents[i]);
 		}
-		// Sort open list
-		UpdateIndexSmallerSpatial();
 	}
 
-	//Once finish, clear open list
-	spatial_openList.clear();
-
+	return P.getG();
 	
 }
 
@@ -346,14 +342,12 @@ void Agent::TimeSpaceAstarHelper(Location start, Location finish, int time){
 		if (time_openList.empty()){
 			// invalid solution, break
 			break;
-		}
-			
-		
-			 
+		}	 
 		
 		//let p be the best node in the open list
-		P = GetSmallestNodeFromTimeOpenList();
+		P = time_openList[index_lower_time_openList];
 		time_closedList.push_back(P);
+		UpdateTimeOpenList();
 
 		// If P is the goal node, then we finished
 		if (P.getLocation() == finish){
@@ -471,25 +465,21 @@ void Agent::TimeSpaceAstarHelper(Location start, Location finish, int time){
 }
 
 
-void Agent::executeSpatialAstarUntilFound(Location start, Node toFind){
+int Agent::executeSpatialAstarUntilFound(Location start, Node toFind){
 	if (!FindNodeAtSpatialClosedList(toFind)){
 		// If the node we are looking for is not on the closed list
 		// look for it
-		executebacksearchAstar(start, toFind.getLocation());
+		return executebacksearchAstar(start, toFind.getLocation());
+	}
+	else{
+		return spatial_closedList[GetIndexOfElementAtSpatialClosedList(toFind.getLocation())].getG();
 	}
 }
 
 void Agent::calculateRealHeuristic(Node* toCalculate, Location finish){
-	executeSpatialAstarUntilFound(finish, *toCalculate);
-	for (unsigned int i = 0; i < spatial_closedList.size(); i++){
-		if (spatial_closedList[i] == *toCalculate){
-			toCalculate->setH(spatial_closedList[i].getG());
-			spatial_openList.clear();// That way the search can restart
-			index_lower_spatial_openList = 0;
-			break;
-		}
-	}
-
+	toCalculate->setH(executeSpatialAstarUntilFound(finish, *toCalculate));
+	spatial_openList.clear();// That way the search can restart
+	index_lower_spatial_openList = 0;
 }
 
 
@@ -1036,10 +1026,9 @@ Node Agent::GetEscapeNodeNotOnRoute(Location start, vector<Node> path, bool lowe
 		/*	Since the openList is sorted every time an item is added, then the best
 		option to select is the first item
 		*/
-		//P = spatial_openList[0];
-		P = GetSmallestNodeFromSpatialOpenList();
+		P = spatial_openList[index_lower_spatial_openList];
 		spatial_closedList.push_back(P);
-		//spatial_openList.erase(spatial_openList.begin());
+		UpdateSpatialOpenList();
 
 		// Get Adjacents without parent :D
 		vector<Node> adjacents = getAdjacentsWithoutParents(P);
@@ -1073,9 +1062,6 @@ Node Agent::GetEscapeNodeNotOnRoute(Location start, vector<Node> path, bool lowe
 	return P;
 }
 
-// TODO: Copy constructors are to expensive for the list sizes we manage, that is why
-// there must be directly a method called search in open list, and search in closed list
-
 void Agent::addToSpatialOpenList(Node n){
 	if (!FindNodeAtSpatialClosedList(n)){
 		//If it is at the open list
@@ -1087,7 +1073,7 @@ void Agent::addToSpatialOpenList(Node n){
 			spatial_openList.push_back(n);
 		}
 		else {
-			int index = GetIndexOfElement(spatial_openList, n);
+			int index = GetIndexOfElementAtSpatialOpenList(n.getLocation());
 			/* 
 				If the element on the list has a bigger G value than the
 				one we are trying to add, then we should change paths.
@@ -1101,7 +1087,7 @@ void Agent::addToSpatialOpenList(Node n){
 	}
 	else {
 		//If this element is already in the closed_list, check if it is a better option
-		int index = GetIndexOfElement(spatial_closedList, n);
+		int index = GetIndexOfElementAtSpatialClosedList(n.getLocation());
 		if (spatial_closedList[index].getG() > n.getG()){
 			spatial_closedList[index] = n;
 		}
@@ -1132,7 +1118,7 @@ void Agent::addToTimeOpenList(Node n){
 			time_openList.push_back(n); // Finally, add the element to the list
 		}
 		else {// if the element is already on the open list
-			int index = GetIndexOfElement(time_openList, n); // get its index
+			int index = GetIndexOfElementAtTimeOpenList(n.getLocation()); // get its index
 			// if the element on the list has a bigger value, then update the values
 			if (time_openList[index].getG() > n.getG()){
 				time_openList.erase(time_openList.begin() + index);
@@ -1141,12 +1127,8 @@ void Agent::addToTimeOpenList(Node n){
 
 			}
 		}
-	}
-	
-	
+	}	
 }
-
-
 
 // Returns the index of an element on a list
 int Agent::GetIndexOfElement(vector<Node> list, Node element){
@@ -1158,6 +1140,50 @@ int Agent::GetIndexOfElement(vector<Node> list, Node element){
 		}
 	}
 
+	return result;
+}
+
+int Agent::GetIndexOfElementAtSpatialOpenList(Location element){
+	int result = -1;
+	for (unsigned int i = 0; i < spatial_openList.size(); i++){
+		if (element == spatial_openList[i].getLocation()){
+			result = i;
+			break;
+		}
+	}
+	return result;
+}
+
+int Agent::GetIndexOfElementAtSpatialClosedList(Location element){
+	int result = -1;
+	for (unsigned int i = 0; i < spatial_closedList.size(); i++){
+		if (element == spatial_closedList[i].getLocation()){
+			result = i;
+			break;
+		}
+	}
+	return result;
+}
+
+int Agent::GetIndexOfElementAtTimeOpenList(Location element){
+	int result = -1;
+	for (unsigned int i = 0; i < time_openList.size(); i++){
+		if (element == time_openList[i].getLocation()){
+			result = i;
+			break;
+		}
+	}
+	return result;
+}
+
+int Agent::GetIndexOfElementAtTimeClosedList(Location element){
+	int result = -1;
+	for (unsigned int i = 0; i < time_closedList.size(); i++){
+		if (element == time_closedList[i].getLocation()){
+			result = i;
+			break;
+		}
+	}
 	return result;
 }
 
@@ -1194,10 +1220,10 @@ Node Agent::EscapeAstar(Location start){
 		/*	Since the openList is sorted every time an item is added, then the best
 		option to select is the first item
 		*/
-		//P = spatial_openList[0];
-		P = GetSmallestNodeFromSpatialOpenList();
+		
+		P = spatial_openList[index_lower_spatial_openList];
 		spatial_closedList.push_back(P);
-		//spatial_openList.erase(spatial_openList.begin());
+		UpdateSpatialOpenList();
 
 
 		vector<Node> adjacents = getAdjacentsWithoutParents(P);
@@ -1312,18 +1338,14 @@ void Agent::setPartialDestination(Node val){
 	has_partial_destination = true;
 }
 
-Node Agent::GetSmallestNodeFromSpatialOpenList(){
-	Node smallest = spatial_openList[index_lower_spatial_openList];
+void Agent::UpdateSpatialOpenList(){
 	spatial_openList.erase(spatial_openList.begin() + index_lower_spatial_openList);
 	UpdateIndexSmallerSpatial();
-	return smallest;
 }
 
-Node Agent::GetSmallestNodeFromTimeOpenList(){
-	Node smallest = time_openList[index_lower_time_openList];
+void Agent::UpdateTimeOpenList(){
 	time_openList.erase(time_openList.begin() + index_lower_time_openList);
 	UpdateIndexSmallerTime();
-	return smallest;
 }
 
 
@@ -1331,7 +1353,7 @@ Node Agent::GetSmallestNodeFromTimeOpenList(){
 void Agent::UpdateIndexSmallerSpatial(){
 	index_lower_spatial_openList = 0;
 	if (spatial_openList.size() > 1){
-		for (unsigned int i = 0; i < spatial_openList.size(); i++){
+		for (unsigned int i = 1; i < spatial_openList.size(); i++){
 			if (spatial_openList[i] < spatial_openList[index_lower_spatial_openList]){
 				index_lower_spatial_openList = i;
 			}

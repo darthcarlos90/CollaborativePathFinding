@@ -46,7 +46,7 @@ public:
 	void executeSpatialAstar(Location start, Location finish);
 
 	//Execute spatial Astar until you find certain node
-	void executeSpatialAstarUntilFound(Location start, Node toFind);
+	int executeSpatialAstarUntilFound(Location start, Node toFind);
 
 	void executeTimeSpaceAstar(int starting_time);
 
@@ -54,7 +54,7 @@ public:
 
 	void calculateRealHeuristic(Node* toCalculate, Location finish);
 
-	void executebacksearchAstar(Location start, Location finish);
+	int executebacksearchAstar(Location start, Location finish);
 
 	
 	int getSic();
@@ -146,24 +146,30 @@ public:
 
 
 private:
-	//Helper functions
+	/*Helper functions*/
 	void TimeSpaceAstarHelper(Location start, Location finish, int time);
-	bool FindNodeAtList(Node n, vector<Node> list); 
+	
 	// Finder methods
+	bool FindNodeAtList(Node n, vector<Node> list);
 	bool FindNodeAtSpatialOpenList(Node n);
 	bool FindNodeAtSpatialClosedList(Node n);
 	bool FindNodeAtTimeOpenList(Node n);
 	bool FindNodeAtTimeClosedList(Node n);
+	int GetIndexOfElement(vector<Node> list, Node element);
+	int GetIndexOfElementAtSpatialOpenList(Location element);
+	int GetIndexOfElementAtSpatialClosedList(Location element);
+	int GetIndexOfElementAtTimeOpenList(Location element);
+	int GetIndexOfElementAtTimeClosedList(Location element);
+
 	void reserveRoute(int starting_time); // To be used in the Silver's Astar
 	void reserveRouteFromIndex(unsigned int index);
 	void addToSpatialOpenList(Node n);
 	void addToTimeOpenList(Node n);
-	int GetIndexOfElement(vector<Node> list, Node element);
 	void clearSpatialLists(bool clearSpatialRoute);
 	void clearTimeLists(bool clearTimeRoute);
 	
-	Node GetSmallestNodeFromSpatialOpenList();
-	Node GetSmallestNodeFromTimeOpenList();
+	void UpdateSpatialOpenList();
+	void UpdateTimeOpenList();
 	
 	void UpdateIndexSmallerSpatial();
 	void UpdateIndexSmallerTime();
