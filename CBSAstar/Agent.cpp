@@ -35,7 +35,7 @@ void Agent::ConstraintAstar(Location start, Location finish, int starting_time, 
 
 	// Add them to the adjacent list
 	for (unsigned int i = 0; i < adjacents.size(); i++){
-		addToSpatialOpenList(adjacents[i]);
+		addToTimedSpatialOpenList(adjacents[i]);
 	}
 	
 	// Start with those nodes
@@ -53,7 +53,8 @@ void Agent::ConstraintAstar(Location start, Location finish, int starting_time, 
 		//Some changes
 
 		// If P is a valid movement, it will be processed, otherwise, it will be discarded
-		if (validMovement(P.getLocation(), (P.getDepth() - 1) + starting_time, constraints)){
+		int timespan = (P.getDepth() - 1) + starting_time;
+		if (validMovement(P.getLocation(),timespan , constraints)){
 			spatial_closedList.push_back(P);
 
 
@@ -64,7 +65,7 @@ void Agent::ConstraintAstar(Location start, Location finish, int starting_time, 
 
 			vector<Node> adjacents = getAdjacents(P, finish);
 			for (unsigned int i = 0; i < adjacents.size(); i++){
-				addToSpatialOpenList(adjacents[i]);
+				addToTimedSpatialOpenList(adjacents[i]);
 			}
 		}
 		
@@ -1100,8 +1101,25 @@ void Agent::addToSpatialOpenList(Node n){
 }
 
 void Agent::addToTimedSpatialOpenList(Node n){
-	// TODO: Finish coding this so that the constraint astar can add repeated elements
-	//copy paste the method below, and change to spatial open and closed list
+
+	 // if it isnt at the closed list
+		if (!FindNodeAtSpatialOpenList(n)){ // If it is not on the open list
+			if (spatial_openList.size() > 0){ // if the list already has elements
+				if (n < spatial_openList[index_lower_spatial_openList])// if this element is smaller then the smallest element
+					index_lower_spatial_openList = spatial_openList.size(); // update the index
+			}
+			spatial_openList.push_back(n); // Finally, add the element to the list
+		}
+		else {// if the element is already on the open list
+			int index = GetIndexOfElementAtSpatialOpenList(n.getLocation()); // get its index
+			// if the element on the list has a bigger value, then update the values
+			if (spatial_openList[index].getG() > n.getG()){
+				spatial_openList.erase(spatial_openList.begin() + index);
+				spatial_openList.push_back(n);
+				UpdateIndexSmallerSpatial();
+
+			}
+		}
 }
 
 void Agent::addToTimeOpenList(Node n){
