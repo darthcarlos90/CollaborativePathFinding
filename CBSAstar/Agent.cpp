@@ -50,6 +50,7 @@ void Agent::ConstraintAstar(Location start, Location finish, int starting_time, 
 		//let p be the best node in the open list
 		P = spatial_openList[index_lower_spatial_openList];
 		UpdateSpatialOpenList();
+		//Some changes
 
 		// If P is a valid movement, it will be processed, otherwise, it will be discarded
 		if (validMovement(P.getLocation(), (P.getDepth() - 1) + starting_time, constraints)){
@@ -1096,6 +1097,11 @@ void Agent::addToSpatialOpenList(Node n){
 			spatial_closedList[index] = n;
 		}
 	}
+}
+
+void Agent::addToTimedSpatialOpenList(Node n){
+	// TODO: Finish coding this so that the constraint astar can add repeated elements
+	//copy paste the method below, and change to spatial open and closed list
 }
 
 void Agent::addToTimeOpenList(Node n){

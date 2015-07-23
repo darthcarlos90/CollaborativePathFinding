@@ -164,6 +164,7 @@ private:
 	void reserveRoute(int starting_time); // To be used in the Silver's Astar
 	void reserveRouteFromIndex(unsigned int index);
 	void addToSpatialOpenList(Node n);
+	void addToTimedSpatialOpenList(Node n);
 	void addToTimeOpenList(Node n);
 	void clearSpatialLists(bool clearSpatialRoute);
 	void clearTimeLists(bool clearTimeRoute);

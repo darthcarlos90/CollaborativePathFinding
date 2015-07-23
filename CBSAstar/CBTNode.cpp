@@ -59,13 +59,18 @@ void CBTNode::ExpandNode(){
 	}
 
 	for (unsigned int i = 0; i < conflict.users.size(); i++){
-		Constraint cnst(conflict.users[i], conflict.v, conflict.times[i]);
-		CBTNode* child = new CBTNode(constraints, agents, paths);
-		bool dest_conf = conflict.destination_conflict;
-		child->addConstraint(cnst);
-		child->RecalculateRoutesOnConstraints(dest_conf, conflict.users[i]);
-		child->calculateCost();
-		children.push_back(child);
+		if (conflict.times[i] != 0){
+			Constraint cnst(conflict.users[i], conflict.locations[i], conflict.times[i]);
+			CBTNode* child = new CBTNode(constraints, agents, paths);
+			bool dest_conf = conflict.destination_conflict;
+			child->addConstraint(cnst);
+			child->RecalculateRoutesOnConstraints(dest_conf, conflict.users[i]);
+			child->calculateCost();
+			children.push_back(child);
+		}
+		else {
+			cout << "We have a constraint at a time 0." << endl;
+		}
 	}
 }
 
@@ -93,19 +98,32 @@ void CBTNode::validatePaths(){
 }
 
 void CBTNode::CreateConflict(unsigned int time_ocurrence, Location location, vector<int> users, bool dest_con){
-	conflict.v = location;
-	for (unsigned int i = 0; i < users.size(); i++)
+	for (unsigned int i = 0; i < users.size(); i++){
 		conflict.times.push_back(time_ocurrence);
-	conflict.times.push_back(time_ocurrence);
+		conflict.locations.push_back(location);
+	}
 	conflict.users = users;
 	conflict.destination_conflict = dest_con;
 	conflict.empty = false;
 }
 
-void CBTNode::CreateSpecialConflict(vector<unsigned int> times, Location location, vector<int> users){
-	conflict.v = location;
-	conflict.times = times;
-	conflict.users = users;
+void CBTNode::CreateSpecialConflict(unsigned int time, vector<Location> locations, vector<int> users){
+	
+	for (unsigned int i = 0; i < users.size(); i++){
+		// Add twice every user
+		conflict.users.push_back(users[i]);
+		conflict.users.push_back(users[i]);
+		//Add the corresponding times
+		conflict.times.push_back(time);
+		conflict.times.push_back(time + 1);
+	}
+
+	// Add the locations in the correct order
+	conflict.locations.push_back(locations[0]);
+	conflict.locations.push_back(locations[1]);
+	conflict.locations.push_back(locations[1]);
+	conflict.locations.push_back(locations[0]);	
+
 	conflict.empty = false;
 }
 
@@ -123,11 +141,11 @@ bool CBTNode::findConstraintsConflicts(unsigned int t){
 						users.push_back(toCompareId);
 						users.push_back(i);
 						//Se how much more agents are invovled in this conflict
-						for (unsigned int j = i + 1; j < paths.size(); j++){
+						/*for (unsigned int j = i + 1; j < paths.size(); j++){
 							if (toCompare == paths[j][t].getLocation())
 								users.push_back(j);
 								
-						}
+						}*/
 
 						// create the conflict with the information
 						CreateConflict(t, toCompare, users, false);
@@ -152,19 +170,18 @@ bool CBTNode::findConstraintsConflicts(unsigned int t){
 							if (paths[toCompareId][t + 1] == paths[i][t]){
 								// We have another type of conflict, an invalid movement!
 								/*
-									Little hack: Since when deploying the expansion of nodes, the
-									algorithm dictates that the leftmost node must be selected in the
-									case when both nodes have the same value. This leads to a infinite
-									loop sort of thing. So, to make things work, Im gonna change the
-									order of the elements added to the list, so the best option is selected.
+									On this kind of conflict there will be 4 nodes created:
+									- One where agent 1 can't occupy the node at t
+									- One for t + 1
+									- And the same for the other agent
 								*/
 								vector<int> users;
-								users.push_back(i);
 								users.push_back(toCompareId);
-								vector<unsigned int> times;
-								times.push_back(t + 1);
-								times.push_back(t);
-								CreateSpecialConflict(times, toCompare, users);
+								users.push_back(i);
+								vector<Location> locations;
+								locations.push_back(toCompare);
+								locations.push_back(paths[i][t].getLocation());
+								CreateSpecialConflict(t, locations, users);
 								foundConflict = true;
 								break;
 							}
