@@ -181,7 +181,7 @@ private:
 	*/
 	Node EscapeAstar(Location start); // The time at which a set of adjacent elements will be found
 	
-	void ConstraintAstar(Location start, Location finish, int starting_time, vector<Constraint> constraints);
+	bool ConstraintAstar(Location start, Location finish, int starting_time, vector<Constraint> constraints);
 	
 	bool validMovement(Location location, int time, vector<Constraint> constraints);
 	

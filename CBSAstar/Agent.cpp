@@ -26,7 +26,7 @@ Agent::~Agent(void){
 }
 
 
-void Agent::ConstraintAstar(Location start, Location finish, int starting_time, vector<Constraint> constraints){
+bool Agent::ConstraintAstar(Location start, Location finish, int starting_time, vector<Constraint> constraints){
 	// Since start is at time starting_time - 1, get nodes for starting_time
 	Node A(0, start);
 	bool pathFound = false;
@@ -87,6 +87,7 @@ void Agent::ConstraintAstar(Location start, Location finish, int starting_time, 
 		inverse_route[i].clearParent(); // To save memory
 		spatial_route.push_back(inverse_route[i]);// Save it on the spatial_route
 	}
+	return pathFound;
 }
 
 
@@ -406,8 +407,7 @@ void Agent::TimeSpaceAstarHelper(Location start, Location finish, int time){
 				// Get the adjacents of the last node
 				vector<Node> around = getTimedAdjacents(partial_path_nodes[i], 
 					partial_path_nodes[i].getDepth() + 1, finish); // get the adjacents
-				// Sort it to get the best option
-				std::sort(around.begin(), around.end()); //sort so the first element is the smaller
+				
 				clearSpatialLists(true);
 				// This option is our terminal node, calculate route from terminal node to end
 				executeSpatialAstar(around[0].getLocation(), destination.getLocation());
@@ -498,6 +498,9 @@ vector<Node> Agent::getAdjacents(Node element, Location ending){
 		result[i].calculateF();
 	}
 
+	// Sorting must be done here
+	std::sort(result.begin(), result.end());
+
 	return result;
 }
 
@@ -539,6 +542,9 @@ vector<Node> Agent::getAdjacentsonConstraints(Node element, Location ending, vec
 		}
 	}
 
+	// Sorting must be done here
+	std::sort(result.begin(), result.end());
+
 	return result;
 
 }
@@ -556,6 +562,9 @@ vector<Node> Agent::getAdjacentsWithoutParents(Node element){
 		result[i].calculateF();
 		result[i].clearParent();
 	}
+
+	// Sorting must be done here
+	std::sort(result.begin(), result.end());
 
 	return result;
 
@@ -598,6 +607,9 @@ std::vector<Node> Agent::getTimedAdjacents(Node element, int res_time, Location 
 		}
 	}
 
+	// Sorting must be done here
+	std::sort(result.begin(), result.end());
+
 	return result;
 }
 
@@ -625,6 +637,9 @@ vector<Node> Agent::getTimedAdjacentsWithoutParents(Node location, int time){
 		result[i].calculateF();
 		result[i].clearParent();
 	}
+
+	// Sorting must be done here
+	std::sort(result.begin(), result.end());
 
 	return result;
 }
@@ -756,10 +771,22 @@ void Agent::ModifyRouteOnConstraints(vector<Constraint> constraints, bool dest_c
 			if(replan) { // otherwise recalculate path
 				clearSpatialLists(true);
 				// If the movement is invalid, we need to replan the path
-				ConstraintAstar(time_route[i - 1].getLocation(), destination.getLocation(), i, constraints);
+				// If the constraints wont allow to plan at this timespan, go back one 
+				while (!ConstraintAstar(time_route[i - 1].getLocation(), destination.getLocation(), i, constraints)){
+					i--;
+					if (i == 0){
+						break;
+						// error!
+					}
+				}
 
 				 //After a recalculation is done, add the new steps to the path
+				int difference = time_route[time_route.size() - 1].getG();
 				for (unsigned int i = 0; i < spatial_route.size(); i++){
+					// Update the correct G value
+					spatial_route[i].setG(spatial_route[i].getG() + difference);
+					// Update the F value
+					spatial_route[i].calculateF();
 					temp_path.push_back(spatial_route[i]);
 				}
 			}
@@ -986,8 +1013,6 @@ Node Agent::GetSimpleEscapeNode(Location start){
 	// Get the adjacents	
 	vector<Node> adjacents = getAdjacents(A, destination.getLocation());
 	
-	// Sort the adjacents
-	std::sort(adjacents.begin(), adjacents.end());
 	
 	/*
 		Here, we get the biggest element of the list. Why the biggest?
@@ -1255,8 +1280,7 @@ Node Agent::EscapeAstar(Location start){
 
 
 		vector<Node> adjacents = getAdjacentsWithoutParents(P);
-		// Sort the adjacents to the cheapest one
-		std::sort(adjacents.begin(), adjacents.end());
+		
 
 		for (unsigned int i = 0; i < adjacents.size(); i++){
 			if (!map->isReserved(adjacents[i], starting_time, id)){ // If we found an empty element

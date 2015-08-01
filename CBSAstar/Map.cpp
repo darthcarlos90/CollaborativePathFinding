@@ -115,8 +115,6 @@ vector<Node> Map::adjacentHelper(Location element){
 		}
 	}*/
 
-	std::sort(result.begin(), result.end());
-
 	return result;
 
 }
