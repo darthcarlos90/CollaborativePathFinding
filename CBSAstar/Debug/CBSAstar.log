@@ -1,38 +1,24 @@
-﻿Build started 01/08/2015 10:30:52 p. m..
+﻿Build started 02/08/2015 07:38:18 p. m..
      1>Project "C:\Users\Carlos\Dropbox\Projects\Dissertation\ExampleCode\Git\CBSAstar\CBSAstar.vcxproj" on node 2 (Build target(s)).
      1>ClCompile:
-         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /sdl /Od /Oy- /D WIN32 /D _DEBUG /D _CONSOLE /D _LIB /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt Agent.cpp CBTNode.cpp ConstraintTree.cpp Map.cpp
-         Map.cpp
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /sdl /Od /Oy- /D WIN32 /D _DEBUG /D _CONSOLE /D _LIB /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt Agent.cpp
          Agent.cpp
-     1>c:\users\carlos\dropbox\projects\dissertation\examplecode\git\cbsastar\agent.cpp(29): error C2039: 'ConstraintAstar' : is not a member of 'Agent'
-                 c:\users\carlos\dropbox\projects\dissertation\examplecode\git\cbsastar\agent.h(7) : see declaration of 'Agent'
-     1>c:\users\carlos\dropbox\projects\dissertation\examplecode\git\cbsastar\agent.cpp(34): error C3861: 'getAdjacents': identifier not found
-     1>c:\users\carlos\dropbox\projects\dissertation\examplecode\git\cbsastar\agent.cpp(38): error C3861: 'addToTimedSpatialOpenList': identifier not found
-     1>c:\users\carlos\dropbox\projects\dissertation\examplecode\git\cbsastar\agent.cpp(47): error C2065: 'spatial_openList' : undeclared identifier
-     1>c:\users\carlos\dropbox\projects\dissertation\examplecode\git\cbsastar\agent.cpp(47): error C2228: left of '.size' must have class/struct/union
-                 type is 'unknown-type'
-     1>c:\users\carlos\dropbox\projects\dissertation\examplecode\git\cbsastar\agent.cpp(51): error C2065: 'spatial_openList' : undeclared identifier
-     1>c:\users\carlos\dropbox\projects\dissertation\examplecode\git\cbsastar\agent.cpp(51): error C2065: 'index_lower_spatial_openList' : undeclared identifier
-     1>c:\users\carlos\dropbox\projects\dissertation\examplecode\git\cbsastar\agent.cpp(52): error C3861: 'UpdateSpatialOpenList': identifier not found
-     1>c:\users\carlos\dropbox\projects\dissertation\examplecode\git\cbsastar\agent.cpp(57): error C3861: 'validMovement': identifier not found
-     1>c:\users\carlos\dropbox\projects\dissertation\examplecode\git\cbsastar\agent.cpp(58): error C2065: 'spatial_closedList' : undeclared identifier
-     1>c:\users\carlos\dropbox\projects\dissertation\examplecode\git\cbsastar\agent.cpp(58): error C2228: left of '.push_back' must have class/struct/union
-                 type is 'unknown-type'
-     1>c:\users\carlos\dropbox\projects\dissertation\examplecode\git\cbsastar\agent.cpp(66): error C3861: 'getAdjacents': identifier not found
-     1>c:\users\carlos\dropbox\projects\dissertation\examplecode\git\cbsastar\agent.cpp(68): error C3861: 'addToTimedSpatialOpenList': identifier not found
-     1>c:\users\carlos\dropbox\projects\dissertation\examplecode\git\cbsastar\agent.cpp(88): error C2065: 'spatial_route' : undeclared identifier
-     1>c:\users\carlos\dropbox\projects\dissertation\examplecode\git\cbsastar\agent.cpp(88): error C2228: left of '.push_back' must have class/struct/union
-                 type is 'unknown-type'
-         Generating Code...
-         Compiling...
-         CBTNode.cpp
-     1>c:\users\carlos\dropbox\projects\dissertation\examplecode\git\cbsastar\cbtnode.cpp(293): warning C4018: '<' : signed/unsigned mismatch
-     1>c:\users\carlos\dropbox\projects\dissertation\examplecode\git\cbsastar\cbtnode.cpp(294): warning C4018: '<' : signed/unsigned mismatch
-         Generating Code...
-         Skipping... (no relevant changes detected)
-         ConstraintTree.cpp
-     1>Done Building Project "C:\Users\Carlos\Dropbox\Projects\Dissertation\ExampleCode\Git\CBSAstar\CBSAstar.vcxproj" (Build target(s)) -- FAILED.
+     1>cl : Command line warning D9028: minimal rebuild failure, reverting to normal build
+       Link:
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\Carlos\Dropbox\Projects\Dissertation\ExampleCode\Git\Debug\CBSAstar.exe" /INCREMENTAL /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:\Users\Carlos\Dropbox\Projects\Dissertation\ExampleCode\Git\Debug\CBSAstar.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Users\Carlos\Dropbox\Projects\Dissertation\ExampleCode\Git\Debug\CBSAstar.lib" /MACHINE:X86 Debug\CBTNode.obj
+         Debug\ConstraintTree.obj
+         Debug\FileManager.obj
+         Debug\Location.obj
+         Debug\main.obj
+         Debug\Map.obj
+         Debug\MAPF.obj
+         Debug\Menu.obj
+         Debug\Node.obj
+         Debug\ReservationTable.obj
+         Debug\Agent.obj
+         CBSAstar.vcxproj -> C:\Users\Carlos\Dropbox\Projects\Dissertation\ExampleCode\Git\Debug\CBSAstar.exe
+     1>Done Building Project "C:\Users\Carlos\Dropbox\Projects\Dissertation\ExampleCode\Git\CBSAstar\CBSAstar.vcxproj" (Build target(s)).
 
-Build FAILED.
+Build succeeded.
 
-Time Elapsed 00:00:15.13
+Time Elapsed 00:00:07.27

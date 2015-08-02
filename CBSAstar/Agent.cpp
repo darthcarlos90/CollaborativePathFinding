@@ -774,6 +774,8 @@ void Agent::ModifyRouteOnConstraints(vector<Constraint> constraints, bool dest_c
 				// If the constraints wont allow to plan at this timespan, go back one 
 				while (!ConstraintAstar(time_route[i - 1].getLocation(), destination.getLocation(), i, constraints)){
 					i--;
+					temp_path.pop_back();
+					clearSpatialLists(true); // to clean (again) the lists
 					if (i == 0){
 						break;
 						// error!
@@ -781,7 +783,7 @@ void Agent::ModifyRouteOnConstraints(vector<Constraint> constraints, bool dest_c
 				}
 
 				 //After a recalculation is done, add the new steps to the path
-				int difference = time_route[time_route.size() - 1].getG();
+				int difference = time_route[i - 1].getG();
 				for (unsigned int i = 0; i < spatial_route.size(); i++){
 					// Update the correct G value
 					spatial_route[i].setG(spatial_route[i].getG() + difference);
