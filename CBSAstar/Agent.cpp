@@ -61,8 +61,8 @@ bool Agent::ConstraintAstar(Location start, Location finish, int starting_time, 
 			if (P.getLocation() == finish){
 				if (!FindSpecialCaseCBS(finish, timespan, constraints)){
 					pathFound = true;
-				}
-				break;
+					break;
+				}	
 			}
 
 			vector<Node> adjacents = getAdjacents(P, finish);
@@ -73,22 +73,27 @@ bool Agent::ConstraintAstar(Location start, Location finish, int starting_time, 
 		
 	}
 
-	vector<Node> inverse_route;
-	//Once the path has been found, retrace your steps
-	if (P.hasParent()){
-		while (P.hasParent()){
-			inverse_route.push_back(P);
-			P = P.getParent();
+	// If the path was found
+	if (pathFound){
+		vector<Node> inverse_route;
+		//Once the path has been found, retrace your steps
+		if (P.hasParent()){
+			while (P.hasParent()){
+				inverse_route.push_back(P);
+				P = P.getParent();
+			}
 		}
-	}
-	else inverse_route.push_back(P); //This in case the next node is the answer
+		else inverse_route.push_back(P); //This in case the next node is the answer
 
-	//For some reason the route is backwards, lets but it on the corect order
-	for (int i = inverse_route.size() - 1; i >= 0; i--){
-		// Remove if something breaks
-		inverse_route[i].clearParent(); // To save memory
-		spatial_route.push_back(inverse_route[i]);// Save it on the spatial_route
+		//For some reason the route is backwards, lets but it on the corect order
+		for (int i = inverse_route.size() - 1; i >= 0; i--){
+			// Remove if something breaks
+			inverse_route[i].clearParent(); // To save memory
+			spatial_route.push_back(inverse_route[i]);// Save it on the spatial_route
+		}
+
 	}
+	
 	return pathFound;
 }
 
@@ -1439,7 +1444,6 @@ void Agent::UpdateIndexSmallerTime(){
 	Misunderstanding of CBS by me, SO SORRY :(
 */
 bool Agent::validMovement(Location location, int time, vector<Constraint> constraints){
-	bool result = true;
 	for (unsigned int i = 0; i < constraints.size(); i++){
 		if (constraints[i].t != 0){ // It is ridiculous to have a constraint on time 0 ...
 			if (constraints[i].id == id){
@@ -1452,7 +1456,7 @@ bool Agent::validMovement(Location location, int time, vector<Constraint> constr
 		}
 	}
 
-	return result;
+	return true;
 }
 
 void Agent::SanitizePath(){
@@ -1493,7 +1497,11 @@ bool Agent::FindSpecialCaseCBS(Location location, int t, vector<Constraint> cons
 		if (constraints[i].t == t + 1){
 			if (constraints[i].location == location){
 				if (constraints[i].id == id){
+					vector<Node> adjacents = getAdjacentsWithoutParents(Node(0, location));
 					result = true;
+					for (unsigned int i = 0; i < adjacents.size(); i++){
+						result = result && !validMovement(adjacents[i].getLocation(), t + 1, constraints);
+					}
 					break;
 				}
 			}
