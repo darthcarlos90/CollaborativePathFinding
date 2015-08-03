@@ -753,7 +753,7 @@ void Agent::ModifyRouteOnConstraints(vector<Constraint> constraints, bool dest_c
 			}
 
 			//else if (i == 0){
-			//	// If it is the first element
+			//	// If it is the first element+
 			//	// Repeat the first step so the agent waits for some other element to use the other cell
 			//	Node toAdd = time_route[0];
 			//	toAdd.setG(toAdd.getG() + 10);
