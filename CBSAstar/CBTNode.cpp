@@ -216,6 +216,8 @@ bool CBTNode::isAtList(int element, vector<int> list){
 
 void CBTNode::calculateCost(){
 	for (unsigned int i = 0; i < agents.size(); i++){
+		agents[i].SanitizePath();
+		agents[i].calculateSIC();
 		cost += agents[i].getSic();
 	}
 }

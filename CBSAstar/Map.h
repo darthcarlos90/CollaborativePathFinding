@@ -22,6 +22,7 @@ public:
 
 	//Another fix, this changes to public, and getAdjacents and get timed Adjacents go to unit
 	vector<Node> adjacentHelper(Location element);//Adjacent helper function that returns adjacents
+	int NumberAdjacents(Location element); // returns the number of adjacents of a location
 
 	
 	void reserve(int t, Node n, int id);

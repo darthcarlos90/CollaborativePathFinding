@@ -119,6 +119,34 @@ vector<Node> Map::adjacentHelper(Location element){
 
 }
 
+int Map::NumberAdjacents(Location element){
+	int result = 0;
+	int x = element.x;
+	int y = element.y;
+
+	if (y - 1 >= 0){
+		if (data->get_element(x, y - 1) != 1)
+			result++;
+	}
+
+	if (x - 1 >= 0){
+		if (data->get_element(x - 1, y) != 1)
+			result++;
+	}
+
+	if (x + 1 < data->get_x_size()){
+		if (data->get_element(x + 1, y) != 1)
+			result++;
+	}
+
+	if (y + 1 < data->get_y_size()){
+		if (data->get_element(x, y + 1) != 1)
+			result++;
+	}
+
+	return result;
+}
+
 
 void Map::setElement(int x, int y, int val){
 	data->set_element(x, y, val);

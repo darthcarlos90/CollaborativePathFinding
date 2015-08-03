@@ -728,7 +728,16 @@ void Agent::ModifyRouteOnConstraints(vector<Constraint> constraints, bool dest_c
 			}
 			// if
 			bool replan = false;
-			if (i > 0){ // If it isnt the first element
+			/*
+				If the conflict is over an element that has 2 adjacents, means that this element is on
+				a corridor, which means that waiting will not be a viable option, since sooner or latter
+				it will have to move. By making this if, we are forcing to replan when there is a conflict 
+				over a corridor element. This not only tries to eliminate certain bugs, but also makes the
+				CBS tree more efficient by creating less conflicts.
+			*/
+			if (map->NumberAdjacents(time_route[i].getLocation()) <= 2){
+				replan = true;
+			} else if (i > 0){ // If it isnt the first element
 				// If the past step is available to wait on this time
 				if (validMovement(time_route[i - 1].getLocation(), i, constraints)){
 
