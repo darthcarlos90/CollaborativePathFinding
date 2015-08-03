@@ -176,6 +176,25 @@ private:
 	void UpdateIndexSmallerTime();
 
 	/*
+		Helper function that allows us to find a special case:
+		If the Astar has found the destination, but there are constraints for this agent after it has found its destination, lets check:
+			- If those constraints are on the destination of this element
+			- AND if one of those constraints is at t + 1
+			- AND at that same timespace the adjacents of the destination are on constraints
+			- Means that this agent must not yet reach the destination, so it must move to some other place.
+		This special case is identified with this function.
+		You might be asking yourself, why t + 1? The answer is simple:
+		If you may recall on the method ModifyRouteOnConstraints, when the element is not able to wait on its last location due to a 
+		constraint, it replans its last steps. If it is unable to find a route given the constraints, it goes back one step, and tries to 
+		replan from there. But what happens if when we go back one step, we go to a step that is adjacent to the end. Well, on the next step
+		it is going to find the goal node AND, therefore, break. Whast happens next is that all timespans after it found its destination, 
+		this agent will be there even though it is not able to be there, leading us to an infinite tree expansion in CBS. If you find 
+		this difficult to understand, you can always contact me and I try my best to explain it better :)
+	*/
+	bool FindSpecialCaseCBS(Location location, int t, vector<Constraint> constraints);
+
+
+	/*
 		This method runs a normal Astar algorithm, and stops until an element out
 		of the critical zone is located, and returns that element.
 	*/

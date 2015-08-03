@@ -59,7 +59,9 @@ bool Agent::ConstraintAstar(Location start, Location finish, int starting_time, 
 
 
 			if (P.getLocation() == finish){
-				pathFound = true;
+				if (!FindSpecialCaseCBS(finish, timespan, constraints)){
+					pathFound = true;
+				}
 				break;
 			}
 
@@ -1483,4 +1485,20 @@ void Agent::resetElement(){
 int Agent::getManhattanBetweenNodes(){
 	return abs(startingPoint.getLocation().x - destination.getLocation().x) + 
 		abs(startingPoint.getLocation().y - destination.getLocation().y);
+}
+
+bool Agent::FindSpecialCaseCBS(Location location, int t, vector<Constraint> constraints){
+	bool result = false;
+	for (unsigned int i = 0; i < constraints.size(); i++){
+		if (constraints[i].t == t + 1){
+			if (constraints[i].location == location){
+				if (constraints[i].id == id){
+					result = true;
+					break;
+				}
+			}
+		}
+	}
+
+	return result;
 }
