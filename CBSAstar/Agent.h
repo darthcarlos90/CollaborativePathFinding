@@ -59,7 +59,7 @@ public:
 	
 	int getSic();
 
-	void ModifyRouteOnConstraints(vector<Constraint> constraints, bool dest_conf); // Modifies the rute based on the constraints given
+	void ModifyRouteOnConstraints(vector<Constraint> constraints, bool reroute_flag); // Modifies the rute based on the constraints given
 
 	std::vector<Node> getSpatialRoute() { return spatial_route; }
 	std::vector<Node> getPath() { return time_route; }

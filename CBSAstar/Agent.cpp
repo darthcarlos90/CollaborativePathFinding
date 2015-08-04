@@ -713,7 +713,7 @@ void Agent::ReroutePathUsingCBS(){
 	calculateSIC();
 }
 
-void Agent::ModifyRouteOnConstraints(vector<Constraint> constraints, bool dest_conf){
+void Agent::ModifyRouteOnConstraints(vector<Constraint> constraints, bool reroute_flag){
 	// Lets look for an invalid movement
 	for (unsigned int i = 0; i < time_route.size(); i++){
 		// check each step for an invalid movement
@@ -728,8 +728,9 @@ void Agent::ModifyRouteOnConstraints(vector<Constraint> constraints, bool dest_c
 			}
 			// if
 			bool replan = false;
-			
-			if (i > 0){ // If it isnt the first element
+			if (reroute_flag){
+				replan = true;
+			} else if (i > 0){ // If it isnt the first element
 				// If the past step is available to wait on this time
 				if (validMovement(time_route[i - 1].getLocation(), i, constraints)){
 
@@ -1500,9 +1501,10 @@ bool Agent::FindSpecialCaseCBS(Location location, int t, vector<Constraint> cons
 				if (constraints[i].id == id){
 					vector<Node> adjacents = getAdjacentsWithoutParents(Node(0, location));
 					result = true;
-					for (unsigned int i = 0; i < adjacents.size(); i++){
+					// TODO: Uncomment if needed
+					/*for (unsigned int i = 0; i < adjacents.size(); i++){
 						result = result && !validMovement(adjacents[i].getLocation(), t + 1, constraints);
-					}
+					}*/
 					break;
 				}
 			}

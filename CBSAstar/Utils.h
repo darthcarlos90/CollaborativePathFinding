@@ -48,7 +48,7 @@ struct Conflict{
 	//Empty constructor, literally
 	Conflict(){
 		empty = true;
-		destination_conflict = false;
+		replan_flag = false;
 	}
 
 	void addUser(int id){
@@ -59,8 +59,8 @@ struct Conflict{
 	std::vector<Location> locations; // Fix for a multi location conflict
 	std::vector<unsigned int> times;
 	bool empty;
-	// TODO: Eliminate the boolean destination_conflict is unused
-	bool destination_conflict;
+	
+	bool replan_flag;
 };
 
 /*

@@ -62,9 +62,8 @@ void CBTNode::ExpandNode(){
 		if (conflict.times[i] != 0){
 			Constraint cnst(conflict.users[i], conflict.locations[i], conflict.times[i]);
 			CBTNode* child = new CBTNode(constraints, agents, paths);
-			bool dest_conf = conflict.destination_conflict;
 			child->addConstraint(cnst);
-			child->RecalculateRoutesOnConstraints(dest_conf, conflict.users[i]);
+			child->RecalculateRoutesOnConstraints(conflict.users[i], conflict.replan_flag);
 			child->calculateCost();
 			children.push_back(child);
 		}
@@ -97,13 +96,13 @@ void CBTNode::validatePaths(){
 	}
 }
 
-void CBTNode::CreateConflict(unsigned int time_ocurrence, Location location, vector<int> users, bool dest_con){
+void CBTNode::CreateConflict(unsigned int time_ocurrence, Location location, vector<int> users){
 	for (unsigned int i = 0; i < users.size(); i++){
 		conflict.times.push_back(time_ocurrence);
 		conflict.locations.push_back(location);
 	}
 	conflict.users = users;
-	conflict.destination_conflict = dest_con;
+	conflict.replan_flag = false;
 	conflict.empty = false;
 }
 
@@ -123,7 +122,7 @@ void CBTNode::CreateSpecialConflict(unsigned int time, vector<Location> location
 	conflict.locations.push_back(locations[1]);
 	conflict.locations.push_back(locations[1]);
 	conflict.locations.push_back(locations[0]);	
-
+	conflict.replan_flag = true;
 	conflict.empty = false;
 }
 
@@ -148,7 +147,7 @@ bool CBTNode::findConstraintsConflicts(unsigned int t){
 						}*/
 
 						// create the conflict with the information
-						CreateConflict(t, toCompare, users, false);
+						CreateConflict(t, toCompare, users);
 						// flag to break the search
 						foundConflict = true;
 						break;
@@ -234,8 +233,8 @@ int CBTNode::addAgent(Agent a){
 	return a.getId();
 }
 
-void CBTNode::RecalculateRoutesOnConstraints(bool dest_conf, int agent_id){
-	agents[agent_id].ModifyRouteOnConstraints(constraints, dest_conf);// Update the paths on the agent
+void CBTNode::RecalculateRoutesOnConstraints(int agent_id, bool replan_flag){
+	agents[agent_id].ModifyRouteOnConstraints(constraints, replan_flag);// Update the paths on the agent
 	paths[agent_id] = agents[agent_id].getPath(); // Let the node know the new paths
 	agents[agent_id].calculateSIC();
 }
