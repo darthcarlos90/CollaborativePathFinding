@@ -63,6 +63,8 @@ struct Conflict{
 	bool replan_flag;
 };
 
+
+
 /*
 	This struct represents 2 or more conflicted entities, used for
 	the detection of special conflicts that Silver's algorithm is unable to solve.

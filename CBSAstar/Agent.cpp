@@ -49,7 +49,7 @@ bool Agent::ConstraintAstar(Location start, Location finish, int starting_time, 
 
 		//let p be the best node in the open list
 		P = spatial_openList[index_lower_spatial_openList];
-		UpdateSpatialOpenList();
+		UpdateSpatialOpenListCAT();
 		//Some changes
 
 		// If P is a valid movement, it will be processed, otherwise, it will be discarded
@@ -330,7 +330,7 @@ void Agent::TimeSpaceAstarHelper(Location start, Location finish, int time){
 	bool emtyOpenList = false; // flag for partial path empty list
 	Node A(0, start); //Let A be the starting point
 
-	A.setG(10);
+	A.setG(1);
 	calculateRealHeuristic(&A, finish);
 	A.calculateF();
 	
@@ -517,7 +517,7 @@ vector<Node> Agent::getAdjacentsonConstraints(Node element, Location ending, vec
 
 	// Get the adjacents of the element
 	temp = map->adjacentHelper(element.getLocation());
-	element.setIndividualG(10);
+	element.setIndividualG(1);
 	element.calculateG();
 	temp.push_back(element); // So we can have the option to stay
 	for (unsigned int i = 0; i < temp.size(); i++){
@@ -605,7 +605,7 @@ std::vector<Node> Agent::getTimedAdjacents(Node element, int res_time, Location 
 	//If a reserved element was found, give the option of stay on your place (Only if it is available)
 	if (reservedElement){
 		if (!map->isReserved(element, res_time, id)){
-			Node repeatedNode(0, 10, element.getX(), element.getY());
+			Node repeatedNode(0, 1, element.getX(), element.getY());
 			calculateRealHeuristic(&repeatedNode, ending);
 			repeatedNode.setParent(element);
 			repeatedNode.calculateG();
@@ -713,7 +713,8 @@ void Agent::ReroutePathUsingCBS(){
 	calculateSIC();
 }
 
-void Agent::ModifyRouteOnConstraints(vector<Constraint> constraints, bool reroute_flag){
+void Agent::ModifyRouteOnConstraints(vector<Constraint> constraints, bool reroute_flag, vector<Constraint> CAT){
+	this->CAT = CAT;
 	// Lets look for an invalid movement
 	for (unsigned int i = 0; i < time_route.size(); i++){
 		// check each step for an invalid movement
@@ -736,7 +737,7 @@ void Agent::ModifyRouteOnConstraints(vector<Constraint> constraints, bool rerout
 
 					// Repeat the last step so the agent waits for some other element to use the other cell
 					Node toAdd = temp_path[temp_path.size() - 1];
-					toAdd.setG(toAdd.getG() + 10);
+					toAdd.setG(toAdd.getG() + 1);
 					toAdd.calculateF();
 					temp_path.push_back(toAdd);
 
@@ -745,7 +746,7 @@ void Agent::ModifyRouteOnConstraints(vector<Constraint> constraints, bool rerout
 					for (unsigned int index = i; index < time_route.size(); index++){
 						// Staying has a value of 10, so the values must be recalculated
 						Node toAdd = time_route[index];
-						toAdd.setG(toAdd.getG() + 10);
+						toAdd.setG(toAdd.getG() + 1);
 						toAdd.calculateF();
 						temp_path.push_back(toAdd);
 					}
@@ -758,7 +759,7 @@ void Agent::ModifyRouteOnConstraints(vector<Constraint> constraints, bool rerout
 			//	// If it is the first element+
 			//	// Repeat the first step so the agent waits for some other element to use the other cell
 			//	Node toAdd = time_route[0];
-			//	toAdd.setG(toAdd.getG() + 10);
+			//	toAdd.setG(toAdd.getG() + 1);
 			//	toAdd.calculateF();
 			//	temp_path.push_back(toAdd);
 
@@ -766,7 +767,7 @@ void Agent::ModifyRouteOnConstraints(vector<Constraint> constraints, bool rerout
 			//	//finish adding the elements of the route
 			//	for (unsigned int index = i; index < time_route.size(); index++){
 			//		// An extra step was added, so an extra cost should be added
-			//		time_route[index].setG(time_route[index].getG() + 10);
+			//		time_route[index].setG(time_route[index].getG() + 1);
 			//		time_route[index].calculateF();
 			//		temp_path.push_back(time_route[index]);
 			//	}
@@ -1411,6 +1412,11 @@ void Agent::UpdateTimeOpenList(){
 	UpdateIndexSmallerTime();
 }
 
+void Agent::UpdateSpatialOpenListCAT(){
+	spatial_openList.erase(spatial_openList.begin() + index_lower_spatial_openList);
+	UpdateIndexSmallerSpatialCAT();
+}
+
 
 
 void Agent::UpdateIndexSmallerSpatial(){
@@ -1435,6 +1441,28 @@ void Agent::UpdateIndexSmallerTime(){
 		}
 	}
 	
+}
+
+/*
+	Checks if there are two nodes with same F values. If so, it checks which node has less occurances on 
+	the CAT table. That node is selected as the lower node.
+*/
+void Agent::UpdateIndexSmallerSpatialCAT(){
+	index_lower_spatial_openList = 0;
+	if (spatial_openList.size() > 1){
+		for (unsigned int i = 1; i < spatial_openList.size(); i++){
+			if (spatial_openList[i] < spatial_openList[index_lower_spatial_openList]){
+				index_lower_spatial_openList = i;
+			}
+			else if (spatial_openList[i].getF() == spatial_openList[index_lower_spatial_openList].getF()){
+				int ocurrences_i = FindNumberOcurrancesCAT(spatial_openList[i].getLocation());
+				int ocurrences_actual = FindNumberOcurrancesCAT(spatial_openList[index_lower_spatial_openList].getLocation());
+				if (ocurrences_i < ocurrences_actual){
+					index_lower_spatial_openList = i;
+				}
+			}
+		}
+	}
 }
 
 /*
@@ -1509,6 +1537,15 @@ bool Agent::FindSpecialCaseCBS(Location location, int t, vector<Constraint> cons
 				}
 			}
 		}
+	}
+
+	return result;
+}
+
+int Agent::FindNumberOcurrancesCAT(Location location){
+	int result = 0;
+	for (unsigned int i = 0; i < CAT.size(); i++){
+		if (CAT[i].location == location) result++;
 	}
 
 	return result;

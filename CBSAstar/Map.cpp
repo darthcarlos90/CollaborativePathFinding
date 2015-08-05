@@ -69,7 +69,7 @@ vector<Node> Map::adjacentHelper(Location element){
 	if (y - 1 >= 0){
 		type = data->get_element(x, y - 1);
 		if (type != 1){
-			result.push_back(Node(type, 10, x, y - 1));
+			result.push_back(Node(type, 1, x, y - 1));
 		}
 	}
 
@@ -83,14 +83,14 @@ vector<Node> Map::adjacentHelper(Location element){
 	if (x - 1 >= 0){
 		type = data->get_element(x - 1, y);
 		if (type != 1){
-			result.push_back(Node(type, 10, x - 1, y));
+			result.push_back(Node(type, 1, x - 1, y));
 		}
 	}
 
 	if (x + 1 < data->get_x_size()){
 		type = data->get_element(x + 1, y);
 		if (type != 1){
-			result.push_back(Node(type, 10, x + 1, y));
+			result.push_back(Node(type, 1, x + 1, y));
 		}
 	}
 
@@ -104,7 +104,7 @@ vector<Node> Map::adjacentHelper(Location element){
 	if (y + 1 < data->get_y_size()){
 		type = data->get_element(x, y + 1);
 		if (type != 1){
-			result.push_back(Node(type, 10, x, y + 1));
+			result.push_back(Node(type, 1, x, y + 1));
 		}
 	}
 

@@ -91,6 +91,7 @@ private:
 	bool FindDeadLock();
 	void SolveDeadLock();
 
+	void UpdateCAT();
 	
 	// This method balances the paths of the agents so a proper check coudld be done
 	int BalancePaths();
@@ -110,6 +111,10 @@ private:
 	*/
 
 	vector<Constraint> constraints;
+	/*
+		The Constraint avoidance table described on the paper.
+	*/
+	vector<Constraint> CAT;
 	Conflict conflict;
 	
 

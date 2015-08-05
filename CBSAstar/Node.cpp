@@ -110,7 +110,7 @@ void Node::calculateManhattanHeuristic(Location destination){
 	}
 
 	h += (abs(finalX - finalY) * 10);*/
-	h = (finalX + finalY) * 10;
+	h = (finalX + finalY);
 }
 
 

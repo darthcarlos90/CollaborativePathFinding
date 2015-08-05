@@ -59,7 +59,7 @@ public:
 	
 	int getSic();
 
-	void ModifyRouteOnConstraints(vector<Constraint> constraints, bool reroute_flag); // Modifies the rute based on the constraints given
+	void ModifyRouteOnConstraints(vector<Constraint> constraints, bool reroute_flag, vector <Constraint> CAT); // Modifies the rute based on the constraints given
 
 	std::vector<Node> getSpatialRoute() { return spatial_route; }
 	std::vector<Node> getPath() { return time_route; }
@@ -175,6 +175,11 @@ private:
 	void UpdateIndexSmallerSpatial();
 	void UpdateIndexSmallerTime();
 
+	void UpdateSpatialOpenListCAT();
+	void UpdateIndexSmallerSpatialCAT();
+
+	int FindNumberOcurrancesCAT(Location location);
+
 	/*
 		Helper function that allows us to find a special case:
 		If the Astar has found the destination, but there are constraints for this agent after it has found its destination, lets check:
@@ -236,4 +241,6 @@ private:
 	std::vector<Node> partial_path_nodes;
 
 	bool validSolution;
+
+	vector<Constraint> CAT;
 };

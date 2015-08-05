@@ -10,6 +10,7 @@ CBTNode::CBTNode(vector<Constraint> parent_constraints, vector<Agent> parents_ag
 	this->paths = parents_paths;
 	cost = 0;
 	goal = false;
+	UpdateCAT();
 }
 
 //Copy constructor
@@ -50,6 +51,8 @@ void CBTNode::CalculatePaths(){
 		//Get the path, and push it into the paths vector
 		paths.push_back(agents[i].getPath());
 	}
+
+	UpdateCAT();
 }
 
 void CBTNode::ExpandNode(){
@@ -214,7 +217,7 @@ bool CBTNode::isAtList(int element, vector<int> list){
 }
 
 void CBTNode::calculateCost(){
-	for (unsigned int i = 0; i < agents.size(); i++){
+	for (unsigned int i = 1; i < agents.size(); i++){
 		agents[i].SanitizePath();
 		paths[i] = agents[i].getPath();
 		agents[i].calculateSIC();
@@ -234,7 +237,7 @@ int CBTNode::addAgent(Agent a){
 }
 
 void CBTNode::RecalculateRoutesOnConstraints(int agent_id, bool replan_flag){
-	agents[agent_id].ModifyRouteOnConstraints(constraints, replan_flag);// Update the paths on the agent
+	agents[agent_id].ModifyRouteOnConstraints(constraints, replan_flag, CAT);// Update the paths on the agent
 	paths[agent_id] = agents[agent_id].getPath(); // Let the node know the new paths
 	agents[agent_id].calculateSIC();
 }
@@ -508,5 +511,13 @@ void CBTNode::SanitizePaths(){
 		agents[i].calculateSIC();
 		// save the path
 		paths[i] = agents[i].getPath();
+	}
+}
+
+void CBTNode::UpdateCAT(){
+	for (unsigned int i = 0; i < paths.size(); i++){
+		for (unsigned int j = 1; j < paths[i].size(); j++){
+			CAT.push_back(Constraint(agents[i].getId(), paths[i][j].getLocation(), j));
+		}
 	}
 }
