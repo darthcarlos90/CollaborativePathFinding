@@ -67,7 +67,7 @@ bool Agent::ConstraintAstar(Location start, Location finish, int starting_time, 
 
 			vector<Node> adjacents = getAdjacents(P, finish);
 			for (unsigned int i = 0; i < adjacents.size(); i++){
-				addToTimedSpatialOpenList(adjacents[i]);
+				AddToTimedSpatialOpenListCAT(adjacents[i]);
 			}
 		}
 		
@@ -654,7 +654,7 @@ vector<Node> Agent::getTimedAdjacentsWithoutParents(Node location, int time){
 
 void Agent::calculateSIC(){
 	if (time_route.size() > 0){
-		for (unsigned int i = 0; i < time_route.size(); i++){
+		for (unsigned int i = 1; i < time_route.size(); i++){
 			SIC += time_route[i].getF();
 		}
 	}

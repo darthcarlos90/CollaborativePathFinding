@@ -88,6 +88,7 @@ private:
 	bool LocationAtNodeList(Location location, vector<Node> list, int* index = NULL);
 	void CreateConflict(unsigned int time_ocurrence, Location location, vector<int> users);
 	void CreateSpecialConflict(unsigned int time, vector<Location> locations, vector<int> users);
+	void CreateDestinationConflict(unsigned int time, Location location, int user);
 	bool FindDeadLock();
 	void SolveDeadLock();
 
@@ -97,6 +98,9 @@ private:
 	int BalancePaths();
 	// The oposite of the above
 	void SanitizePaths();
+
+	void countPossibleConflicts();
+	
 
 
 	//Properties

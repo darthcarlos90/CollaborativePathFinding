@@ -99,24 +99,47 @@ void CBTNode::validatePaths(){
 	}
 }
 
-void CBTNode::CreateConflict(unsigned int time_ocurrence, Location location, vector<int> users){
-	conflict.empty = false;
-	conflict.replan_flag = false;
-	for (unsigned int i = 0; i < users.size(); i++){
-		conflict.times.push_back(time_ocurrence);
-		conflict.locations.push_back(location);
-		/*
-			If either location is a destination for either of the elements,
-			waiting will not be an option  for the other element. So lets 
-			both recalculate their paths, and see which is better. If the 
-			finished element moving, or the other moving around.
-		*/
-		if (location == agents[users[i]].getDestinationLocation()){
-			conflict.replan_flag = true;
+/*
+	Checks how many possible conflicts there are in the designated child, and balances it through the cost
+*/
+void CBTNode::countPossibleConflicts(){
+	unsigned int largest_size = BalancePaths();
+	int count = 0;
+	for (unsigned int i = 0; i < largest_size; i++){
+		if (findConstraintsConflicts(i)){
+			count++;
 		}
 	}
+
+	conflict.clear();
+	//Clear the conflict!!!!
+
+	cost += count * 10;
+	//SanitizePaths();
+}
+
+void CBTNode::CreateConflict(unsigned int time_ocurrence, Location location, vector<int> users){
+	bool special = false;
+	/*for (unsigned int i = 0; i < users.size(); i++){
+		if (agents[users[i]].getDestinationLocation() == location){
+			CreateDestinationConflict(time_ocurrence, location, users[i]);
+			special = true;
+			break;
+		}
+	}*/
 	
-	conflict.users = users;
+	if (!special){
+		conflict.empty = false;
+		conflict.replan_flag = false;
+		for (unsigned int i = 0; i < users.size(); i++){
+			conflict.times.push_back(time_ocurrence);
+			conflict.locations.push_back(location);
+			//if (agents[users[i]].getDestinationLocation() == location) conflict.replan_flag = true;
+		}
+	
+		conflict.users = users;
+	}
+	
 	
 	
 }
@@ -138,6 +161,14 @@ void CBTNode::CreateSpecialConflict(unsigned int time, vector<Location> location
 	conflict.locations.push_back(locations[1]);
 	conflict.locations.push_back(locations[0]);	
 	conflict.replan_flag = true;
+	conflict.empty = false;
+}
+
+void CBTNode::CreateDestinationConflict(unsigned int time, Location location, int user){
+	conflict.users.push_back(user);
+	conflict.times.push_back(time);
+	conflict.locations.push_back(location);
+	conflict.replan_flag = false;
 	conflict.empty = false;
 }
 
@@ -223,10 +254,12 @@ bool CBTNode::isAtList(int element, vector<int> list){
 }
 
 void CBTNode::calculateCost(){
-	SanitizePaths();
-	for (unsigned int i = 1; i < agents.size(); i++){
+	BalancePaths();
+	for (unsigned int i = 0; i < agents.size(); i++){
 		cost += agents[i].getSic();
 	}
+
+	//countPossibleConflicts();
 }
 
 // Adds and returns the id of the element that was recently added

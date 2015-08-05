@@ -51,8 +51,12 @@ struct Conflict{
 		replan_flag = false;
 	}
 
-	void addUser(int id){
-		users.push_back(id);
+	void clear(){
+		users.clear();
+		locations.clear();
+		times.clear();
+		empty = true;
+		replan_flag = false;
 	}
 
 	std::vector<int> users;
