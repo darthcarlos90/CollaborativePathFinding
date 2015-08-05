@@ -100,13 +100,25 @@ void CBTNode::validatePaths(){
 }
 
 void CBTNode::CreateConflict(unsigned int time_ocurrence, Location location, vector<int> users){
+	conflict.empty = false;
+	conflict.replan_flag = false;
 	for (unsigned int i = 0; i < users.size(); i++){
 		conflict.times.push_back(time_ocurrence);
 		conflict.locations.push_back(location);
+		/*
+			If either location is a destination for either of the elements,
+			waiting will not be an option  for the other element. So lets 
+			both recalculate their paths, and see which is better. If the 
+			finished element moving, or the other moving around.
+		*/
+		if (location == agents[users[i]].getDestinationLocation()){
+			conflict.replan_flag = true;
+		}
 	}
+	
 	conflict.users = users;
-	conflict.replan_flag = false;
-	conflict.empty = false;
+	
+	
 }
 
 void CBTNode::CreateSpecialConflict(unsigned int time, vector<Location> locations, vector<int> users){
@@ -142,12 +154,6 @@ bool CBTNode::findConstraintsConflicts(unsigned int t){
 						vector<int> users;
 						users.push_back(toCompareId);
 						users.push_back(i);
-						//Se how much more agents are invovled in this conflict
-						/*for (unsigned int j = i + 1; j < paths.size(); j++){
-							if (toCompare == paths[j][t].getLocation())
-								users.push_back(j);
-								
-						}*/
 
 						// create the conflict with the information
 						CreateConflict(t, toCompare, users);
@@ -217,10 +223,8 @@ bool CBTNode::isAtList(int element, vector<int> list){
 }
 
 void CBTNode::calculateCost(){
+	SanitizePaths();
 	for (unsigned int i = 1; i < agents.size(); i++){
-		agents[i].SanitizePath();
-		paths[i] = agents[i].getPath();
-		agents[i].calculateSIC();
 		cost += agents[i].getSic();
 	}
 }
@@ -491,7 +495,7 @@ int CBTNode::BalancePaths(){
 				// Push to the back of the route the element of the last index
 				// First calculate the correct values in case of need
 				Node toAdd = agents[i].getPath()[agents[i].pathSize() - 1];
-				toAdd.setG(agents[i].getPath()[agents[i].pathSize() - 1].getG() + 10);
+				toAdd.setG(agents[i].getPath()[agents[i].pathSize() - 1].getG() + 1);
 				toAdd.calculateF();
 				agents[i].PushElementAtTheBackOfRoute(toAdd);
 			}

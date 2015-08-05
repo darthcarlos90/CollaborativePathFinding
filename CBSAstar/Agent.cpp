@@ -35,7 +35,7 @@ bool Agent::ConstraintAstar(Location start, Location finish, int starting_time, 
 
 	// Add them to the adjacent list
 	for (unsigned int i = 0; i < adjacents.size(); i++){
-		addToTimedSpatialOpenList(adjacents[i]);
+		AddToTimedSpatialOpenListCAT(adjacents[i]);
 	}
 	
 	// Start with those nodes
@@ -1157,6 +1157,23 @@ void Agent::addToTimedSpatialOpenList(Node n){
 
 			}
 		}
+}
+
+void Agent::AddToTimedSpatialOpenListCAT(Node n){
+	// if it isnt at the closed list
+	if (!FindNodeAtSpatialOpenList(n)){ // If it is not on the open list
+		spatial_openList.push_back(n); // Finally, add the element to the list
+	}
+	else {// if the element is already on the open list
+		int index = GetIndexOfElementAtSpatialOpenList(n.getLocation()); // get its index
+		// if the element on the list has a bigger value, then update the values
+		if (spatial_openList[index].getG() > n.getG()){
+			spatial_openList.erase(spatial_openList.begin() + index);
+			spatial_openList.push_back(n);
+		}
+	}
+
+	UpdateIndexSmallerSpatialCAT();
 }
 
 void Agent::addToTimeOpenList(Node n){

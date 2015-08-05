@@ -171,6 +171,8 @@ private:
 	
 	void UpdateSpatialOpenList();
 	void UpdateTimeOpenList();
+
+	void AddToTimedSpatialOpenListCAT(Node n);
 	
 	void UpdateIndexSmallerSpatial();
 	void UpdateIndexSmallerTime();
