@@ -148,6 +148,8 @@ public:
 	bool getPriority() { return priority; }
 
 
+
+
 private:
 	/*Helper functions*/
 	void TimeSpaceAstarHelper(Location start, Location finish, int time);

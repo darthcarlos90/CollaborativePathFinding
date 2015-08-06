@@ -80,6 +80,8 @@ public:
 	int getSwapCounter() { return swapcounter; }
 
 	int getMainActor() { return main_actor_id; }
+
+	bool isValidNode() { return validNode; }
 	
 
 	
@@ -129,6 +131,9 @@ private:
 	Conflicted deadlock; // Any deadlock detected will be stored here
 
 	bool goal;
+
+	// If this node has a valid solution, it must be set to true
+	bool validNode;
 
 	/*
 		This element will cout how many consecutive swaps have this node done so far.

@@ -788,24 +788,37 @@ void Agent::ModifyRouteOnConstraints(vector<Constraint> constraints, bool rerout
 					temp_path.pop_back();
 					clearSpatialLists(true); // to clean (again) the lists
 					if (i == 0){
-						cout << "smnthng!" << endl;
-						// error!
+						// Means that a solution couldnt be found, so this node must be descarted
+						// First, if this agent has priority, remove it
+						priority = false;
+						
+						// Now, we must tell that the path wasn't found so this node is not selected
+						validSolution = false;
+						
+
+
+						break;
 					}
 				}
 
 				 //After a recalculation is done, add the new steps to the path
-				int difference = time_route[i - 1].getG();
-				for (unsigned int i = 0; i < spatial_route.size(); i++){
-					// Update the correct G value
-					spatial_route[i].setG(spatial_route[i].getG() + difference);
-					// Update the F value
-					spatial_route[i].calculateF();
-					temp_path.push_back(spatial_route[i]);
+				if (validSolution){
+					int difference = 0;
+					if (i > 0) difference = time_route[i - 1].getG();
+					for (unsigned int i = 0; i < spatial_route.size(); i++){
+						// Update the correct G value
+						spatial_route[i].setG(spatial_route[i].getG() + difference);
+						// Update the F value
+						spatial_route[i].calculateF();
+						temp_path.push_back(spatial_route[i]);
+					}
 				}
+				
 			}
 
 			//replace the old route with the new one
 			time_route = temp_path;
+			
 		}
 	}
 				

@@ -13,6 +13,7 @@ CBTNode::CBTNode(vector<Constraint> parent_constraints, vector<Agent> parents_ag
 	UpdateCAT();
 	swapcounter = 0;
 	main_actor_id = 0;
+	validNode = true;
 }
 
 //Copy constructor
@@ -47,6 +48,17 @@ CBTNode* CBTNode::getSmallestChild(){
 		priorityAgentExist = priorityAgentExist || agents[i].getPriority();
 	}
 
+	for (unsigned int i = 0; i < children.size(); i++){
+		// If there are any invalid nodes, ignore priority
+		if (!children[i]->isValidNode()){
+			for (unsigned int i = 0; i < agents.size(); i++){
+				agents[i].setPriority(false); // deactivate priorities
+			}
+			priorityAgentExist = false;
+			break;
+		}
+	}
+
 	if (priorityAgentExist && swapcounter > 2 && children.size() == 4){
 		// First, find the first child node that has that actor as its main actor
 		for (unsigned int i = 0; i < children.size(); i++){
@@ -64,10 +76,20 @@ CBTNode* CBTNode::getSmallestChild(){
 		}
 	}
 	else {
-		for (unsigned int i = 1; i < children.size(); i++){
-			if (*children[i] < *children[index_smaller]){
+		// First, look for the first element that has a valid solution
+		for (unsigned int i = 0; i < children.size(); i++){
+			if (children[i]->isValidNode()){
 				index_smaller = i;
+				break;
 			}
+		}
+
+		// Now compare it against valid solutions with cost
+		for (unsigned int i = 0; i < children.size(); i++){
+				if ((*children[i] < *children[index_smaller]) && children[i]->isValidNode()){
+					index_smaller = i;
+				}
+			
 		}
 	}
 	
@@ -81,11 +103,12 @@ void CBTNode::CalculatePaths(){
 	for (unsigned int i = 0; i < agents.size(); i++){
 		//Calculate the paths of each of the agents, as if they where the only element on the grid
 		agents[i].calculateRoute();
-
+		validNode = validNode && agents[i].hasValidSolution();
 		//Get the path, and push it into the paths vector
 		paths.push_back(agents[i].getPath());
 	}
 
+	
 	UpdateCAT();
 }
 
@@ -169,18 +192,25 @@ void CBTNode::CreateConflict(unsigned int time_ocurrence, Location location, vec
 void CBTNode::CreateSpecialConflict(unsigned int time, vector<Location> locations, vector<int> users){
 	
 	for (unsigned int i = 0; i < users.size(); i++){
+		//Add the corresponding times
+		if (time != 0){
+			conflict.times.push_back(time);
+			conflict.users.push_back(users[i]);
+		}
+		
+		conflict.times.push_back(time + 1);
+		
+		
 		// Add twice every user
 		conflict.users.push_back(users[i]);
-		conflict.users.push_back(users[i]);
-		//Add the corresponding times
-		conflict.times.push_back(time);
-		conflict.times.push_back(time + 1);
+		
 	}
 
 	// Add the locations in the correct order
-	conflict.locations.push_back(locations[0]);
+
+	if(time != 0) conflict.locations.push_back(locations[0]);
 	conflict.locations.push_back(locations[1]);
-	conflict.locations.push_back(locations[1]);
+	if (time != 0) conflict.locations.push_back(locations[1]);
 	conflict.locations.push_back(locations[0]);	
 	conflict.replan_flag = true;
 	conflict.empty = false;
@@ -277,10 +307,18 @@ bool CBTNode::isAtList(int element, vector<int> list){
 }
 
 void CBTNode::calculateCost(){
-	BalancePaths();
 	for (unsigned int i = 0; i < agents.size(); i++){
-		cost += agents[i].getSic();
+		validNode = validNode && agents[i].hasValidSolution();
 	}
+	if (validNode){
+		BalancePaths();
+		for (unsigned int i = 0; i < agents.size(); i++){
+			cost += agents[i].getSic();
+			validNode = validNode && agents[i].hasValidSolution();
+		}
+	}
+
+	
 
 	//countPossibleConflicts();
 }
@@ -618,7 +656,7 @@ void CBTNode::setSwapCounter(int val){
 		}
 
 		// Once finished, we set the priority to that element
-		agents[indexBigger].setPriority(true);
+		if (validNode) agents[indexBigger].setPriority(true);
 
 		delete appearancesConstraintTable;
 		appearancesConstraintTable = NULL;
