@@ -144,6 +144,9 @@ public:
 	int getManhattanBetweenNodes();
 	bool hasValidSolution() { return validSolution; }
 
+	void setPriority(bool val) { priority = val; }
+	bool getPriority() { return priority; }
+
 
 private:
 	/*Helper functions*/
@@ -245,4 +248,6 @@ private:
 	bool validSolution;
 
 	vector<Constraint> CAT;
+
+	bool priority;// TODO: Wipe this if this doesn't work
 };

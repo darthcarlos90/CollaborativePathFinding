@@ -76,6 +76,10 @@ public:
 	// reuse that code
 	void FindSpecialCases();
 
+	void setSwapCounter(int val);
+	int getSwapCounter() { return swapcounter; }
+
+	int getMainActor() { return main_actor_id; }
 	
 
 	
@@ -125,5 +129,18 @@ private:
 	Conflicted deadlock; // Any deadlock detected will be stored here
 
 	bool goal;
+
+	/*
+		This element will cout how many consecutive swaps have this node done so far.
+		This will be helpful to detect a corrdidors.
+	*/
+	int swapcounter;
+
+	/*
+		The main actor term will be used to describe the agent whos path is being modified 
+		when expanding a node.
+	*/
+
+	int main_actor_id;
 	
 };

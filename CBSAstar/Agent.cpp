@@ -19,6 +19,7 @@ actualNode(location), startingPoint(location)
 	index_lower_spatial_openList = 0;
 	index_lower_time_openList = 0;
 	validSolution = false;
+	priority = false;
 }
 
 Agent::~Agent(void){

@@ -11,17 +11,21 @@ CBTNode::CBTNode(vector<Constraint> parent_constraints, vector<Agent> parents_ag
 	cost = 0;
 	goal = false;
 	UpdateCAT();
+	swapcounter = 0;
+	main_actor_id = 0;
 }
 
 //Copy constructor
 CBTNode::CBTNode(const CBTNode& n):
 children(n.children), cost(n.cost), agents(n.agents),
 paths(n.paths), constraints(n.constraints),
-conflict(n.conflict)
+conflict(n.conflict), swapcounter(n.swapcounter),
+main_actor_id(n.main_actor_id)
 {}
 
 CBTNode::~CBTNode(void){
 	//No need for a destructor for now
+	//TODO: Check if this is needed
 }
 
 bool CBTNode::operator < (const CBTNode& n){
@@ -33,12 +37,42 @@ bool CBTNode::operator >(const CBTNode& n){
 }
 
 CBTNode* CBTNode::getSmallestChild(){
+	bool priorityAgentExist = false;
 	int index_smaller = 0;
-	for (unsigned int i = 1; i < children.size(); i++){
-		if (*children[i] < *children[index_smaller]){
-			index_smaller = i;
+	int priorityId = -1;
+
+	// If there is one agent with priority, priorityAgentExists will be true
+	for (unsigned int i = 0; i < agents.size(); i++){
+		if (agents[i].getPriority()) priorityId = i;
+		priorityAgentExist = priorityAgentExist || agents[i].getPriority();
+	}
+
+	if (priorityAgentExist && swapcounter > 2 && children.size() == 4){
+		// First, find the first child node that has that actor as its main actor
+		for (unsigned int i = 0; i < children.size(); i++){
+			if (children[i]->getMainActor() == priorityId){
+				index_smaller = i;
+				break;
+			}
+		}
+
+		// Now, find the smaller amon the ones with the priority
+		for (unsigned int i = index_smaller + 1; i < children.size(); i++){
+			if (*children[i] < *children[index_smaller]){
+				index_smaller = i;
+			}
 		}
 	}
+	else {
+		for (unsigned int i = 1; i < children.size(); i++){
+			if (*children[i] < *children[index_smaller]){
+				index_smaller = i;
+			}
+		}
+	}
+	
+	
+	
 
 	return children[index_smaller];
 }
@@ -68,6 +102,7 @@ void CBTNode::ExpandNode(){
 			child->addConstraint(cnst);
 			child->RecalculateRoutesOnConstraints(conflict.users[i], conflict.replan_flag);
 			child->calculateCost();
+			child->setSwapCounter(swapcounter);
 			children.push_back(child);
 		}
 		else {
@@ -119,29 +154,16 @@ void CBTNode::countPossibleConflicts(){
 }
 
 void CBTNode::CreateConflict(unsigned int time_ocurrence, Location location, vector<int> users){
-	bool special = false;
-	/*for (unsigned int i = 0; i < users.size(); i++){
-		if (agents[users[i]].getDestinationLocation() == location){
-			CreateDestinationConflict(time_ocurrence, location, users[i]);
-			special = true;
-			break;
-		}
-	}*/
+	conflict.empty = false;
+	conflict.replan_flag = false;
 	
-	if (!special){
-		conflict.empty = false;
-		conflict.replan_flag = false;
-		for (unsigned int i = 0; i < users.size(); i++){
-			conflict.times.push_back(time_ocurrence);
-			conflict.locations.push_back(location);
-			//if (agents[users[i]].getDestinationLocation() == location) conflict.replan_flag = true;
-		}
-	
-		conflict.users = users;
+	for (unsigned int i = 0; i < users.size(); i++){
+		conflict.times.push_back(time_ocurrence);
+		conflict.locations.push_back(location);
 	}
-	
-	
-	
+
+	conflict.users = users;
+	swapcounter = 0; // reset the swap counter
 }
 
 void CBTNode::CreateSpecialConflict(unsigned int time, vector<Location> locations, vector<int> users){
@@ -162,6 +184,7 @@ void CBTNode::CreateSpecialConflict(unsigned int time, vector<Location> location
 	conflict.locations.push_back(locations[0]);	
 	conflict.replan_flag = true;
 	conflict.empty = false;
+	swapcounter++; // Increase the swap counter, since this is a swap
 }
 
 void CBTNode::CreateDestinationConflict(unsigned int time, Location location, int user){
@@ -294,6 +317,9 @@ void CBTNode::addConstraint(Constraint c){
 		//The list is empty, add the element
 		constraints.push_back(c);
 	}
+	
+	// The main actor id gotten from the new constraint
+	main_actor_id = c.id;
 }
 
 void CBTNode::UpdateAgentsPaths(){
@@ -556,5 +582,46 @@ void CBTNode::UpdateCAT(){
 		for (unsigned int j = 1; j < paths[i].size(); j++){
 			CAT.push_back(Constraint(agents[i].getId(), paths[i][j].getLocation(), j));
 		}
+	}
+}
+
+void CBTNode::setSwapCounter(int val){
+	swapcounter = val;
+	/*
+		If there are more than 2 consecutive swaps in the problem, it means
+		that we are trying to solve a corridor. So, when we are trying to solve a corridor,
+		the most optimal way of solving it is: one agent moves out of the way, the other
+		gets to its position, and then the other one goes back to solving its problem.
+		For this, we are going to set an agent with a priority. This priority will indicate
+		who gets to move out of the way, and who doesnt. (If priority = true, you move out of the way).
+		So when taking on decisions, you will always choose when one of the agents gets to move.
+	*/
+	if (swapcounter > 2){
+		// create an array to tll the agents appearances in constraint table
+		int *appearancesConstraintTable = new int[agents.size()];
+
+		// Set the appearances to 0
+		for (unsigned int i = 0; i < agents.size(); i++){
+			appearancesConstraintTable[i] = 0;
+		}
+
+		// Count the appareances
+		for (unsigned int i = 0; i < constraints.size(); i++){
+			appearancesConstraintTable[constraints[i].id]++;
+		}
+
+		int indexBigger = 0;
+		for (unsigned int i = 1; i < agents.size(); i++){
+			if (appearancesConstraintTable[indexBigger] < appearancesConstraintTable[i]){
+				indexBigger = i;
+			}
+		}
+
+		// Once finished, we set the priority to that element
+		agents[indexBigger].setPriority(true);
+
+		delete appearancesConstraintTable;
+		appearancesConstraintTable = NULL;
+
 	}
 }
