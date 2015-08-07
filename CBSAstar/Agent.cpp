@@ -654,6 +654,7 @@ vector<Node> Agent::getTimedAdjacentsWithoutParents(Node location, int time){
 
 
 void Agent::calculateSIC(){
+	SIC = 0; // Reset the SIC
 	if (time_route.size() > 0){
 		for (unsigned int i = 1; i < time_route.size(); i++){
 			SIC += time_route[i].getF();
@@ -662,7 +663,7 @@ void Agent::calculateSIC(){
 }
 
 int Agent::getSic(){
-	if (SIC == 0) calculateSIC();
+	calculateSIC();
 	return SIC;
 }
 

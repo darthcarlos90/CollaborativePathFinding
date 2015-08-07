@@ -10,7 +10,9 @@ CBTNode::CBTNode(vector<Constraint> parent_constraints, vector<Agent> parents_ag
 	this->paths = parents_paths;
 	cost = 0;
 	goal = false;
+	SanitizePaths();
 	UpdateCAT();
+	BalancePaths();
 	swapcounter = 0;
 	main_actor_id = 0;
 	validNode = true;
@@ -179,18 +181,54 @@ void CBTNode::countPossibleConflicts(){
 void CBTNode::CreateConflict(unsigned int time_ocurrence, Location location, vector<int> users){
 	conflict.empty = false;
 	conflict.replan_flag = false;
+
+	bool blockingConflict = false;
+	int blockingUser = -1;
 	
 	for (unsigned int i = 0; i < users.size(); i++){
 		conflict.times.push_back(time_ocurrence);
 		conflict.locations.push_back(location);
+		if (location == agents[users[i]].getDestinationLocation()){
+			if (agents[users[i]].debugNumberOfAdjacents()){
+				/*
+					If we have the case where the destination is blocking other elements, and this destination is on a 
+					tight place (that is why the adjacents is 2 or less), then this element is blocking other elements,
+					thus this element MUST MOVE.
+				*/
+				blockingConflict = true;
+				blockingUser = i;
+				break;
+			}
+		}
 	}
 
-	conflict.users = users;
+	if (blockingConflict){
+		conflict.times.clear();
+		conflict.locations.clear();
+		conflict.times.push_back(time_ocurrence);
+		conflict.locations.push_back(location);
+		conflict.users.push_back(users[blockingUser]);
+	}
+	else {
+		conflict.users = users;
+	}
+
+	
 	swapcounter = 0; // reset the swap counter
 }
 
 void CBTNode::CreateSpecialConflict(unsigned int time, vector<Location> locations, vector<int> users){
-	
+	conflict.replan_flag = true;
+	conflict.empty = false;
+
+	bool blockingConflict = false;
+	int blockingEntity = -1;
+
+	if ((locations[1] == agents[users[0]].getDestinationLocation()) || (locations[0] == agents[users[0]].getDestinationLocation()) &&
+		(locations[1] == agents[users[1]].getDestinationLocation()) || (locations[0] == agents[users[1]].getDestinationLocation())){
+		cout << "Breaking shit down!!!!" << endl;
+	}
+
 	for (unsigned int i = 0; i < users.size(); i++){
 		//Add the corresponding times
 		if (time != 0){
@@ -199,22 +237,56 @@ void CBTNode::CreateSpecialConflict(unsigned int time, vector<Location> location
 		}
 		
 		conflict.times.push_back(time + 1);
-		
-		
 		// Add twice every user
 		conflict.users.push_back(users[i]);
 		
+
+
+		if ((locations[1] == agents[users[i]].getDestinationLocation()) || (locations[0] == agents[users[i]].getDestinationLocation())){
+			if (agents[users[i]].debugNumberOfAdjacents()){
+				blockingConflict = true;
+				blockingEntity = i;
+				break;
+			}
+			
+		}
+		
 	}
 
-	// Add the locations in the correct order
+	if (blockingConflict){
+		conflict.times.clear();
+		conflict.locations.clear();
+		conflict.users.clear();
+		
+		
+		conflict.times.push_back(time);
+		conflict.times.push_back(time + 1);
+		
+		conflict.users.push_back(users[blockingEntity]);
+		conflict.users.push_back(users[blockingEntity]);
 
-	if(time != 0) conflict.locations.push_back(locations[0]);
-	conflict.locations.push_back(locations[1]);
-	if (time != 0) conflict.locations.push_back(locations[1]);
-	conflict.locations.push_back(locations[0]);	
-	conflict.replan_flag = true;
-	conflict.empty = false;
-	swapcounter++; // Increase the swap counter, since this is a swap
+		if (blockingEntity == 0){
+			conflict.locations.push_back(locations[0]);
+			conflict.locations.push_back(locations[1]);
+		}
+		else {
+			conflict.locations.push_back(locations[1]);
+			conflict.locations.push_back(locations[0]);
+		}
+		swapcounter++;
+		//swapcounter = 0;
+	}
+	else {
+		// Add the locations in the correct order
+		if (time != 0) conflict.locations.push_back(locations[0]);
+		conflict.locations.push_back(locations[1]);
+		if (time != 0) conflict.locations.push_back(locations[1]);
+		conflict.locations.push_back(locations[0]);
+		
+		swapcounter++; // Increase the swap counter, since this is a swap
+	}
+
+	
 }
 
 void CBTNode::CreateDestinationConflict(unsigned int time, Location location, int user){
@@ -312,6 +384,7 @@ void CBTNode::calculateCost(){
 	}
 	if (validNode){
 		BalancePaths();
+		//SanitizePaths();
 		for (unsigned int i = 0; i < agents.size(); i++){
 			cost += agents[i].getSic();
 			validNode = validNode && agents[i].hasValidSolution();
@@ -577,6 +650,9 @@ bool CBTNode::LocationAtNodeList(Location location, vector<Node> list, int * ind
 }
 
 int CBTNode::BalancePaths(){
+	SanitizePaths();
+	UpdateCAT();
+
 	unsigned int largestSize = 0;
 	// Get the largest pathsize
 	for (unsigned int i = 0; i < agents.size(); i++){
@@ -616,6 +692,7 @@ void CBTNode::SanitizePaths(){
 }
 
 void CBTNode::UpdateCAT(){
+	
 	for (unsigned int i = 0; i < paths.size(); i++){
 		for (unsigned int j = 1; j < paths[i].size(); j++){
 			CAT.push_back(Constraint(agents[i].getId(), paths[i][j].getLocation(), j));

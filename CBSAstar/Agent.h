@@ -147,6 +147,8 @@ public:
 	void setPriority(bool val) { priority = val; }
 	bool getPriority() { return priority; }
 
+	bool debugNumberOfAdjacents() { return map->NumberAdjacents(destination.getLocation()) <= 2; }
+
 
 
 
