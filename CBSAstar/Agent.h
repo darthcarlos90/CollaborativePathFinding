@@ -150,7 +150,7 @@ public:
 	bool debugNumberOfAdjacents() { return map->NumberAdjacents(destination.getLocation()) <= 2; }
 
 
-
+	Location getLocationAtTime(int time){ return time_route[time].getLocation(); }
 
 private:
 	/*Helper functions*/

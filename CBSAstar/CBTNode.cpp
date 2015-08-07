@@ -226,66 +226,80 @@ void CBTNode::CreateSpecialConflict(unsigned int time, vector<Location> location
 
 	if ((locations[1] == agents[users[0]].getDestinationLocation()) || (locations[0] == agents[users[0]].getDestinationLocation()) &&
 		(locations[1] == agents[users[1]].getDestinationLocation()) || (locations[0] == agents[users[1]].getDestinationLocation())){
-		cout << "Breaking shit down!!!!" << endl;
-	}
-
-	for (unsigned int i = 0; i < users.size(); i++){
-		//Add the corresponding times
-		if (time != 0){
-			conflict.times.push_back(time);
+		// If both are trying to get to their destination, stop, let them let the other element pass first
+		for (unsigned int i = 0; i < users.size(); i++){
+			Location destination_location = agents[users[i]].getDestinationLocation();
 			conflict.users.push_back(users[i]);
+			conflict.locations.push_back(destination_location);
+			if (agents[users[i]].getLocationAtTime(time) == destination_location){
+				conflict.times.push_back(time);
+			}
+			else conflict.times.push_back(time + 1);
 		}
-		
-		conflict.times.push_back(time + 1);
-		// Add twice every user
-		conflict.users.push_back(users[i]);
-		
+	}
+	else{
+
+		for (unsigned int i = 0; i < users.size(); i++){
+			//Add the corresponding times
+			if (time != 0){
+				conflict.times.push_back(time);
+				conflict.users.push_back(users[i]);
+			}
+
+			conflict.times.push_back(time + 1);
+			// Add twice every user
+			conflict.users.push_back(users[i]);
 
 
-		if ((locations[1] == agents[users[i]].getDestinationLocation()) || (locations[0] == agents[users[i]].getDestinationLocation())){
-			if (agents[users[i]].debugNumberOfAdjacents()){
-				blockingConflict = true;
-				blockingEntity = i;
-				break;
+
+			if ((locations[1] == agents[users[i]].getDestinationLocation()) || 
+				(locations[0] == agents[users[i]].getDestinationLocation())){
+				if (agents[users[i]].debugNumberOfAdjacents()){
+					blockingConflict = true;
+					blockingEntity = i;
+					break;
+				}
+
+			}
+
+		}
+
+		if (blockingConflict){
+			conflict.times.clear();
+			conflict.locations.clear();
+			conflict.users.clear();
+
+
+			conflict.times.push_back(time);
+			conflict.times.push_back(time + 1);
+
+			conflict.users.push_back(users[blockingEntity]);
+			conflict.users.push_back(users[blockingEntity]);
+
+			if (blockingEntity == 0){
+				conflict.locations.push_back(locations[0]);
+				conflict.locations.push_back(locations[1]);
+			}
+			else {
+				conflict.locations.push_back(locations[1]);
+				conflict.locations.push_back(locations[0]);
 			}
 			
-		}
-		
-	}
-
-	if (blockingConflict){
-		conflict.times.clear();
-		conflict.locations.clear();
-		conflict.users.clear();
-		
-		
-		conflict.times.push_back(time);
-		conflict.times.push_back(time + 1);
-		
-		conflict.users.push_back(users[blockingEntity]);
-		conflict.users.push_back(users[blockingEntity]);
-
-		if (blockingEntity == 0){
-			conflict.locations.push_back(locations[0]);
-			conflict.locations.push_back(locations[1]);
+			
 		}
 		else {
+			// Add the locations in the correct order
+			if (time != 0) conflict.locations.push_back(locations[0]);
 			conflict.locations.push_back(locations[1]);
+			if (time != 0) conflict.locations.push_back(locations[1]);
 			conflict.locations.push_back(locations[0]);
+
+			
 		}
-		swapcounter++;
-		//swapcounter = 0;
-	}
-	else {
-		// Add the locations in the correct order
-		if (time != 0) conflict.locations.push_back(locations[0]);
-		conflict.locations.push_back(locations[1]);
-		if (time != 0) conflict.locations.push_back(locations[1]);
-		conflict.locations.push_back(locations[0]);
-		
-		swapcounter++; // Increase the swap counter, since this is a swap
+
 	}
 
+	swapcounter++; // Increase the swap counter, since this is a swap
 	
 }
 
