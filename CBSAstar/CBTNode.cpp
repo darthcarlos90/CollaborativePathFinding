@@ -32,7 +32,19 @@ CBTNode::~CBTNode(void){
 }
 
 bool CBTNode::operator < (const CBTNode& n){
-	return (this->cost < n.getCost());
+	/*
+		TODO: Delete the next code an paste whats next if something stops working.
+		return (this->cost < n.getCost());
+		Explanation:
+		Because there will be times when two nodes will be the same, the tie break will be decided by how 
+		many possible conflicts does a node has. This will be created with the help of the CAT table.
+	*/
+	if (this->cost == n.getCost()){
+		return (this->getCATCost() < n.getCATCost());
+	
+	}
+	else return (this->cost < n.getCost());
+	
 }
 
 bool CBTNode::operator >(const CBTNode& n){
@@ -236,6 +248,8 @@ void CBTNode::CreateSpecialConflict(unsigned int time, vector<Location> location
 			}
 			else conflict.times.push_back(time + 1);
 		}
+
+		swapcounter = 0;
 	}
 	else{
 
@@ -296,10 +310,11 @@ void CBTNode::CreateSpecialConflict(unsigned int time, vector<Location> location
 
 			
 		}
+		swapcounter++; // Increase the swap counter, since this is a swap
 
 	}
 
-	swapcounter++; // Increase the swap counter, since this is a swap
+	
 	
 }
 
@@ -753,4 +768,28 @@ void CBTNode::setSwapCounter(int val){
 		appearancesConstraintTable = NULL;
 
 	}
+}
+
+
+int CBTNode::getCATCost() const{
+	/*
+		Lambda function because YOLO.
+	*/
+	std::function<int(Location, vector<Constraint>)> FindNumberOcurrancesCAT = [](Location location, vector<Constraint> CAT) {
+		int result = 0;
+		for (unsigned int i = 0; i < CAT.size(); i++){
+			if (CAT[i].location == location) result++;
+		}
+
+		return result;
+	};
+
+	int result = 0;
+	for (unsigned int i = 0; i < paths.size(); i++){
+		for (unsigned int index = 0; index < paths[i].size(); index++){
+			result += FindNumberOcurrancesCAT(paths[i][index].getLocation(), CAT);
+		}
+	}
+
+	return result;
 }

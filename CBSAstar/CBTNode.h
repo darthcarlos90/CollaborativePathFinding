@@ -1,4 +1,5 @@
 #include "Agent.h"
+#include <functional>
 /*
 	Class: CBTNode
 	Description: This class represents the nodes inside a Constraint Tree.
@@ -83,7 +84,7 @@ public:
 
 	bool isValidNode() { return validNode; }
 	
-
+	int getCATCost() const ;
 	
 
 private:

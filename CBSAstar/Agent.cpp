@@ -1574,7 +1574,7 @@ bool Agent::FindSpecialCaseCBS(Location location, int t, vector<Constraint> cons
 	return result;
 }
 
-int Agent::FindNumberOcurrancesCAT(Location location){
+int Agent::FindNumberOcurrancesCAT(Location location) {
 	int result = 0;
 	for (unsigned int i = 0; i < CAT.size(); i++){
 		if (CAT[i].location == location) result++;

@@ -147,10 +147,15 @@ public:
 	void setPriority(bool val) { priority = val; }
 	bool getPriority() { return priority; }
 
+	/*
+		Debug methods that I will probably not use, or use only once.
+		Or use only for debugging.
+	*/
 	bool debugNumberOfAdjacents() { return map->NumberAdjacents(destination.getLocation()) <= 2; }
 
 
 	Location getLocationAtTime(int time){ return time_route[time].getLocation(); }
+	
 
 private:
 	/*Helper functions*/
@@ -187,7 +192,7 @@ private:
 	void UpdateSpatialOpenListCAT();
 	void UpdateIndexSmallerSpatialCAT();
 
-	int FindNumberOcurrancesCAT(Location location);
+	
 
 	/*
 		Helper function that allows us to find a special case:
@@ -217,6 +222,8 @@ private:
 	bool ConstraintAstar(Location start, Location finish, int starting_time, vector<Constraint> constraints);
 	
 	bool validMovement(Location location, int time, vector<Constraint> constraints);
+
+	int FindNumberOcurrancesCAT(Location location);
 	
 	int id;
 
