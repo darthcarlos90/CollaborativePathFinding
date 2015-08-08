@@ -16,6 +16,7 @@ CBTNode::CBTNode(vector<Constraint> parent_constraints, vector<Agent> parents_ag
 	swapcounter = 0;
 	main_actor_id = 0;
 	validNode = true;
+	CATCost = 0;
 }
 
 //Copy constructor
@@ -100,10 +101,11 @@ CBTNode* CBTNode::getSmallestChild(){
 
 		// Now compare it against valid solutions with cost
 		for (unsigned int i = 0; i < children.size(); i++){
+			if (i != index_smaller){
 				if ((*children[i] < *children[index_smaller]) && children[i]->isValidNode()){
 					index_smaller = i;
 				}
-			
+			}
 		}
 	}
 	
@@ -150,6 +152,7 @@ void CBTNode::ExpandNode(){
 
 void CBTNode::validatePaths(){
 	unsigned int largest_size = BalancePaths();
+	
 	//Get the largest path size
 	// Uneeded but still 
 	/*for (unsigned int i = 0; i < paths.size(); i++){
@@ -236,8 +239,16 @@ void CBTNode::CreateSpecialConflict(unsigned int time, vector<Location> location
 	bool blockingConflict = false;
 	int blockingEntity = -1;
 
-	if ((locations[1] == agents[users[0]].getDestinationLocation()) || (locations[0] == agents[users[0]].getDestinationLocation()) &&
-		(locations[1] == agents[users[1]].getDestinationLocation()) || (locations[0] == agents[users[1]].getDestinationLocation())){
+	Location destination1 = agents[users[0]].getDestinationLocation();
+	Location destination2 = agents[users[1]].getDestinationLocation();
+
+	bool comparison1 = (locations[1] == destination1) || (locations[0] == destination1);
+	bool comparison2 = (locations[1] == destination2) || (locations[0] == destination2);
+
+	// This is the cause of all evil
+	//TODO: Check the notes in my bag :3
+
+	if (comparison1 && comparison2){
 		// If both are trying to get to their destination, stop, let them let the other element pass first
 		for (unsigned int i = 0; i < users.size(); i++){
 			Location destination_location = agents[users[i]].getDestinationLocation();
@@ -266,8 +277,8 @@ void CBTNode::CreateSpecialConflict(unsigned int time, vector<Location> location
 
 
 
-			if ((locations[1] == agents[users[i]].getDestinationLocation()) || 
-				(locations[0] == agents[users[i]].getDestinationLocation())){
+
+			if ((locations[1] == agents[users[i]].getDestinationLocation()) || (locations[0] == agents[users[i]].getDestinationLocation())){
 				if (agents[users[i]].debugNumberOfAdjacents()){
 					blockingConflict = true;
 					blockingEntity = i;
@@ -420,7 +431,7 @@ void CBTNode::calculateCost(){
 		}
 	}
 
-	
+	CalculateCATCost();
 
 	//countPossibleConflicts();
 }
@@ -771,7 +782,7 @@ void CBTNode::setSwapCounter(int val){
 }
 
 
-int CBTNode::getCATCost() const{
+void CBTNode::CalculateCATCost() {
 	/*
 		Lambda function because YOLO.
 	*/
@@ -784,12 +795,12 @@ int CBTNode::getCATCost() const{
 		return result;
 	};
 
-	int result = 0;
+	
 	for (unsigned int i = 0; i < paths.size(); i++){
 		for (unsigned int index = 0; index < paths[i].size(); index++){
-			result += FindNumberOcurrancesCAT(paths[i][index].getLocation(), CAT);
+			CATCost += FindNumberOcurrancesCAT(paths[i][index].getLocation(), CAT);
 		}
 	}
 
-	return result;
+	
 }

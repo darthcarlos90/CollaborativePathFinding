@@ -84,7 +84,7 @@ public:
 
 	bool isValidNode() { return validNode; }
 	
-	int getCATCost() const ;
+	int getCATCost() const { return CATCost; }
 	
 
 private:
@@ -108,6 +108,7 @@ private:
 
 	void countPossibleConflicts();
 	
+	void CalculateCATCost();
 
 
 	//Properties
@@ -148,5 +149,8 @@ private:
 	*/
 
 	int main_actor_id;
+
+	// A cost used when two nodes have the same value, this cost breaks the ties
+	int CATCost;
 	
 };
