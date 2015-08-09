@@ -792,11 +792,9 @@ void Agent::ModifyRouteOnConstraints(vector<Constraint> constraints, bool rerout
 						// Means that a solution couldnt be found, so this node must be descarted
 						// First, if this agent has priority, remove it
 						priority = false;
-						
+
 						// Now, we must tell that the path wasn't found so this node is not selected
 						validSolution = false;
-						
-
 
 						break;
 					}

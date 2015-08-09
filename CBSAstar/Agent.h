@@ -261,4 +261,8 @@ private:
 	vector<Constraint> CAT;
 
 	bool priority;// TODO: Wipe this if this doesn't work
+
+	//Debug variable
+	//int distance_destination;
+
 };

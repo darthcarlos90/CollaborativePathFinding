@@ -134,6 +134,8 @@ void CBTNode::ExpandNode(){
 		return;
 	}
 
+	int childCost = 0;
+
 	for (unsigned int i = 0; i < conflict.users.size(); i++){
 		if (conflict.times[i] != 0){
 			Constraint cnst(conflict.users[i], conflict.locations[i], conflict.times[i]);
@@ -142,11 +144,18 @@ void CBTNode::ExpandNode(){
 			child->RecalculateRoutesOnConstraints(conflict.users[i], conflict.replan_flag);
 			child->calculateCost();
 			child->setSwapCounter(swapcounter);
+			childCost += child->getCost();
 			children.push_back(child);
 		}
 		else {
 			cout << "We have a constraint at a time 0." << endl;
 		}
+	}
+
+	// If the children couldnt find a route, then discard this node
+	if (childCost == 0){
+		validNode = false;
+		this->cost = 0;
 	}
 }
 
@@ -246,21 +255,31 @@ void CBTNode::CreateSpecialConflict(unsigned int time, vector<Location> location
 	bool comparison2 = (locations[1] == destination2) || (locations[0] == destination2);
 
 	// This is the cause of all evil
-	//TODO: Check the notes in my bag :3
 
 	if (comparison1 && comparison2){
-		// If both are trying to get to their destination, stop, let them let the other element pass first
+		// If both are trying to get to their destination, stop, should let the other one pass first
 		for (unsigned int i = 0; i < users.size(); i++){
 			Location destination_location = agents[users[i]].getDestinationLocation();
+			Location otherLocation;
 			conflict.users.push_back(users[i]);
-			conflict.locations.push_back(destination_location);
-			if (agents[users[i]].getLocationAtTime(time) == destination_location){
+			// Check which location is not destination and push that
+			for (unsigned int j = 0; j < locations.size(); j++){
+				if (!(destination_location == locations[j])){
+					otherLocation = locations[j];
+					conflict.locations.push_back(otherLocation);
+				}
+					
+			}
+			
+			// Now that we know what location must not be occupied, push the time at where they must not occupy it
+			if (agents[users[i]].getLocationAtTime(time) == otherLocation){
 				conflict.times.push_back(time);
 			}
 			else conflict.times.push_back(time + 1);
 		}
-
-		swapcounter = 0;
+		
+		conflict.replan_flag = false;
+		swapcounter++;
 	}
 	else{
 
@@ -276,7 +295,7 @@ void CBTNode::CreateSpecialConflict(unsigned int time, vector<Location> location
 			conflict.users.push_back(users[i]);
 
 
-
+			// TODO: uncomment or comment if necesary, lets just assume you cant occupy before the destination
 
 			if ((locations[1] == agents[users[i]].getDestinationLocation()) || (locations[0] == agents[users[i]].getDestinationLocation())){
 				if (agents[users[i]].debugNumberOfAdjacents()){
@@ -294,21 +313,29 @@ void CBTNode::CreateSpecialConflict(unsigned int time, vector<Location> location
 			conflict.locations.clear();
 			conflict.users.clear();
 
-
-			conflict.times.push_back(time);
-			conflict.times.push_back(time + 1);
+			Location destination = agents[users[blockingEntity]].getDestinationLocation();
+			if (agents[users[blockingEntity]].getLocationAtTime(time) == destination){
+				conflict.times.push_back(time);
+			} else conflict.times.push_back(time + 1);
+			
 
 			conflict.users.push_back(users[blockingEntity]);
-			conflict.users.push_back(users[blockingEntity]);
+			//conflict.users.push_back(users[blockingEntity]);
 
-			if (blockingEntity == 0){
+			/*if (blockingEntity == 0){
 				conflict.locations.push_back(locations[0]);
 				conflict.locations.push_back(locations[1]);
 			}
 			else {
 				conflict.locations.push_back(locations[1]);
 				conflict.locations.push_back(locations[0]);
+			}*/
+
+			if (locations[0] == destination){
+				conflict.locations.push_back(locations[0]);
 			}
+			else conflict.locations.push_back(locations[1]);
+			swapcounter = 0;
 			
 			
 		}
@@ -318,11 +345,12 @@ void CBTNode::CreateSpecialConflict(unsigned int time, vector<Location> location
 			conflict.locations.push_back(locations[1]);
 			if (time != 0) conflict.locations.push_back(locations[1]);
 			conflict.locations.push_back(locations[0]);
+			swapcounter++; // Increase the swap counter, since this is a swap
+
 
 			
 		}
-		swapcounter++; // Increase the swap counter, since this is a swap
-
+		
 	}
 
 	
