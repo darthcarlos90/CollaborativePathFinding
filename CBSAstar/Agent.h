@@ -156,6 +156,9 @@ public:
 
 	Location getLocationAtTime(int time){ return time_route[time].getLocation(); }
 	
+	void setDistanceDestination(int val){ distance_destination = val; }
+	int getDistanceDestination() { return distance_destination; }
+	
 
 private:
 	/*Helper functions*/
@@ -263,6 +266,7 @@ private:
 	bool priority;// TODO: Wipe this if this doesn't work
 
 	//Debug variable
-	//int distance_destination;
+	int distance_destination;
+
 
 };

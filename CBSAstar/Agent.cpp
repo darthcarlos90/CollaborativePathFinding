@@ -20,6 +20,7 @@ actualNode(location), startingPoint(location)
 	index_lower_time_openList = 0;
 	validSolution = false;
 	priority = false;
+	distance_destination = -1;
 }
 
 Agent::~Agent(void){
@@ -739,6 +740,7 @@ void Agent::ModifyRouteOnConstraints(vector<Constraint> constraints, bool rerout
 
 					// Repeat the last step so the agent waits for some other element to use the other cell
 					Node toAdd = temp_path[temp_path.size() - 1];
+					toAdd.calculateManhattanHeuristic(destination.getLocation());
 					toAdd.setG(toAdd.getG() + 1);
 					toAdd.calculateF();
 					temp_path.push_back(toAdd);

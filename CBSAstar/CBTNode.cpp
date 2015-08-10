@@ -2,6 +2,11 @@
 
 CBTNode::CBTNode(void){
 	cost = 0;
+	goal = false;
+	swapcounter = 0;
+	main_actor_id = 0;
+	validNode = true;
+	CATCost = 0;
 }
 
 CBTNode::CBTNode(vector<Constraint> parent_constraints, vector<Agent> parents_agents,vector<vector<Node>> parents_paths){
@@ -122,6 +127,7 @@ void CBTNode::CalculatePaths(){
 		validNode = validNode && agents[i].hasValidSolution();
 		//Get the path, and push it into the paths vector
 		paths.push_back(agents[i].getPath());
+		agents[i].setDistanceDestination(agents[i].pathSize() - 1);
 	}
 
 	
@@ -206,6 +212,10 @@ void CBTNode::CreateConflict(unsigned int time_ocurrence, Location location, vec
 	conflict.empty = false;
 	conflict.replan_flag = false;
 
+	if (location == Location(1, 9)){
+		cout << "testing" << endl;
+	}
+
 	bool blockingConflict = false;
 	int blockingUser = -1;
 	
@@ -232,6 +242,7 @@ void CBTNode::CreateConflict(unsigned int time_ocurrence, Location location, vec
 		conflict.times.push_back(time_ocurrence);
 		conflict.locations.push_back(location);
 		conflict.users.push_back(users[blockingUser]);
+		//conflict.replan_flag = true;
 	}
 	else {
 		conflict.users = users;
@@ -244,6 +255,12 @@ void CBTNode::CreateConflict(unsigned int time_ocurrence, Location location, vec
 void CBTNode::CreateSpecialConflict(unsigned int time, vector<Location> locations, vector<int> users){
 	conflict.replan_flag = true;
 	conflict.empty = false;
+	for (unsigned int i = 0; i < locations.size(); i++){
+		if (locations[i] == Location(1, 9)){
+			cout << "testing" << endl;
+		}
+	}
+	
 
 	bool blockingConflict = false;
 	int blockingEntity = -1;
@@ -258,6 +275,7 @@ void CBTNode::CreateSpecialConflict(unsigned int time, vector<Location> location
 
 	if (comparison1 && comparison2){
 		// If both are trying to get to their destination, stop, should let the other one pass first
+		
 		for (unsigned int i = 0; i < users.size(); i++){
 			Location destination_location = agents[users[i]].getDestinationLocation();
 			Location otherLocation;
@@ -278,8 +296,9 @@ void CBTNode::CreateSpecialConflict(unsigned int time, vector<Location> location
 			else conflict.times.push_back(time + 1);
 		}
 		
-		conflict.replan_flag = false;
+
 		swapcounter++;
+
 	}
 	else{
 
@@ -315,8 +334,8 @@ void CBTNode::CreateSpecialConflict(unsigned int time, vector<Location> location
 
 			Location destination = agents[users[blockingEntity]].getDestinationLocation();
 			if (agents[users[blockingEntity]].getLocationAtTime(time) == destination){
-				conflict.times.push_back(time);
-			} else conflict.times.push_back(time + 1);
+				conflict.times.push_back(time + 1);
+			} else conflict.times.push_back(time);
 			
 
 			conflict.users.push_back(users[blockingEntity]);
@@ -332,9 +351,9 @@ void CBTNode::CreateSpecialConflict(unsigned int time, vector<Location> location
 			}*/
 
 			if (locations[0] == destination){
-				conflict.locations.push_back(locations[0]);
+				conflict.locations.push_back(locations[1]);
 			}
-			else conflict.locations.push_back(locations[1]);
+			else conflict.locations.push_back(locations[0]);
 			swapcounter = 0;
 			
 			
@@ -450,6 +469,8 @@ void CBTNode::calculateCost(){
 	for (unsigned int i = 0; i < agents.size(); i++){
 		validNode = validNode && agents[i].hasValidSolution();
 	}
+
+
 	if (validNode){
 		BalancePaths();
 		//SanitizePaths();
@@ -736,6 +757,7 @@ int CBTNode::BalancePaths(){
 				// Push to the back of the route the element of the last index
 				// First calculate the correct values in case of need
 				Node toAdd = agents[i].getPath()[agents[i].pathSize() - 1];
+				toAdd.calculateManhattanHeuristic(agents[i].getDestinationLocation());
 				toAdd.setG(agents[i].getPath()[agents[i].pathSize() - 1].getG() + 1);
 				toAdd.calculateF();
 				agents[i].PushElementAtTheBackOfRoute(toAdd);
@@ -760,7 +782,7 @@ void CBTNode::SanitizePaths(){
 }
 
 void CBTNode::UpdateCAT(){
-	
+	CAT.clear();
 	for (unsigned int i = 0; i < paths.size(); i++){
 		for (unsigned int j = 1; j < paths[i].size(); j++){
 			CAT.push_back(Constraint(agents[i].getId(), paths[i][j].getLocation(), j));
