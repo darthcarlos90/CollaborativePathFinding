@@ -290,7 +290,7 @@ void MAPF::MoveBySilvers(bool hybrid, bool automatic){
 	bool finished = false;
 	bool verify = false;
 	while (!finished){
-		system("cls");
+		if (!automatic)system("cls");
 		if (!automatic) map->cleanMap();
 		finished = players[0].finished();
 		for (unsigned int i = 0; i < players.size(); i++){
@@ -298,6 +298,7 @@ void MAPF::MoveBySilvers(bool hybrid, bool automatic){
 				players[i].move(time); // The element at i will be the element at time = i + 1
 				if (i > 0) finished = finished && players[i].finished();
 				verify = verify || players[i].NeedsPathVerification(); // When An element just updated its path
+				map->setElement(players[i].getLocation(), (players[i].getId() + 2)); // Uncoment for clean whatever
 			}
 			
 		}
@@ -316,6 +317,16 @@ void MAPF::MoveBySilvers(bool hybrid, bool automatic){
 		time++;
 		if (!automatic)map->printData();
 		if(!automatic)system("pause");
+	}
+
+	if (!automatic){
+		for (unsigned int i = 0; i < players.size(); i++){
+			cout << "Path of agent " << players[i].getId() << endl;
+			for (unsigned int j = 0; j < paths[i].size(); j++){
+				cout << "t" << j << ": ";
+				paths[i][j].printValue();
+			}
+		}
 	}
 
 }
