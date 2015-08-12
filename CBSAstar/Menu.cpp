@@ -152,7 +152,7 @@ void Menu::LoadMap(){
 		filename = "testcaseSilversBlocking.txt";
 		break;
 	case 14:
-		filename = "smthg.txt";
+		filename = "corridor.txt";
 		break;
 	}
 

@@ -21,6 +21,7 @@ actualNode(location), startingPoint(location)
 	validSolution = false;
 	priority = false;
 	distance_destination = -1;
+	savedG = 0;
 }
 
 Agent::~Agent(void){
@@ -190,7 +191,7 @@ void Agent::executeSpatialAstar(Location start, Location finish){
 
 int Agent::executebacksearchAstar(Location start, Location finish){
 	// clear open list
-	spatial_openList.clear();
+	//spatial_openList.clear();
 	
 	bool nodeFound = false;
 	//Let A be the starting point
@@ -332,7 +333,7 @@ void Agent::TimeSpaceAstarHelper(Location start, Location finish, int time){
 	bool emtyOpenList = false; // flag for partial path empty list
 	Node A(0, start); //Let A be the starting point
 
-	A.setG(1);
+	A.setG(0);
 	calculateRealHeuristic(&A, finish);
 	A.calculateF();
 	
@@ -493,7 +494,7 @@ int Agent::executeSpatialAstarUntilFound(Location start, Node toFind){
 
 void Agent::calculateRealHeuristic(Node* toCalculate, Location finish){
 	toCalculate->setH(executeSpatialAstarUntilFound(finish, *toCalculate));
-	spatial_openList.clear();// That way the search can restart
+	//spatial_openList.clear();// That way the search can restart
 	index_lower_spatial_openList = 0;
 }
 

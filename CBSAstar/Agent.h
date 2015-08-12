@@ -267,6 +267,7 @@ private:
 
 	//Debug variable
 	int distance_destination;
+	int savedG;
 
 
 };
