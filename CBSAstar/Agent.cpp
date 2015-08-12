@@ -477,14 +477,18 @@ void Agent::TimeSpaceAstarHelper(Location start, Location finish, int time){
 
 
 int Agent::executeSpatialAstarUntilFound(Location start, Node toFind){
+	
 	if (!FindNodeAtSpatialClosedList(toFind)){
 		// If the node we are looking for is not on the closed list
 		// look for it
 		return executebacksearchAstar(start, toFind.getLocation());
 	}
 	else{
-		return spatial_closedList[GetIndexOfElementAtSpatialClosedList(toFind.getLocation())].getG();
+		int index = GetIndexOfElementAtSpatialClosedList(toFind.getLocation());
+		int resutl = spatial_closedList[index].getG();
+		return resutl;
 	}
+	
 }
 
 void Agent::calculateRealHeuristic(Node* toCalculate, Location finish){
