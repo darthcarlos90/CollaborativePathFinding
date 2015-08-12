@@ -244,51 +244,31 @@ std::vector<Constraint> Map::GetReservationTableConstraints(){
 	return reservationTable.getFullConstraints();
 }
 
-Map Map::createSubMap(Location blocking, Location escape, Location blocked, Location* difference){
+Map Map::createSubMap(vector<Location> locations, Location* difference){
 	
 	/*
 	Get the row where the blocking element is.
 	*/
-	Location lowerBounds = blocking;
-	Location upperBounds = blocking;
+	Location lowerBounds = locations[0];
+	Location upperBounds = locations[0];
 
-	/*
-		If the escape element is on the same row as the blocking element, then
-		grab the upper and lower rows.
-	*/
-	if (blocking.y == escape.y){
-		if(lowerBounds.y > 0) 
-			lowerBounds.y = lowerBounds.y - 1;
-		if(upperBounds.y < data->get_y_size() - 1)
-			upperBounds.y = upperBounds.y + 1;
-	} //Otherwise, get the row where the escape element is
-	else {
-		if (lowerBounds.y > escape.y) 
-			lowerBounds.y = escape.y;
-		else if (upperBounds.y < escape.y) 
-			upperBounds.y = escape.y;
+	// Get the smallest and biggest locations to create a square
+	for (unsigned int i = 1; i < locations.size(); i++){
+		if (lowerBounds.x > locations[i].x)
+			lowerBounds.x = locations[i].x;
+		if (upperBounds.x < locations[i].x)
+			upperBounds.x = locations[i].x;
+
+		if (lowerBounds.y > locations[i].y)
+			lowerBounds.y = locations[i].y;
+		if (upperBounds.y < locations[i].y)
+			upperBounds.y = locations[i].y;
 	}
-
-	/*
-		Get the elements that are on the furthest side of the 
-	*/
-	if (lowerBounds.x > escape.x) 
-		lowerBounds.x = escape.x;
-	if (upperBounds.x < escape.x) 
-		upperBounds.x = escape.x;
-	if (lowerBounds.x > blocked.x) 
-		lowerBounds.x = blocked.x;
-	if (upperBounds.x < blocked.x) 
-		upperBounds.x = blocked.x;
 	
-	//Finally, add the elements if they are outside our danger zone
-	if (lowerBounds.y > blocked.y) lowerBounds.y = blocked.y;
-	if (upperBounds.y < blocked.y) upperBounds.y = blocked.y;
-
 	/*
 		There are some situations, where leaving the exact size of the submap may 
-		cause deadlocks to happen. Since CBS apparently is not optimized for
-		deadlocks, the submap will be expanded a bit.
+		cause deadlocks to happen. To make solution simpler, the map will be
+		expanded a bit.
 	*/
 
 	if(upperBounds.x < data->get_x_size() - 1)upperBounds.x = upperBounds.x + 1;
@@ -312,6 +292,55 @@ Map Map::createSubMap(Location blocking, Location escape, Location blocked, Loca
 
 	//return the result
 	return submap;
+}
+
+Map Map::expandMap(Matrix<int>* oldData, Location pastDifference, Location * difference){
+	Location lowerBounds = pastDifference;
+	Location upperBounds = Location(pastDifference.x + oldData->get_x_size(), pastDifference.y + oldData->get_y_size());
+	delete oldData; // Delete the past matrix
+	oldData = new Matrix<int>();
+	
+	// New variables
+	Location newLowerBounds;
+	Location newUpperBounds;
+	
+	// Just in case we cant make it bigger
+	bool decreatseLowerX = false;
+	bool decreaseLowerY = false;
+	bool incrementUpperX = false;
+	bool incrementUpperY = false;
+	
+	// Increment
+	if (lowerBounds.x >= 1) newLowerBounds.x = lowerBounds.x - 1;
+	else incrementUpperX = true;
+	if (lowerBounds.y >= 1) newLowerBounds.y = lowerBounds.y - 1;
+	else incrementUpperY = true;
+	if (upperBounds.x <= data->get_x_size() - 1) newUpperBounds.x = upperBounds.x + 1;
+	else decreatseLowerX = true;
+	if (upperBounds.y <= data->get_y_size() - 1) newUpperBounds.y = upperBounds.y + 1;
+	else decreaseLowerY = true;
+
+	// Do the rest of the increments
+	if (decreatseLowerX) if (newLowerBounds.x >= 1) newLowerBounds.x--;
+	if (decreaseLowerY) if (newLowerBounds.y >= 1) newLowerBounds.y--;
+	if (incrementUpperX) if (newUpperBounds.x <= data->get_x_size() - 1) newUpperBounds.x++;
+	if (incrementUpperY) if (newUpperBounds.y <= data->get_y_size() - 1) newUpperBounds.y++;
+
+	//Now that we have the sizes, lets create the new extended map with the new cooridantes
+	*oldData = getSubData(newLowerBounds.x, newLowerBounds.y, newUpperBounds.x, newUpperBounds.y);
+
+	// createmap 
+	Map submap(oldData);
+
+	// If there is a pointer, lets feed it data
+	if (difference){
+		*difference = newLowerBounds;
+	}
+
+	//return the result
+	return submap;
+
+
 }
 
 void Map::cleanConstraintsReservations(){

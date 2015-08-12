@@ -49,13 +49,16 @@ public:
 	/*
 		This element creates a sub-map based on the parameters given.
 		Params:
-			- Node blocking: The Node where the blocking element is located.
-			- Node escape: The escape node where the blocking element is moving.
-			- Node blocked: The element that is being blocked, the acces to
+			- Vector of Locations: This is a vector with the locations of all the locations
+				involved in the conflict.
 			- Node difference: The difference should help transform from normal map
 				coordinates to submap coordinates.
 	*/
-	Map createSubMap(Location blocking, Location escape, Location blocked, Location* difference = NULL);
+	Map createSubMap(vector<Location> location, Location* difference = NULL);
+
+	// If the solution couldnt be found with the map size, make it bigger
+	Map expandMap(Matrix<int>* oldData, Location pastDifference, Location * difference = NULL);
+
 
 	bool hasData() { return has_data; }
 

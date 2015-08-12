@@ -38,7 +38,7 @@ public:
 	void cleanReservationsConstraints();
 	
 
-private://
+private:
 	void StartCBSPathFinding();
 	void StartSilversPathFinding();
 	void StartHybridPathFinding();
@@ -52,17 +52,15 @@ private://
 	int getIndexOfAgent(int id);
 
 	//Each method consists detects one type of conflict
-	void Deadlock(); // returns the length of the critical path
-	void SolveDeadLock(Conflicted c);
 	void Blocking(); // Detects if a finished element blocks the path of another element
-	void SolveBlockingSimple( Conflicted c); // Solves the blocking 
-	void SolveBlockingComplex(Conflicted c);
-	void DefaultHelper(Conflicted c);
-	void SolveBlockingMultiple(Conflicted c);
-
 	// Helper functions for the blocking element
 	void SimpleBlocking();
 	void MultipleBlocking();
+	
+	void SolveBlockingComplex(Conflicted c);
+	void ConflictSolver(Conflicted c);
+
+	
 	
 	int countCriticalZone(Conflicted c, vector <Node>* criticalZoneNodes = NULL);
 	int GetIndexAtArray(vector<Node> list, Location val); //This searches element by element, so first make sure the element is there

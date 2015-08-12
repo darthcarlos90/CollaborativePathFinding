@@ -1,0 +1,1 @@
+Alternative Solutions that are worth keeping even thought they are not used
