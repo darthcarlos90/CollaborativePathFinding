@@ -14,14 +14,11 @@ actualNode(location), startingPoint(location)
 	map->setElement(destination.getX(), destination.getY(), id + 2);
 	system("cls");
 	map->printData();
-	has_partial_destination = false;
 	needsPathVerification = false;
 	index_lower_spatial_openList = 0;
 	index_lower_time_openList = 0;
 	validSolution = false;
 	priority = false;
-	distance_destination = -1;
-	savedG = 0;
 }
 
 Agent::~Agent(void){
@@ -692,16 +689,7 @@ void Agent::calculateRoute(){
 	time_route.clear();
 	clearSpatialLists(true);
 
-	// If there is a partial destination
-	if (has_partial_destination){
-		//First calculate the route to the partial destination
-		executeSpatialAstar(actualNode.getLocation(), partialDestination.getLocation());
-		spatial_route.push_back(partialDestination); // Wait there a bit ..
-		clearSpatialLists(false);
-		//Now go the the actual destination
-		executeSpatialAstar(partialDestination.getLocation(), destination.getLocation());
-	}
-	else executeSpatialAstar(actualNode.getLocation(), destination.getLocation());
+	executeSpatialAstar(actualNode.getLocation(), destination.getLocation());
 
 	time_route = spatial_route; // Because the route was saved on the spatial route
 	spatial_route.clear();
@@ -1432,11 +1420,6 @@ void Agent::reserveRouteFromIndex(unsigned int index){
 
 void Agent::ActivateReplanFlag(){
 	stepsTaken = steps_limit;
-}
-
-void Agent::setPartialDestination(Node val){
-	partialDestination = val;
-	has_partial_destination = true;
 }
 
 void Agent::UpdateSpatialOpenList(){

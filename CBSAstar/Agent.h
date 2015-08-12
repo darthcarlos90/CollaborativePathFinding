@@ -127,9 +127,6 @@ public:
 	*/
 	void ActivateReplanFlag();
 
-	Node getPartialDestination() { return partialDestination; }
-	void setPartialDestination(Node val);
-	bool hasPartialDestination() { return has_partial_destination; }
 	
 	bool NeedsPathVerification() { return needsPathVerification; }
 	void SetPathVerificationFlag(bool val){ needsPathVerification = val; }
@@ -155,9 +152,6 @@ public:
 
 
 	Location getLocationAtTime(int time){ return time_route[time].getLocation(); }
-	
-	void setDistanceDestination(int val){ distance_destination = val; }
-	int getDistanceDestination() { return distance_destination; }
 	
 
 private:
@@ -233,14 +227,12 @@ private:
 	Node startingPoint;
 	Node actualNode;
 	Node destination;
-	Node partialDestination;
 
 	Map* map;
 	
 	unsigned int steps_limit;
 
 	bool active;
-	bool has_partial_destination;
 
 	unsigned int stepsTaken;
 
@@ -264,10 +256,6 @@ private:
 	vector<Constraint> CAT;
 
 	bool priority;// TODO: Wipe this if this doesn't work
-
-	//Debug variable
-	int distance_destination;
-	int savedG;
 
 
 };

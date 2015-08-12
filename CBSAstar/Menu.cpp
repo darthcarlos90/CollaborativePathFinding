@@ -107,6 +107,7 @@ void Menu::LoadMap(){
 	cout << "12) Complex testcase 3: 2 agents, narrow corridor + head to head collision." << endl;
 	cout << "13) Complex testcase 4: 2 agents, blocking + bottleneck" << endl;
 	cout << "14) Complex testcase 5: 3 agents, blocking + narrow corridor + head to head + small map." << endl;
+	cout << "15) Unsolvable testcase" << endl;
 	
 	//getline(cin, filename);
 	
@@ -153,6 +154,9 @@ void Menu::LoadMap(){
 		break;
 	case 14:
 		filename = "corridor.txt";
+		break;
+	case 15:
+		filename = "unsolvableTest.txt";
 		break;
 	}
 

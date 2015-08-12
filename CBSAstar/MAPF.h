@@ -71,14 +71,8 @@ private:
 	void solveConflicts();
 
 	//CBS helper method so that I don't have to repeat this code over and over again
-	/*
-		Fix: if RunCheck is true, then a check for certain events will be ran.
-		Date:04/07/2015
-		Why?
-		Because it turned out that CBS can't deal with certain types of narrow path blocking
-		situations, that is why the algorithm needs a bit of a help.
-	*/
-	void CBSHelper(bool RunCheck);
+	
+	void CBSHelper();
 
 	// Helper function to detect blocking elements
 	bool DetectBlockingHelper(unsigned int currentPlayer, unsigned int currentPath, Node destination, unsigned int* timeOc = NULL);

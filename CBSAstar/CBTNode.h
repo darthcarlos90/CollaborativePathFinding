@@ -73,9 +73,6 @@ public:
 	*/
 	vector<Node> getPathAt(unsigned int index);
 
-	// Copy paste of a method used in another class, since I could find a more efficient way to 
-	// reuse that code
-	void FindSpecialCases();
 
 	void setSwapCounter(int val);
 	int getSwapCounter() { return swapcounter; }
@@ -96,8 +93,6 @@ private:
 	void CreateConflict(unsigned int time_ocurrence, Location location, vector<int> users);
 	void CreateSpecialConflict(unsigned int time, vector<Location> locations, vector<int> users);
 	void CreateDestinationConflict(unsigned int time, Location location, int user);
-	bool FindDeadLock();
-	void SolveDeadLock();
 
 	void UpdateCAT();
 	
