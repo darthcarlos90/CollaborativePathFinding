@@ -475,6 +475,11 @@ void MAPF::ConflictSolver(Conflicted c){
 		// Then there is no solution
 		if (expansionCounter < 1){
 			submap = map->expandMap(submap.getData(), exchange_rate, &exchange_rate);
+			// When the map has been modified, call the submathods we are creating
+			/*
+				TODO: Even better, create a lambda function for the creation of the agents, so it can only acces
+				elements within this scope
+			*/
 		}
 		else {
 			break;
