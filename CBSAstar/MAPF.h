@@ -60,6 +60,11 @@ private:
 	void SolveBlockingComplex(Conflicted c);
 	void ConflictSolver(Conflicted c);
 
+	// Here are the helper functions for the conflict solver method
+	//Gets the indexes of when the agents enter and go out of the submap
+	void GetIndexHelper(int indexOther, int *time_index, int *exit_index);
+	vector<Agent> createAgents(int indexOther, int indexToMove, int time_index, int exit_index, Location exchange_rate, Location blockingLocation, Map &submap);
+
 	
 	
 	int countCriticalZone(Conflicted c, vector <Node>* criticalZoneNodes = NULL);
@@ -83,6 +88,8 @@ private:
 	// Helper functions to create a random map
 	void AddMapObstacles(int limit);
 	bool ValidMap();
+
+	
 
 
 	//TODO: Keep adding more elements throught the development of this project.

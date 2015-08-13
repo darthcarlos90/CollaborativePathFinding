@@ -333,8 +333,8 @@ void CBTNode::CreateSpecialConflict(unsigned int time, vector<Location> location
 
 			Location destination = agents[users[blockingEntity]].getDestinationLocation();
 			if (agents[users[blockingEntity]].getLocationAtTime(time) == destination){
-				conflict.times.push_back(time + 1);
-			} else conflict.times.push_back(time);
+				conflict.times.push_back(time);
+			} else conflict.times.push_back(time + 1);
 			
 
 			conflict.users.push_back(users[blockingEntity]);
@@ -350,9 +350,9 @@ void CBTNode::CreateSpecialConflict(unsigned int time, vector<Location> location
 			}*/
 
 			if (locations[0] == destination){
-				conflict.locations.push_back(locations[1]);
+				conflict.locations.push_back(locations[0]);
 			}
-			else conflict.locations.push_back(locations[0]);
+			else conflict.locations.push_back(locations[1]);
 			swapcounter = 0;
 			
 			

@@ -453,92 +453,33 @@ void MAPF::ConflictSolver(Conflicted c){
 
 	// Let's build the submap
 	Map submap = map->createSubMap(c.locations, &exchange_rate);
-
-
 	
-	// Get at what step does the element enters the submap (And the location)
-	int time_index = -1;
+	int time_index = 0;
+	int exit_index = 0;
+	// Get the indexes of when the other element gets in and out of the submap
+	GetIndexHelper(indexOther, &time_index, &exit_index);
 
-	if (time > 0){
-		// The for loop will start at the current time
-		for (unsigned int i = time; i < paths[indexOther].size(); i++){
-			// If the element of the map at that location is -1, we find the danger zone
-			if (map->getValueAt(paths[indexOther][i].getLocation()) == -1){
-				time_index = i;
-				break;
-			}
+	// TODO: Below
+	// Maybe the agents should be created on this part of the code, you know because of copy constructos on the map class
+	vector<Agent> agents = createAgents(indexOther, indexToMove, time_index, exit_index, exchange_rate, c.locations[0], &submap);
+	
+	int expansionCounter = 0;
+	// Run CBS to try to find a solution for this problem
+	while (!RunCBSUsingPlayers(agents)){
+		// If the map has reached the size of the real map, run once
+		if (submap.getXValue() == map->getXValue() && submap.getYValue() == map->getYValue()){
+			expansionCounter++;
 		}
 
-		if (time_index == -1){
-			time_index = time - 1;
+		// If it is the second time we try to run the CBS with the submap with the size of the map
+		// Then there is no solution
+		if (expansionCounter < 1){
+			submap = map->expandMap(submap.getData(), exchange_rate, &exchange_rate);
 		}
-	}
-	else {
-		for (unsigned int i = 0; i < paths[indexOther].size(); i++){
-			// If the element of the map at that location is -1, we find the danger zone
-			if (map->getValueAt(paths[indexOther][i].getLocation()) == -1){
-				time_index = i;
-				break;
-			}
-		}
-
-		/*
-		If the time index is still -1, it means that the submap covers the whole map!
-		Therefore the starting index will be 0
-		*/
-		if (time_index == -1){
-			time_index = 0;
-		}
-
-	}
-
-	// Now we need to get the index where the element is out of the submap zone
-	int exit_index = -1;
-	for (unsigned int i = time_index; i < paths[indexOther].size(); i++){
-		if (map->getValueAt(paths[indexOther][i].getLocation()) != -1){
-			exit_index = i - 1;
+		else {
 			break;
 		}
-	}
-	/*
-	Again, if the exit index is -1 it means that the submap is the whole map,
-	or the destination of the entity is part of the submap, that is why the exit index
-	will be the last element of the path
-	*/
-	if (exit_index == -1){
-		exit_index = paths[indexOther].size() - 1;
-	}
-
-	//clean the map of the -1
-	map->cleanMap();
-
-	//Now we need to change from normal map coordinates, to submap coordinates
-	Location agentLocation1 = paths[indexOther][time_index].getLocation();
-	agentLocation1.x = agentLocation1.x - exchange_rate.x;
-	agentLocation1.y = agentLocation1.y - exchange_rate.y;
-
-	Location agentExitLocation = paths[indexOther][exit_index].getLocation();
-	agentExitLocation.x = agentExitLocation.x - exchange_rate.x;
-	agentExitLocation.y = agentExitLocation.y - exchange_rate.y;
-
-	Location agentLocation2 = c.locations[0];
-	agentLocation2.x = agentLocation2.x - exchange_rate.x;
-	agentLocation2.y = agentLocation2.y - exchange_rate.y;
-
-	
-	Agent partialAgent1(Node(0, agentLocation1), Node(0,agentExitLocation), &submap, 0, 5); // Move to the exit location
-	Agent partialAgent2(Node(0, agentLocation2), toMove.getDestination(), &submap, 1, 5); // Move to its destination, let CBS do the magic
-
-	// Run the CBS only for these agents
-	vector<Agent> agents;
-	agents.push_back(partialAgent1);
-	agents.push_back(partialAgent2);
-
-	//Run the CBS for these situation
-	bool solutionFound = false;
-	//TODO: Continue this
-	while (!solutionFound){
-		RunCBSUsingPlayers(agents);
+		
 	}
 		
 
@@ -578,6 +519,94 @@ void MAPF::ConflictSolver(Conflicted c){
 	//Update the paths
 	paths[indexOther] = otherAgent.getPath();
 	paths[indexToMove] = toMove.getPath();
+}
+
+void MAPF::GetIndexHelper( int indexOther, int *time_index, int *exit_index){
+	// Get at what step does the element enters the submap (And the location)
+	int time_index = -1;
+
+	if (time > 0){
+		// The for loop will start at the current time
+		for (unsigned int i = time; i < paths[indexOther].size(); i++){
+			// If the element of the map at that location is -1, we find the danger zone
+			if (map->getValueAt(paths[indexOther][i].getLocation()) == -1){
+				*time_index = i;
+				break;
+			}
+		}
+
+		if (*time_index == -1){
+			*time_index = time - 1;
+		}
+	}
+	else {
+		for (unsigned int i = 0; i < paths[indexOther].size(); i++){
+			// If the element of the map at that location is -1, we find the danger zone
+			if (map->getValueAt(paths[indexOther][i].getLocation()) == -1){
+				*time_index = i;
+				break;
+			}
+		}
+
+		/*
+		If the time index is still -1, it means that the submap covers the whole map!
+		Therefore the starting index will be 0
+		*/
+		if (*time_index == -1){
+			time_index = 0;
+		}
+
+	}
+
+	// Now we need to get the index where the element is out of the submap zone
+	int exit_index = -1;
+	for (unsigned int i = *time_index; i < paths[indexOther].size(); i++){
+		if (map->getValueAt(paths[indexOther][i].getLocation()) != -1){
+			*exit_index = i - 1;
+			break;
+		}
+	}
+
+	/*
+	Again, if the exit index is -1 it means that the submap is the whole map,
+	or the destination of the entity is part of the submap, that is why the exit index
+	will be the last element of the path
+	*/
+	if (*exit_index == -1){
+		*exit_index = paths[indexOther].size() - 1;
+	}
+
+	//clean the map of the -1
+	map->cleanMap();
+}
+
+vector<Agent> MAPF::createAgents(int indexOther, int indexToMove, int time_index, int exit_index, Location exchange_rate, Location blockingLocation, Map &submap){
+	//Now we need to change from normal map coordinates, to submap coordinates
+	Location agentLocation1 = paths[indexOther][time_index].getLocation();
+	agentLocation1.x = agentLocation1.x - exchange_rate.x;
+	agentLocation1.y = agentLocation1.y - exchange_rate.y;
+
+	Location agentExitLocation = paths[indexOther][exit_index].getLocation();
+	agentExitLocation.x = agentExitLocation.x - exchange_rate.x;
+	agentExitLocation.y = agentExitLocation.y - exchange_rate.y;
+
+	Location agentLocation2 = blockingLocation;
+	agentLocation2.x = agentLocation2.x - exchange_rate.x;
+	agentLocation2.y = agentLocation2.y - exchange_rate.y;
+
+	Location agentDestination2 = players[indexToMove].getDestination().getLocation();
+	agentDestination2.x = agentDestination2.x - exchange_rate.x;
+	agentDestination2.y = agentDestination2.y - exchange_rate.y;
+
+	Agent partialAgent1(Node(0, agentLocation1), Node(0, agentExitLocation), &submap, 0, 5); // Move to the exit location
+	Agent partialAgent2(Node(0, agentLocation2), Node(0, agentDestination2), &submap, 1, 5); // Move to its destination, let CBS do the magic
+
+	// Run the CBS only for these agents
+	vector<Agent> agents;
+	agents.push_back(partialAgent1);
+	agents.push_back(partialAgent2);
+
+	return agents;
 }
 
 /*
