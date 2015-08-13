@@ -193,20 +193,13 @@ void MAPF::StartSilversPathFinding(){
 }
 
 void MAPF::StartCBSPathFinding(){
-	/*
-		Fix: Now the CBS needs a parameter to know on who run the CBS, the players given by the user, or
-		some other custom players.
-		Date: 10/06/2015
-		Why?
-		Re-use of code
-	*/
 	
-	RunCBSUsingPlayers(players);
-	
-	for (unsigned int i = 0; i < players.size(); i++){
-		players[i].setPath(tree->getSolution()->getPathAt(i));
-		paths.push_back(players[i].getPath());
-		players[i].setValidPath(true);
+	if (RunCBSUsingPlayers(players)){
+		for (unsigned int i = 0; i < players.size(); i++){
+			players[i].setPath(tree->getSolution()->getPathAt(i));
+			paths.push_back(players[i].getPath());
+			players[i].setValidPath(true);
+		}
 	}
 
 }
@@ -218,28 +211,35 @@ void MAPF::StartHybridPathFinding(){
 	RevisePaths();
 }
 
-void MAPF::CBSHelper(){
+bool MAPF::CBSHelper(){
 	bool solutionFound = false;
 	//While we can't find the solution
 	while (!solutionFound){
 		//Get the best node of the tree
 		CBTNode* P = tree->getSolution();
+		if (P->isValidNode()){
+			//Validate the paths until a conflict occurs
+			P->validatePaths();
 
-		//Validate the paths until a conflict occurs
-		P->validatePaths();
-
-		//If it is a goal node, end this, we found the solution
-		if (P->isGoal()) {
-			solutionFound = true;
-			P->UpdateAgentsPaths();
+			//If it is a goal node, end this, we found the solution
+			if (P->isGoal()) {
+				solutionFound = true;
+				P->UpdateAgentsPaths();
+			}
+			else {
+				P->ExpandNode();
+			}
 		}
-		else {
-			P->ExpandNode();
+		else{
+			// There was not a solution found
+			break;
 		}
 	}
+
+	return solutionFound;
 }
 
-void MAPF::RunCBSUsingPlayers(vector<Agent> agents){
+bool MAPF::RunCBSUsingPlayers(vector<Agent> agents){
 	//Create the constraint tree
 	tree = new ConstraintTree();
 
@@ -260,8 +260,7 @@ void MAPF::RunCBSUsingPlayers(vector<Agent> agents){
 	//insert the root into the tree
 	tree->insertRoot(root);
 	
-	CBSHelper();
-
+	return CBSHelper();
 }
 
 void MAPF::MoveEntities( bool automatic){
@@ -328,34 +327,41 @@ void MAPF::MoveBySilvers(bool hybrid, bool automatic){
 
 void MAPF::MoveByCBS(bool automatic){
 	bool finished = false;
+	if (paths.size() == players.size()){
+		while (!finished){
+			if (!automatic)system("cls");
+			if (!automatic)map->cleanMap();
+			for (unsigned int i = 0; i < players.size(); i++){
+				players[i].moveEntity(time);
+				map->setElement(players[i].getX(), players[i].getY(), (players[i].getId() + 2));
+			}
+			time++;
 
-	while (!finished){
-		if (!automatic)system("cls");
-		if (!automatic)map->cleanMap();
-		for (unsigned int i = 0; i < players.size(); i++){
-			players[i].moveEntity(time);
-			map->setElement(players[i].getX(), players[i].getY(), (players[i].getId() + 2));
+			finished = players[0].finished();
+			for (unsigned int i = 1; i < players.size(); i++){
+				finished = finished && players[i].finished();
+			}
+			if (!automatic)map->printData();
+
+			if (!automatic)system("pause");
 		}
-		time++;
 
-		finished = players[0].finished();
-		for (unsigned int i = 1; i < players.size(); i++){
-			finished = finished && players[i].finished(); 
-		}
-		if (!automatic)map->printData();
-		
-		if (!automatic)system("pause");
-	}
-
-	if (!automatic){
-		for (unsigned int i = 0; i < players.size(); i++){
-			cout << "Path of agent " << players[i].getId() << endl;
-			for (unsigned int j = 0; j < paths[i].size(); j++){
-				cout << "t" << j << ": ";
-				paths[i][j].printValue();
+		if (!automatic){
+			for (unsigned int i = 0; i < players.size(); i++){
+				cout << "Path of agent " << players[i].getId() << endl;
+				for (unsigned int j = 0; j < paths[i].size(); j++){
+					cout << "t" << j << ": ";
+					paths[i][j].printValue();
+				}
 			}
 		}
+
 	}
+	else {
+		cout << "SOLUTION NOT FOUND." << endl;
+		system("pause");
+	}
+	
 }
 
 //This method will check for any conflicts with the paths of the agents
@@ -529,7 +535,12 @@ void MAPF::ConflictSolver(Conflicted c){
 	agents.push_back(partialAgent2);
 
 	//Run the CBS for these situation
-	RunCBSUsingPlayers(agents);
+	bool solutionFound = false;
+	//TODO: Continue this
+	while (!solutionFound){
+		RunCBSUsingPlayers(agents);
+	}
+		
 
 	// Get the partial paths
 	vector<Node> escapePath1 = tree->getSolution()->getPathAt(0);

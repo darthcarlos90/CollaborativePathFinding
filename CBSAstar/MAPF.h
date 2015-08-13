@@ -65,14 +65,14 @@ private:
 	int countCriticalZone(Conflicted c, vector <Node>* criticalZoneNodes = NULL);
 	int GetIndexAtArray(vector<Node> list, Location val); //This searches element by element, so first make sure the element is there
 
-	void RunCBSUsingPlayers(vector<Agent> agents);
+	// Returns false if a solution couldnt be found using CBS
+	bool RunCBSUsingPlayers(vector<Agent> agents);
 
 	//Method that solves the conflicts on the list using CBS
 	void solveConflicts();
 
 	//CBS helper method so that I don't have to repeat this code over and over again
-	
-	void CBSHelper();
+	bool CBSHelper();
 
 	// Helper function to detect blocking elements
 	bool DetectBlockingHelper(unsigned int currentPlayer, unsigned int currentPath, Node destination, unsigned int* timeOc = NULL);

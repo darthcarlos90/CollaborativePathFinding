@@ -79,6 +79,7 @@ public:
 
 	int getMainActor() { return main_actor_id; }
 
+	// If this node could find a solution
 	bool isValidNode() { return validNode; }
 	
 	int getCATCost() const { return CATCost; }

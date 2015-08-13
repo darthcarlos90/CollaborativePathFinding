@@ -127,7 +127,6 @@ void CBTNode::CalculatePaths(){
 		validNode = validNode && agents[i].hasValidSolution();
 		//Get the path, and push it into the paths vector
 		paths.push_back(agents[i].getPath());
-		agents[i].setDistanceDestination(agents[i].pathSize() - 1);
 	}
 
 	
@@ -135,7 +134,10 @@ void CBTNode::CalculatePaths(){
 }
 
 void CBTNode::ExpandNode(){
-	//For catching erros
+	/*
+		If code enters this part, either an error, but most likely, the node has no
+		solution.
+	*/
 	if (conflict.empty){
 		return;
 	}
@@ -166,27 +168,24 @@ void CBTNode::ExpandNode(){
 }
 
 void CBTNode::validatePaths(){
-	unsigned int largest_size = BalancePaths();
-	
-	//Get the largest path size
-	// Uneeded but still 
-	/*for (unsigned int i = 0; i < paths.size(); i++){
-		if (paths[i].size() > largest_size) largest_size = paths[i].size();
-	}*/
-	/*
-		We use the index i as the time, the first element, the one located at 
+	if (validNode){
+		//Get the largest path size
+		unsigned int largest_size = BalancePaths();
+		/*
+		We use the index i as the time, the first element, the one located at
 		t = 0, is the starting point, so that element cant be checked for
 		obvious reasons, that is why the checking starts at 1. NOT
-	*/
-	for (unsigned int i = 0; i < largest_size; i++){
-		if (findConstraintsConflicts(i)){
-			break;
+		*/
+		for (unsigned int i = 0; i < largest_size; i++){
+			if (findConstraintsConflicts(i)){
+				break;
+			}
+		}
+		if (conflict.empty){
+			goal = true;
 		}
 	}
-
-	if (conflict.empty){
-		goal = true;
-	}
+	
 }
 
 /*
@@ -523,12 +522,13 @@ void CBTNode::addConstraint(Constraint c){
 }
 
 void CBTNode::UpdateAgentsPaths(){
-	for (unsigned int i = 0; i < agents.size(); i++){
-		agents[i].setPath(paths[i]);
-		agents[i].setValidPath(true);
+	if (validNode){
+		for (unsigned int i = 0; i < agents.size(); i++){
+			agents[i].setPath(paths[i]);
+			agents[i].setValidPath(true);
+		}
+		SanitizePaths();
 	}
-	SanitizePaths();
-	
 }
 
 int CBTNode::ReplanAgentFromLastIndex(int agentId){

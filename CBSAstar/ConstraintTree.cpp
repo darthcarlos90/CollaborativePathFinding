@@ -2,6 +2,7 @@
 
 ConstraintTree::ConstraintTree(void){
 	root = NULL;
+	validSolution = false;
 }
 
 ConstraintTree::~ConstraintTree(void){
@@ -20,11 +21,12 @@ CBTNode* ConstraintTree::getSolution(){
 		while (n->hasChildren()){
 			n = n->getSmallestChild();
 		}
-
+		validSolution = n->isValidNode();
 		return n;
 	}
 	//Otherwise the root is the actual solution
 	else {
+		validSolution = root->isValidNode();
 		return root;
 	}
 
@@ -39,5 +41,10 @@ void ConstraintTree::terminate_tree(CBTNode* n){
 
 	delete n;
 	n = NULL;
+}
+
+bool ConstraintTree::HasValidSolution(){
+	validSolution = getSolution()->isValidNode();
+	return validSolution;
 }
 

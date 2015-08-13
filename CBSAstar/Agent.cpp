@@ -163,24 +163,27 @@ void Agent::executeSpatialAstar(Location start, Location finish){
 		//std::sort(spatial_openList.begin(), spatial_openList.end());
 	}
 
-	vector<Node> inverse_route;
-	//Once the path has been found, retrace your steps
-	//This is not addding the first element of the route
-	if (P.hasParent()){
-		while (P.hasParent()){
-			inverse_route.push_back(P);
-			P = P.getParent();
+	if (pathFound){
+		vector<Node> inverse_route;
+		//Once the path has been found, retrace your steps
+		//This is not addding the first element of the route
+		if (P.hasParent()){
+			while (P.hasParent()){
+				inverse_route.push_back(P);
+				P = P.getParent();
+			}
 		}
-	}
-	else inverse_route.push_back(P); //This in case the next node is the answer
-	// That is why here, we will add the very first element of the route to the inverse route
-	inverse_route.push_back(A);
+		else inverse_route.push_back(P); //This in case the next node is the answer
+		// That is why here, we will add the very first element of the route to the inverse route
+		inverse_route.push_back(A);
 
-	//For some reason the route is backwards, lets but it on the corect order
-	for (int i = inverse_route.size() - 1; i >= 0; i--){
-		// Remove if something breaks
-		inverse_route[i].clearParent(); // To save memory
-		spatial_route.push_back(inverse_route[i]);
+		//For some reason the route is backwards, lets but it on the corect order
+		for (int i = inverse_route.size() - 1; i >= 0; i--){
+			// Remove if something breaks
+			inverse_route[i].clearParent(); // To save memory
+			spatial_route.push_back(inverse_route[i]);
+		}
+
 	}
 
 	validSolution = pathFound;
