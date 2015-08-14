@@ -297,8 +297,10 @@ Map Map::createSubMap(vector<Location> locations, Location* difference){
 Map Map::expandMap(Matrix<int>* oldData, Location pastDifference, Location * difference){
 	Location lowerBounds = pastDifference;
 	Location upperBounds = Location(pastDifference.x + oldData->get_x_size(), pastDifference.y + oldData->get_y_size());
-	delete oldData; // Delete the past matrix
-	oldData = new Matrix<int>();
+	// TODO: Uncoment the management of the old data pointer if needed
+	//delete oldData; // Delete the past matrix
+	//oldData = new Matrix<int>();
+	Matrix<int> *newData = new Matrix<int>();
 	
 	// New variables
 	Location newLowerBounds;
@@ -312,13 +314,25 @@ Map Map::expandMap(Matrix<int>* oldData, Location pastDifference, Location * dif
 	
 	// Increment
 	if (lowerBounds.x >= 1) newLowerBounds.x = lowerBounds.x - 1;
-	else incrementUpperX = true;
+	else {
+		incrementUpperX = true;
+		newLowerBounds.x = lowerBounds.x;
+	}
 	if (lowerBounds.y >= 1) newLowerBounds.y = lowerBounds.y - 1;
-	else incrementUpperY = true;
+	else {
+		incrementUpperY = true;
+		newLowerBounds.y = lowerBounds.y;
+	}
 	if (upperBounds.x <= data->get_x_size() - 1) newUpperBounds.x = upperBounds.x + 1;
-	else decreatseLowerX = true;
+	else {
+		decreatseLowerX = true;
+		newUpperBounds.x = upperBounds.x;
+	}
 	if (upperBounds.y <= data->get_y_size() - 1) newUpperBounds.y = upperBounds.y + 1;
-	else decreaseLowerY = true;
+	else {
+		decreaseLowerY = true;
+		newUpperBounds.y = upperBounds.y;
+	}
 
 	// Do the rest of the increments
 	if (decreatseLowerX) if (newLowerBounds.x >= 1) newLowerBounds.x--;
@@ -327,10 +341,10 @@ Map Map::expandMap(Matrix<int>* oldData, Location pastDifference, Location * dif
 	if (incrementUpperY) if (newUpperBounds.y <= data->get_y_size() - 1) newUpperBounds.y++;
 
 	//Now that we have the sizes, lets create the new extended map with the new cooridantes
-	*oldData = getSubData(newLowerBounds.x, newLowerBounds.y, newUpperBounds.x, newUpperBounds.y);
+	*newData = getSubData(newLowerBounds.x, newLowerBounds.y, newUpperBounds.x, newUpperBounds.y);
 
 	// createmap 
-	Map submap(oldData);
+	Map submap(newData);
 
 	// If there is a pointer, lets feed it data
 	if (difference){

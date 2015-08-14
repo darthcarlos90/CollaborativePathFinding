@@ -454,8 +454,8 @@ void MAPF::ConflictSolver(Conflicted c){
 	// Let's build the submap
 	Map submap = map->createSubMap(c.locations, &exchange_rate);
 	
-	int time_index = 0;
-	int exit_index = 0;
+	int time_index = -1;
+	int exit_index = -1;
 	// Get the indexes of when the other element gets in and out of the submap
 	GetIndexHelper(indexOther, &time_index, &exit_index);
 
@@ -466,7 +466,7 @@ void MAPF::ConflictSolver(Conflicted c){
 	
 	// Lambda function for easiness to read, and for a better administration
 	std::function<void(void)> updateLocationValues = 
-		[&agentLocation1, &agentExitLocation, &agentLocation2, &agentDestination2, exchange_rate]{
+		[&agentLocation1, &agentExitLocation, &agentLocation2, &agentDestination2, &exchange_rate]{
 
 		agentLocation1.x = agentLocation1.x - exchange_rate.x;
 		agentLocation1.y = agentLocation1.y - exchange_rate.y;
@@ -505,6 +505,7 @@ void MAPF::ConflictSolver(Conflicted c){
 		// If it is the second time we try to run the CBS with the submap with the size of the map
 		// Then there is no solution
 		if (expansionCounter < 1){
+			// TODO: Fix the broken pointer
 			submap = map->expandMap(submap.getData(), exchange_rate, &exchange_rate);
 			
 			// When the map has been modified, call the submethods we are creating
@@ -523,8 +524,8 @@ void MAPF::ConflictSolver(Conflicted c){
 			updateLocationValues();
 			
 			//update the agents
-			partialAgent1 = Agent(Node(0, agentLocation1), Node(0, agentExitLocation), &submap, 0, 5);
-			partialAgent2 = Agent(Node(0, agentLocation2), Node(0, agentDestination2), &submap, 1, 5);
+			Agent partialAgent1 (Node(0, agentLocation1), Node(0, agentExitLocation), &submap, 0, 5);
+			Agent partialAgent2 (Node(0, agentLocation2), Node(0, agentDestination2), &submap, 1, 5);
 			
 			agents.push_back(partialAgent1);
 			agents.push_back(partialAgent2);
@@ -577,8 +578,8 @@ void MAPF::ConflictSolver(Conflicted c){
 
 void MAPF::GetIndexHelper( int indexOther, int *time_index, int *exit_index){
 	// Get at what step does the element enters the submap (And the location)
-	int time_index = -1;
-
+	*time_index = -1;
+	*exit_index = -1;
 	if (time > 0){
 		// The for loop will start at the current time
 		for (unsigned int i = time; i < paths[indexOther].size(); i++){
@@ -613,7 +614,6 @@ void MAPF::GetIndexHelper( int indexOther, int *time_index, int *exit_index){
 	}
 
 	// Now we need to get the index where the element is out of the submap zone
-	int exit_index = -1;
 	for (unsigned int i = *time_index; i < paths[indexOther].size(); i++){
 		if (map->getValueAt(paths[indexOther][i].getLocation()) != -1){
 			*exit_index = i - 1;
