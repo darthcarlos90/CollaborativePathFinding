@@ -459,9 +459,40 @@ void MAPF::ConflictSolver(Conflicted c){
 	// Get the indexes of when the other element gets in and out of the submap
 	GetIndexHelper(indexOther, &time_index, &exit_index);
 
-	// TODO: Below
-	// Maybe the agents should be created on this part of the code, you know because of copy constructos on the map class
-	vector<Agent> agents = createAgents(indexOther, indexToMove, time_index, exit_index, exchange_rate, c.locations[0], &submap);
+	Location agentLocation1 = paths[indexOther][time_index].getLocation();
+	Location agentExitLocation = paths[indexOther][exit_index].getLocation();
+	Location agentLocation2 = c.locations[0];
+	Location agentDestination2 = players[indexToMove].getDestination().getLocation();
+	
+	// Lambda function for easiness to read, and for a better administration
+	std::function<void(void)> updateLocationValues = 
+		[&agentLocation1, &agentExitLocation, &agentLocation2, &agentDestination2, exchange_rate]{
+
+		agentLocation1.x = agentLocation1.x - exchange_rate.x;
+		agentLocation1.y = agentLocation1.y - exchange_rate.y;
+
+		agentExitLocation.x = agentExitLocation.x - exchange_rate.x;
+		agentExitLocation.y = agentExitLocation.y - exchange_rate.y;
+
+
+		agentLocation2.x = agentLocation2.x - exchange_rate.x;
+		agentLocation2.y = agentLocation2.y - exchange_rate.y;
+
+
+		agentDestination2.x = agentDestination2.x - exchange_rate.x;
+		agentDestination2.y = agentDestination2.y - exchange_rate.y;
+	};
+	
+	updateLocationValues();
+	
+	Agent partialAgent1(Node(0, agentLocation1), Node(0, agentExitLocation), &submap, 0, 5); // Move to the exit location
+	Agent partialAgent2(Node(0, agentLocation2), Node(0, agentDestination2), &submap, 1, 5); // Move to its destination, let CBS do the magic
+
+	// Run the CBS only for these agents
+	vector<Agent> agents;
+	agents.push_back(partialAgent1);
+	agents.push_back(partialAgent2);
+
 	
 	int expansionCounter = 0;
 	// Run CBS to try to find a solution for this problem
@@ -475,18 +506,36 @@ void MAPF::ConflictSolver(Conflicted c){
 		// Then there is no solution
 		if (expansionCounter < 1){
 			submap = map->expandMap(submap.getData(), exchange_rate, &exchange_rate);
-			// When the map has been modified, call the submathods we are creating
-			/*
-				TODO: Even better, create a lambda function for the creation of the agents, so it can only acces
-				elements within this scope
-			*/
+			
+			// When the map has been modified, call the submethods we are creating
+			agents.clear();// clear the agents
+			
+			// update the indexes
+			GetIndexHelper(indexOther, &time_index, &exit_index);
+			
+			// update the locations
+			agentLocation1 = paths[indexOther][time_index].getLocation();
+			agentExitLocation = paths[indexOther][exit_index].getLocation();
+			agentLocation2 = c.locations[0];
+			agentDestination2 = players[indexToMove].getDestination().getLocation();
+			
+			// update the values
+			updateLocationValues();
+			
+			//update the agents
+			partialAgent1 = Agent(Node(0, agentLocation1), Node(0, agentExitLocation), &submap, 0, 5);
+			partialAgent2 = Agent(Node(0, agentLocation2), Node(0, agentDestination2), &submap, 1, 5);
+			
+			agents.push_back(partialAgent1);
+			agents.push_back(partialAgent2);
+
 		}
 		else {
 			break;
 		}
 		
 	}
-		
+	// TODO: What happens when a soultion cant be found
 
 	// Get the partial paths
 	vector<Node> escapePath1 = tree->getSolution()->getPathAt(0);
@@ -583,35 +632,6 @@ void MAPF::GetIndexHelper( int indexOther, int *time_index, int *exit_index){
 
 	//clean the map of the -1
 	map->cleanMap();
-}
-
-vector<Agent> MAPF::createAgents(int indexOther, int indexToMove, int time_index, int exit_index, Location exchange_rate, Location blockingLocation, Map &submap){
-	//Now we need to change from normal map coordinates, to submap coordinates
-	Location agentLocation1 = paths[indexOther][time_index].getLocation();
-	agentLocation1.x = agentLocation1.x - exchange_rate.x;
-	agentLocation1.y = agentLocation1.y - exchange_rate.y;
-
-	Location agentExitLocation = paths[indexOther][exit_index].getLocation();
-	agentExitLocation.x = agentExitLocation.x - exchange_rate.x;
-	agentExitLocation.y = agentExitLocation.y - exchange_rate.y;
-
-	Location agentLocation2 = blockingLocation;
-	agentLocation2.x = agentLocation2.x - exchange_rate.x;
-	agentLocation2.y = agentLocation2.y - exchange_rate.y;
-
-	Location agentDestination2 = players[indexToMove].getDestination().getLocation();
-	agentDestination2.x = agentDestination2.x - exchange_rate.x;
-	agentDestination2.y = agentDestination2.y - exchange_rate.y;
-
-	Agent partialAgent1(Node(0, agentLocation1), Node(0, agentExitLocation), &submap, 0, 5); // Move to the exit location
-	Agent partialAgent2(Node(0, agentLocation2), Node(0, agentDestination2), &submap, 1, 5); // Move to its destination, let CBS do the magic
-
-	// Run the CBS only for these agents
-	vector<Agent> agents;
-	agents.push_back(partialAgent1);
-	agents.push_back(partialAgent2);
-
-	return agents;
 }
 
 /*

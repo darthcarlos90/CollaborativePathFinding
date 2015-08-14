@@ -1,6 +1,7 @@
 #pragma once
 #include "FileManager.h"
 #include "ConstraintTree.h"
+#include <functional>
 
 /*
 	Class MAPF
@@ -63,7 +64,6 @@ private:
 	// Here are the helper functions for the conflict solver method
 	//Gets the indexes of when the agents enter and go out of the submap
 	void GetIndexHelper(int indexOther, int *time_index, int *exit_index);
-	vector<Agent> createAgents(int indexOther, int indexToMove, int time_index, int exit_index, Location exchange_rate, Location blockingLocation, Map &submap);
 
 	
 	
