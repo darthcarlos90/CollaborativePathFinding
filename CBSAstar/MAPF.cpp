@@ -506,6 +506,7 @@ void MAPF::ConflictSolver(Conflicted c){
 		// Then there is no solution
 		if (expansionCounter < 1){
 			// TODO: Fix the broken pointer
+			
 			submap = map->expandMap(submap.getData(), exchange_rate, &exchange_rate);
 			
 			// When the map has been modified, call the submethods we are creating
@@ -525,7 +526,7 @@ void MAPF::ConflictSolver(Conflicted c){
 			
 			//update the agents
 			Agent partialAgent1 (Node(0, agentLocation1), Node(0, agentExitLocation), &submap, 0, 5);
-			Agent partialAgent2 (Node(0, agentLocation2), Node(0, agentDestination2), &submap, 1, 5);
+			Agent partialAgent2(Node(0, agentLocation2), Node(0, agentDestination2), &submap, 1, 5);
 			
 			agents.push_back(partialAgent1);
 			agents.push_back(partialAgent2);

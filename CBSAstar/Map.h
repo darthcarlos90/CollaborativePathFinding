@@ -18,6 +18,9 @@ public:
 	void printData();
 	int getValueAt(int x, int y);
 	int getValueAt(Location loc);
+
+	// Debug method to test a broken pointer
+	void clearMap();
 	
 
 	//Another fix, this changes to public, and getAdjacents and get timed Adjacents go to unit
@@ -57,7 +60,7 @@ public:
 	Map createSubMap(vector<Location> location, Location* difference = NULL);
 
 	// If the solution couldnt be found with the map size, make it bigger
-	Map expandMap(Matrix<int>* oldData, Location pastDifference, Location * difference = NULL);
+	Matrix<int> expandMap(Matrix<int> oldData, Location pastDifference, Location * difference = NULL);
 
 
 	bool hasData() { return has_data; }

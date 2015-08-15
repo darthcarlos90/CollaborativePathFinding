@@ -25,6 +25,11 @@ Map::Map(void){
 
 //Copy cosntructor
 Map::Map(const Map& m){
+	// Release old memory
+	if (data){
+		delete data;
+		data = NULL;
+	}
 	data = new Matrix<int>();
 	*data = *m.data; // trying to create a copy of the data, not point to the pointer
 	reservationTable = m.reservationTable;
@@ -294,13 +299,11 @@ Map Map::createSubMap(vector<Location> locations, Location* difference){
 	return submap;
 }
 
-Map Map::expandMap(Matrix<int>* oldData, Location pastDifference, Location * difference){
+Matrix<int> Map::expandMap(Matrix<int> oldData, Location pastDifference, Location * difference){
+	// TODO: Test this
 	Location lowerBounds = pastDifference;
-	Location upperBounds = Location(pastDifference.x + oldData->get_x_size(), pastDifference.y + oldData->get_y_size());
-	// TODO: Uncoment the management of the old data pointer if needed
-	//delete oldData; // Delete the past matrix
-	//oldData = new Matrix<int>();
-	Matrix<int> *newData = new Matrix<int>();
+	Location upperBounds = Location(pastDifference.x + oldData.get_x_size(), pastDifference.y + oldData.get_y_size());
+	Matrix<int> newData;
 	
 	// New variables
 	Location newLowerBounds;
@@ -341,10 +344,10 @@ Map Map::expandMap(Matrix<int>* oldData, Location pastDifference, Location * dif
 	if (incrementUpperY) if (newUpperBounds.y <= data->get_y_size() - 1) newUpperBounds.y++;
 
 	//Now that we have the sizes, lets create the new extended map with the new cooridantes
-	*newData = getSubData(newLowerBounds.x, newLowerBounds.y, newUpperBounds.x, newUpperBounds.y);
+	newData = getSubData(newLowerBounds.x, newLowerBounds.y, newUpperBounds.x, newUpperBounds.y);
 
 	// createmap 
-	Map submap(newData);
+	//Map submap(newData);
 
 	// If there is a pointer, lets feed it data
 	if (difference){
@@ -352,11 +355,19 @@ Map Map::expandMap(Matrix<int>* oldData, Location pastDifference, Location * dif
 	}
 
 	//return the result
-	return submap;
+	return newData;
 
 
 }
 
 void Map::cleanConstraintsReservations(){
 	reservationTable.clean();
+}
+
+void Map::cleanMap(){
+	if (data){
+		delete data;
+		data = NULL;
+	}
+
 }
