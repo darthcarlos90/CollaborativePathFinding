@@ -505,9 +505,10 @@ void MAPF::ConflictSolver(Conflicted c){
 		// If it is the second time we try to run the CBS with the submap with the size of the map
 		// Then there is no solution
 		if (expansionCounter < 1){
-			// TODO: Fix the broken pointer
 			
-			submap = map->expandMap(submap.getData(), exchange_rate, &exchange_rate);
+			submap.setData(map->expandMap(submap.getXValue() - 1, submap.getYValue() - 1, exchange_rate, &exchange_rate));
+			system("cls");
+			cout << *submap.getData() << endl;
 			
 			// When the map has been modified, call the submethods we are creating
 			agents.clear();// clear the agents
@@ -575,6 +576,8 @@ void MAPF::ConflictSolver(Conflicted c){
 	//Update the paths
 	paths[indexOther] = otherAgent.getPath();
 	paths[indexToMove] = toMove.getPath();
+	submap.clearData();// manually destroy the map
+
 }
 
 void MAPF::GetIndexHelper( int indexOther, int *time_index, int *exit_index){
@@ -739,10 +742,7 @@ void MAPF::SimpleBlocking(){
 						}
 						else c.locations.push_back(destination.getLocation());
 
-
-
-
-						c.times.push_back(timeOcurrance + 1); /* We add 1 because a node at index i, ocurrs at time i + 1*/
+						c.times.push_back(timeOcurrance); 
 
 						if (map->adjacentHelper(destination.getLocation()).size() > 2){
 							// If there are more than 2 adjacents to this node, we have a simple blocking state

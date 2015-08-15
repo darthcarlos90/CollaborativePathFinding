@@ -66,9 +66,9 @@ Matrix<T> :: ~Matrix() {
 // the if statement whith breakpoints where added for testing purposes
 template <typename T>
 T Matrix<T>::get_element(int x, int y) const {
-	/*if (x < 0 || x >= x_size || y < 0 || y >= y_size){
-	return NULL;
-	}*/
+	if (x < 0 || x >= x_size || y < 0 || y >= y_size){
+		cout << "holis";
+	}
 	return cells[x][y];
 }
 
@@ -76,9 +76,9 @@ T Matrix<T>::get_element(int x, int y) const {
 
 template <typename T>
 void Matrix<T>::set_element(int x, int y, T elem){
-	/*if (x < 0 || x >= x_size || y < 0 || y >= y_size){
-	return NULL;
-	}*/
+	if (x < 0 || x >= x_size || y < 0 || y >= y_size){
+		cout << "holis";
+	}
 	cells[x][y] = elem;
 }
 

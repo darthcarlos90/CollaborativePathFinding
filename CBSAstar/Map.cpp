@@ -38,8 +38,12 @@ Map::Map(const Map& m){
 }
 
 Map::~Map(void){
-	delete data;
-	data = NULL; 
+	has_data = false;
+	if (data){
+		delete data;
+		data = NULL;
+	}
+	
 	//delete nodes;
 }
 
@@ -240,7 +244,10 @@ Matrix<int> Map::getSubData(int lowerX, int lowerY, int upperX, int upperY){
 }
 
 void Map::setData(Matrix<int> val) { 
-	if (!has_data) data = new Matrix<int>();
+	if (!has_data){ 
+		delete data;
+		data = new Matrix<int>();
+	}
 	*data = val;
 	has_data = true;
 }
@@ -299,10 +306,10 @@ Map Map::createSubMap(vector<Location> locations, Location* difference){
 	return submap;
 }
 
-Matrix<int> Map::expandMap(Matrix<int> oldData, Location pastDifference, Location * difference){
+Matrix<int> Map::expandMap(int old_x, int old_y, Location pastDifference, Location * difference){
 	// TODO: Test this
 	Location lowerBounds = pastDifference;
-	Location upperBounds = Location(pastDifference.x + oldData.get_x_size(), pastDifference.y + oldData.get_y_size());
+	Location upperBounds = Location(pastDifference.x + old_x, pastDifference.y + old_y);
 	Matrix<int> newData;
 	
 	// New variables
@@ -326,12 +333,12 @@ Matrix<int> Map::expandMap(Matrix<int> oldData, Location pastDifference, Locatio
 		incrementUpperY = true;
 		newLowerBounds.y = lowerBounds.y;
 	}
-	if (upperBounds.x <= data->get_x_size() - 1) newUpperBounds.x = upperBounds.x + 1;
+	if (upperBounds.x < data->get_x_size() - 1) newUpperBounds.x = upperBounds.x + 1;
 	else {
 		decreatseLowerX = true;
 		newUpperBounds.x = upperBounds.x;
 	}
-	if (upperBounds.y <= data->get_y_size() - 1) newUpperBounds.y = upperBounds.y + 1;
+	if (upperBounds.y < data->get_y_size() - 1) newUpperBounds.y = upperBounds.y + 1;
 	else {
 		decreaseLowerY = true;
 		newUpperBounds.y = upperBounds.y;
@@ -356,18 +363,17 @@ Matrix<int> Map::expandMap(Matrix<int> oldData, Location pastDifference, Locatio
 
 	//return the result
 	return newData;
-
-
 }
 
 void Map::cleanConstraintsReservations(){
 	reservationTable.clean();
 }
 
-void Map::cleanMap(){
+void Map::clearData(){
 	if (data){
 		delete data;
 		data = NULL;
+		has_data = false;
 	}
 
 }
