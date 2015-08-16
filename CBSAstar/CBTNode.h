@@ -83,6 +83,9 @@ public:
 	bool isValidNode() { return validNode; }
 	
 	int getCATCost() const { return CATCost; }
+
+	// This method balances the paths of the agents so a proper check coudld be done
+	int BalancePaths();
 	
 
 private:
@@ -97,8 +100,7 @@ private:
 
 	void UpdateCAT();
 	
-	// This method balances the paths of the agents so a proper check coudld be done
-	int BalancePaths();
+	
 	// The oposite of the above
 	void SanitizePaths();
 

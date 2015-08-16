@@ -1190,15 +1190,14 @@ void Agent::AddToTimedSpatialOpenListCAT(Node n){
 void Agent::addToTimeOpenList(Node n){
 	bool atClosedList = FindNodeAtTimeClosedList(n);// check if it is in the closed list
 	if (atClosedList){// if it is at the closed list
-		atClosedList = true;
+		//Get the index of the element found
+		int index = GetIndexOfElementAtTimeClosedList(n.getLocation());
 		/*
 			The only way to repeat an element in the closed list is, add it only
 			if you are a repeated step, otherwise dont add it.
 		*/
-		if (n.hasParent()){
-			if (n == n.getParent()){
-				atClosedList = false;
-			}
+		if (n.getDepth() !=  time_closedList[index].getDepth()){
+			atClosedList = false;
 		}
 	}
 

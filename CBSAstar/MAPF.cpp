@@ -453,15 +453,27 @@ void MAPF::ConflictSolver(Conflicted c){
 
 	// Let's build the submap
 	Map submap = map->createSubMap(c.locations, &exchange_rate);
+	/*
+		Until the number of spaces is bigger than the number of obstacles, or it
+		reaches its total size. This just in case we have a narrow path element.
+	*/
+	while (submap.getNumberObstacles() > submap.getNumberSpaces() &&
+		map->NumberAdjacents(toMove.getDestinationLocation()) <= 2){
+		submap.setData(map->expandMap(submap.getXValue() - 1, submap.getYValue() - 1, exchange_rate, &exchange_rate));
+		// If weve got the whole map, break
+		if (submap.getXValue() == map->getXValue() && submap.getYValue() == map->getYValue()) break;
+	}
 	
 	int time_index = -1;
 	int exit_index = -1;
 	// Get the indexes of when the other element gets in and out of the submap
-	GetIndexHelper(indexOther, &time_index, &exit_index);
+	GetIndexHelper(indexOther, &time_index, &exit_index, submap.getXValue(), submap.getYValue());
 
 	Location agentLocation1 = paths[indexOther][time_index].getLocation();
 	Location agentExitLocation = paths[indexOther][exit_index].getLocation();
-	Location agentLocation2 = c.locations[0];
+	Location agentLocation2;
+	if (toMove.pathSize() <= time_index)	agentLocation2 = c.locations[0];
+	else agentLocation2 = paths[indexToMove][time_index].getLocation();
 	Location agentDestination2 = players[indexToMove].getDestination().getLocation();
 	
 	// Lambda function for easiness to read, and for a better administration
@@ -505,8 +517,13 @@ void MAPF::ConflictSolver(Conflicted c){
 		// If it is the second time we try to run the CBS with the submap with the size of the map
 		// Then there is no solution
 		if (expansionCounter < 1){
-			
 			submap.setData(map->expandMap(submap.getXValue() - 1, submap.getYValue() - 1, exchange_rate, &exchange_rate));
+			while (submap.getNumberObstacles() > submap.getNumberSpaces() &&
+				map->NumberAdjacents(toMove.getDestinationLocation()) <= 2){
+				submap.setData(map->expandMap(submap.getXValue() - 1, submap.getYValue() - 1, exchange_rate, &exchange_rate));
+				// If weve got the whole map, break
+				if (submap.getXValue() == map->getXValue() && submap.getYValue() == map->getYValue()) break;
+			}
 			system("cls");
 			cout << *submap.getData() << endl;
 			
@@ -514,12 +531,13 @@ void MAPF::ConflictSolver(Conflicted c){
 			agents.clear();// clear the agents
 			
 			// update the indexes
-			GetIndexHelper(indexOther, &time_index, &exit_index);
+			GetIndexHelper(indexOther, &time_index, &exit_index, submap.getXValue(), submap.getYValue());
 			
 			// update the locations
 			agentLocation1 = paths[indexOther][time_index].getLocation();
 			agentExitLocation = paths[indexOther][exit_index].getLocation();
-			agentLocation2 = c.locations[0];
+			if (toMove.pathSize() <= time_index)	agentLocation2 = c.locations[0];
+			else agentLocation2 = paths[indexToMove][time_index].getLocation();
 			agentDestination2 = players[indexToMove].getDestination().getLocation();
 			
 			// update the values
@@ -539,32 +557,39 @@ void MAPF::ConflictSolver(Conflicted c){
 		
 	}
 	// TODO: What happens when a soultion cant be found
-
+	int limit = tree->getSolution()->BalancePaths();
 	// Get the partial paths
 	vector<Node> escapePath1 = tree->getSolution()->getPathAt(0);
 	vector<Node> escapePath2 = tree->getSolution()->getPathAt(1);
 
 
 	// Both routes are supposed to be of the same size, so we will transform the coordinates to correct coordinates
-	for (unsigned int i = 0; i < escapePath1.size(); i++){
+	for (unsigned int i = 0; i < limit; i++){
 		escapePath1[i].ConvertToMapCoordinates(exchange_rate);
 		escapePath2[i].ConvertToMapCoordinates(exchange_rate);
 	}
 	
-
+	bool comparison = toMove.pathSize() <= time_index;
 	// Once the paths have been calculated, now we can update the paths of the agents (converting them to normal coordinates)
 	vector<Node> new_path;
+	vector<Node> new_path2;
 	
 	// First get all the elements before the agent got into the danger zone
 	for (int i = 0; i < time_index; i++){
 		new_path.push_back(paths[indexOther][i]);
+		if (!comparison) new_path2.push_back(paths[indexToMove][i]);
 	}
 
+	
+
 	// Now, update paths with the elements of the escape routes
-	for (unsigned int i = 0; i < escapePath1.size(); i++){
+	for (unsigned int i = 0; i < limit; i++){
 		new_path.push_back(escapePath1[i]);
-		toMove.PushElementAtTheBackOfRoute(escapePath2[i]);
+		if (comparison)	toMove.PushElementAtTheBackOfRoute(escapePath2[i]);
+		else new_path2.push_back(escapePath2[i]);
+		
 	}
+	
 
 	// Finish updating the path of the element that is following its path
 	for (unsigned int i = exit_index; i < otherAgent.pathSize(); i++){
@@ -572,38 +597,63 @@ void MAPF::ConflictSolver(Conflicted c){
 	}
 
 	otherAgent.setPath(new_path); //Update the path directly to the agent
+	if (!comparison) toMove.setPath(new_path2);
+	//Clean the maps
+	otherAgent.SanitizePath();
+	toMove.SanitizePath();
 
 	//Update the paths
 	paths[indexOther] = otherAgent.getPath();
 	paths[indexToMove] = toMove.getPath();
 	submap.clearData();// manually destroy the map
 
+	
+	
+
 }
 
-void MAPF::GetIndexHelper( int indexOther, int *time_index, int *exit_index){
+void MAPF::GetIndexHelper( int indexOther, int *time_index, int *exit_index, int submapSizeX, int submapSizeY){
 	// Get at what step does the element enters the submap (And the location)
 	*time_index = -1;
 	*exit_index = -1;
+	
+	
 	if (time > 0){
-		// The for loop will start at the current time
-		for (unsigned int i = time; i < paths[indexOther].size(); i++){
-			// If the element of the map at that location is -1, we find the danger zone
-			if (map->getValueAt(paths[indexOther][i].getLocation()) == -1){
-				*time_index = i;
-				break;
+		if (submapSizeX == map->getXValue() && submapSizeY == map->getYValue()){
+			// If the size of the map is the same as the submap, force values
+			*time_index = time;
+			*exit_index = -1;
+		}
+		else {
+			// The for loop will start at the current time
+			for (unsigned int i = time; i < paths[indexOther].size(); i++){
+				// If the element of the map at that location is -1, we find the danger zone
+				if (map->getValueAt(paths[indexOther][i].getLocation()) == -1){
+					*time_index = i;
+					break;
+				}
 			}
-		}
 
-		if (*time_index == -1){
-			*time_index = time - 1;
+			if (*time_index == -1){
+				*time_index = time - 1;
+			}
+
 		}
+		
 	}
 	else {
-		for (unsigned int i = 0; i < paths[indexOther].size(); i++){
-			// If the element of the map at that location is -1, we find the danger zone
-			if (map->getValueAt(paths[indexOther][i].getLocation()) == -1){
-				*time_index = i;
-				break;
+		if (submapSizeX == map->getXValue() && submapSizeY == map->getYValue()){
+			// If the size of the map is the same as the submap, force values
+			*time_index = -1;
+			*exit_index = -1;
+		}
+		else {
+			for (unsigned int i = 0; i < paths[indexOther].size(); i++){
+				// If the element of the map at that location is -1, we find the danger zone
+				if (map->getValueAt(paths[indexOther][i].getLocation()) == -1){
+					*time_index = i;
+					break;
+				}
 			}
 		}
 
@@ -612,16 +662,18 @@ void MAPF::GetIndexHelper( int indexOther, int *time_index, int *exit_index){
 		Therefore the starting index will be 0
 		*/
 		if (*time_index == -1){
-			time_index = 0;
+			*time_index = 0;
 		}
 
 	}
 
-	// Now we need to get the index where the element is out of the submap zone
-	for (unsigned int i = *time_index; i < paths[indexOther].size(); i++){
-		if (map->getValueAt(paths[indexOther][i].getLocation()) != -1){
-			*exit_index = i - 1;
-			break;
+	if (!(submapSizeX == map->getXValue() && submapSizeY == map->getYValue())){
+		// Now we need to get the index where the element is out of the submap zone
+		for (unsigned int i = *time_index; i < paths[indexOther].size(); i++){
+			if (map->getValueAt(paths[indexOther][i].getLocation()) != -1){
+				*exit_index = i - 1;
+				break;
+			}
 		}
 	}
 

@@ -63,7 +63,7 @@ private:
 
 	// Here are the helper functions for the conflict solver method
 	//Gets the indexes of when the agents enter and go out of the submap
-	void GetIndexHelper(int indexOther, int *time_index, int *exit_index);
+	void GetIndexHelper(int indexOther, int *time_index, int *exit_index, int submapSizeX, int submapSizeY);
 
 	
 	

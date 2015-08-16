@@ -10,17 +10,25 @@ Map::Map(Matrix<int>* mat){
 	else {
 		has_data = false;
 	}
+	numberObstacles = 0;
+	numberSpaces = 0;
+	countStuff();
 }
 
 Map::Map(unsigned int size_x, unsigned int size_y){
 	data = new Matrix<int>(size_x, size_y);
 	has_data = true;
+	numberObstacles = 0;
+	numberSpaces = 0;
+	countStuff();
 }
 
 //Empty constructor for several purposes
 Map::Map(void){
 	data = NULL; //Make the data pointer null
 	has_data = false;
+	numberObstacles = 0;
+	numberSpaces = 0;
 }
 
 //Copy cosntructor
@@ -35,6 +43,8 @@ Map::Map(const Map& m){
 	reservationTable = m.reservationTable;
 	t = m.t;
 	has_data = m.has_data;
+	numberObstacles = m.numberObstacles;
+	numberSpaces = m.numberSpaces;
 }
 
 Map::~Map(void){
@@ -214,13 +224,16 @@ int Map::CalculateD(){
 
 Matrix<int> Map::getSubData(int lowerX, int lowerY, int upperX, int upperY){
 	// We add 1 to make it row/column inclusive
-	int x_size = (upperX - lowerX) + 1;
-	int y_size = (upperY - lowerY) + 1;
+	// if it is possible
+	int x_size = (upperX - lowerX);
+	if (x_size < data->get_x_size()) x_size++;
+	int y_size = (upperY - lowerY);
+	if (y_size < data->get_y_size()) y_size++;
 	
 	Matrix<int> matrix(x_size, y_size);
 	int x = 0;
 	int y = 0;
-	// Populate the matrix with the values from this matrix
+	// Populate the new matrix with the values from this matrix
 	// Mark our matrix with -1 creating a "danger zone"
 	for (int i = lowerX; i <= upperX; i++){
 		for (int j = lowerY; j <= upperY; j++){
@@ -236,8 +249,8 @@ Matrix<int> Map::getSubData(int lowerX, int lowerY, int upperX, int upperY){
 		y = 0;
 	}
 	//Uncomment for debugging
-	/*cout << *data;
-	cout << matrix;*/
+	cout << *data;
+	cout << matrix;
 	
 	return matrix;
 
@@ -250,6 +263,7 @@ void Map::setData(Matrix<int> val) {
 	}
 	*data = val;
 	has_data = true;
+	countStuff();
 }
 
 std::vector<Constraint> Map::GetReservationTableConstraints(){
@@ -347,8 +361,8 @@ Matrix<int> Map::expandMap(int old_x, int old_y, Location pastDifference, Locati
 	// Do the rest of the increments
 	if (decreatseLowerX) if (newLowerBounds.x >= 1) newLowerBounds.x--;
 	if (decreaseLowerY) if (newLowerBounds.y >= 1) newLowerBounds.y--;
-	if (incrementUpperX) if (newUpperBounds.x <= data->get_x_size() - 1) newUpperBounds.x++;
-	if (incrementUpperY) if (newUpperBounds.y <= data->get_y_size() - 1) newUpperBounds.y++;
+	if (incrementUpperX) if (newUpperBounds.x < data->get_x_size() - 1) newUpperBounds.x++;
+	if (incrementUpperY) if (newUpperBounds.y < data->get_y_size() - 1) newUpperBounds.y++;
 
 	//Now that we have the sizes, lets create the new extended map with the new cooridantes
 	newData = getSubData(newLowerBounds.x, newLowerBounds.y, newUpperBounds.x, newUpperBounds.y);
@@ -376,4 +390,13 @@ void Map::clearData(){
 		has_data = false;
 	}
 
+}
+
+void Map::countStuff(){
+	for (int i = 0; i < data->get_x_size(); i++){
+		for (int j = 0; j < data->get_y_size(); j++){
+			if (data->get_element(i, j) == 1) numberObstacles++;
+			else numberSpaces++;
+		}
+	}
 }

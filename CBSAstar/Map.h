@@ -67,11 +67,14 @@ public:
 
 	int getXValue() { return data->get_x_size(); }
 	int getYValue() { return data->get_y_size(); }
+	int getNumberObstacles() { return numberObstacles; }
+	int getNumberSpaces() { return numberSpaces; }
 
 
 private:
 
 	Node getNode(int x, int y);
+	void countStuff();
 
 	Matrix<int> *data;
 	//Matrix<Node> *nodes;//I dont know if I need this or not, so Ill just let it here
@@ -80,5 +83,7 @@ private:
 	int t; // this represents the map at a certain time
 
 	bool has_data;  // Boolean for all those ugly pointer exceptions that may occur
+	int numberObstacles;
+	int numberSpaces;
 
 };

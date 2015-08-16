@@ -198,6 +198,7 @@ void Node::ConvertToSubmapCoordinates(Location exchange){
 void Node::ConvertToMapCoordinates(Location exchange){
 	x = x + exchange.x;
 	y = y + exchange.y;
+	// Update locations as well
 	my_location.x = x;
 	my_location.y = y;
 }
