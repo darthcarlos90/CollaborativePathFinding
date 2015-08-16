@@ -556,7 +556,7 @@ void MAPF::ConflictSolver(Conflicted c){
 	vector<Node> new_path;
 	
 	// First get all the elements before the agent got into the danger zone
-	for (int i = 0; i <= time_index; i++){
+	for (int i = 0; i < time_index; i++){
 		new_path.push_back(paths[indexOther][i]);
 	}
 
