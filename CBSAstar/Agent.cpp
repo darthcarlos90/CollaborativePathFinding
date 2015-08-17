@@ -19,6 +19,7 @@ actualNode(location), startingPoint(location)
 	index_lower_time_openList = 0;
 	validSolution = false;
 	priority = false;
+	last_reserved = 0;
 }
 
 Agent::~Agent(void){
@@ -233,22 +234,21 @@ int Agent::executebacksearchAstar(Location start, Location finish){
 	
 }
 
+// Move method used by Silvers and Hybrid
 void Agent::move(unsigned int t){
 	/*
 	Step 3: Every t, advance one spot in the road.
 	- If d has been reached or we reaced to the end of the road, stop;
 		otherwise, continue advancing.
 	*/
-	
 	if (actualNode == destination && t >= time_route.size()) {
 		active = false; //we reached the end of the route 
+		reserveDestination();
 	}
 	else {
 		actualNode = time_route[t];
 		stepsTaken++;
 	}
-		
-	//map->setElement(actualNode.getX(), actualNode.getY(), id + 2);
 	
 
 	cout << "Unit: " << id + 2 << " at location: " << actualNode.getX() << " , " << actualNode.getY();
@@ -298,7 +298,20 @@ void Agent::executeTimeSpaceAstar(int starting_time){
 	*/
 	// Now that we have a route, reserve it
 	// If we dont have a valid solution, dont reserve it
-	if (validSolution) reserveRoute(starting_time);
+	if (validSolution) {
+		reserveRoute(starting_time);
+
+		// Now, if the first element of the time route is not the initial step, add it
+		if (time_route[0] != startingPoint){
+			vector<Node> temp = time_route;
+			time_route.clear();
+			time_route.push_back(startingPoint);
+			for (unsigned int i = 0; i < temp.size(); i++){
+				time_route.push_back(temp[i]);
+			}
+		}
+	}
+		
 }
 
 /*
@@ -472,8 +485,6 @@ void Agent::TimeSpaceAstarHelper(Location start, Location finish, int time){
 	}
 
 	validSolution = pathFound;
-
-	
 }
 
 
@@ -821,11 +832,11 @@ void Agent::ModifyRouteOnConstraints(vector<Constraint> constraints, bool rerout
 				
 }
 
+// Move method used when the search is done by CBS
 void Agent::moveEntity(unsigned int t){
 	
 	if (t < time_route.size()){
 		actualNode = time_route[t];
-		//cout << "Unit: " << id + 2 << " at location: " << actualNode.getX() << " , " << actualNode.getY() << endl;
 	} else if (t > time_route.size()){ // If the time overpasses the amount of steps available
 		//Just checking if the acual node is the destination
 		if (actualNode == destination){
@@ -900,6 +911,13 @@ void Agent::reserveRoute(int starting_time){
 			//If it is not reserved, reserve it
 			map->reserve(reservation_time, time_route[i], id);
 			reservation_time++;
+			// If it is destination, lets reserve it for another D steps
+			if (time_route[i] == destination){
+				for (unsigned int diff = 0; diff < steps_limit; diff++){
+					map->reserve(reservation_time + diff, destination, id);
+				}
+				last_reserved = reservation_time + steps_limit;
+			}
 		}
 	}
 
@@ -933,6 +951,14 @@ void Agent::reserveRoute(int starting_time){
 		}
 	}
 
+}
+
+void Agent::reserveDestination(){
+	for (unsigned int i = 0; i < steps_limit; i++){
+		map->reserve(last_reserved + i, destination, id);
+	}
+
+	last_reserved = last_reserved + steps_limit;
 }
 
 bool Agent::FindNodeAtList(Node n, vector<Node> list){
@@ -1196,9 +1222,13 @@ void Agent::addToTimeOpenList(Node n){
 			The only way to repeat an element in the closed list is, add it only
 			if you are a repeated step, otherwise dont add it.
 		*/
-		if (n.getDepth() !=  time_closedList[index].getDepth()){
-			atClosedList = false;
+		if (n.hasParent()){
+			if (n == n.getParent()){
+				atClosedList = false;
+			}
+
 		}
+		
 	}
 
 	if (!atClosedList){ // if it isnt at the closed list

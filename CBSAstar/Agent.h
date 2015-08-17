@@ -221,6 +221,10 @@ private:
 	bool validMovement(Location location, int time, vector<Constraint> constraints);
 
 	int FindNumberOcurrancesCAT(Location location);
+
+	void reserveDestination();
+
+	
 	
 	int id;
 
@@ -256,6 +260,8 @@ private:
 	vector<Constraint> CAT;
 
 	bool priority;// TODO: Wipe this if this doesn't work
+
+	int last_reserved;
 
 
 };

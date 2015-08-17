@@ -172,9 +172,9 @@ void CBTNode::validatePaths(){
 		//Get the largest path size
 		unsigned int largest_size = BalancePaths();
 		/*
-		We use the index i as the time, the first element, the one located at
-		t = 0, is the starting point, so that element cant be checked for
-		obvious reasons, that is why the checking starts at 1. NOT
+			We use the index i as the time, the first element, the one located at
+			t = 0, is the starting point, so that element cant be checked for
+			obvious reasons, that is why the checking starts at 1. NOT
 		*/
 		for (unsigned int i = 0; i < largest_size; i++){
 			if (findConstraintsConflicts(i)){
@@ -185,7 +185,6 @@ void CBTNode::validatePaths(){
 			goal = true;
 		}
 	}
-	
 }
 
 /*

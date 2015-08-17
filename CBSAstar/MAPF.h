@@ -53,6 +53,7 @@ private:
 	int getIndexOfAgent(int id);
 
 	//Each method consists detects one type of conflict
+	bool Invalid(); // When Silvers throws an invalid result, this means paths are empty, so the other methods should not run
 	void Blocking(); // Detects if a finished element blocks the path of another element
 	// Helper functions for the blocking element
 	void SimpleBlocking();
@@ -60,6 +61,7 @@ private:
 	
 	void SolveBlockingComplex(Conflicted c);
 	void ConflictSolver(Conflicted c);
+	void SolveInvalidConflict();
 
 	// Here are the helper functions for the conflict solver method
 	//Gets the indexes of when the agents enter and go out of the submap
@@ -89,7 +91,7 @@ private:
 	void AddMapObstacles(int limit);
 	bool ValidMap();
 
-	
+	void validateSilversPaths();
 
 
 	//TODO: Keep adding more elements throught the development of this project.

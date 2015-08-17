@@ -38,8 +38,6 @@ MAPF::MAPF(string filename){
 			cout << "The data on the file given is incorrect, please try again" << endl;
 		else cout << "Finished loading data from the file" << endl;
 
-
-
 		time = 0;
 	}
 	else {
@@ -190,6 +188,59 @@ void MAPF::StartSilversPathFinding(){
 		players[i].executeTimeSpaceAstar(0); // because element 0 is the starting position
 		paths.push_back(players[i].getPath());
 	}
+
+	validateSilversPaths();
+}
+
+void MAPF::validateSilversPaths(){
+	// Check tha paths for some left oput bugs from silvers
+	unsigned int largestSize = 0;
+	bool validPaths = true;
+	// Get the largest pathsize
+	for (unsigned int i = 0; i < players.size(); i++){
+		if (players[i].pathSize() > largestSize){
+			largestSize = players[i].pathSize();
+		}
+		validPaths = validPaths && players[i].hasValidSolution();
+	}
+
+	if (validPaths){
+		for (unsigned int i = 0; i < players.size(); i++){
+			if (players[i].pathSize() != largestSize){
+				int difference = largestSize - players[i].pathSize();
+				for (int j = 0; j < difference; j++){
+					// Push to the back of the route the element of the last index
+					// First calculate the correct values in case of need
+					Node toAdd = players[i].getPath()[players[i].pathSize() - 1];
+					players[i].PushElementAtTheBackOfRoute(toAdd);
+				}
+				// Update the paths vector
+				paths[i] = players[i].getPath();
+			}
+		}
+
+
+		for (unsigned int index = 0; index < largestSize; index++){
+			for (unsigned int i = 0; i < paths.size(); i++){
+				for (unsigned int j = 0; j < paths.size(); j++){
+					if (i != j){
+						if (paths[i][index] == paths[j][index]){
+							players[i].setValidPath(false);
+							players[j].setValidPath(false);
+							break;
+						}
+					}
+				}
+			}
+		}
+
+		for (unsigned int i = 0; i < players.size(); i++){
+			players[i].SanitizePath();
+			paths[i] = players[i].getPath();
+		}
+	}
+	
+
 }
 
 void MAPF::StartCBSPathFinding(){
@@ -283,6 +334,7 @@ void MAPF::MoveBySilvers(bool hybrid, bool automatic){
 	time = 1;
 	bool finished = false;
 	bool verify = false;
+	bool validSolution = true;
 	while (!finished){
 		if (!automatic)system("cls");
 		if (!automatic) map->cleanMap();
@@ -293,6 +345,12 @@ void MAPF::MoveBySilvers(bool hybrid, bool automatic){
 				if (i > 0) finished = finished && players[i].finished();
 				verify = verify || players[i].NeedsPathVerification(); // When An element just updated its path
 				map->setElement(players[i].getLocation(), (players[i].getId() + 2)); // Uncoment for clean whatever
+			}
+			else {
+				finished = true;
+				validSolution = false;
+				cout << "Could not find a proper route. Exiting." << endl;
+				break;
 			}
 			
 		}
@@ -306,14 +364,15 @@ void MAPF::MoveBySilvers(bool hybrid, bool automatic){
 			}
 			//Now revise the paths if hybrid movement
 			if(hybrid)RevisePaths();
+			else validateSilversPaths();
 		}
 
 		time++;
-		if (!automatic)map->printData();
-		if(!automatic)system("pause");
+		if (!automatic && validSolution)map->printData();
+		if(!automatic && validSolution)system("pause");
 	}
 
-	if (!automatic){
+	if (!automatic && validSolution){
 		for (unsigned int i = 0; i < players.size(); i++){
 			cout << "Path of agent " << players[i].getId() << endl;
 			for (unsigned int j = 0; j < paths[i].size(); j++){
@@ -359,7 +418,7 @@ void MAPF::MoveByCBS(bool automatic){
 	}
 	else {
 		cout << "SOLUTION NOT FOUND." << endl;
-		system("pause");
+		if (!automatic)system("pause");
 	}
 	
 }
@@ -374,9 +433,26 @@ void MAPF::RevisePaths(){
 		Because turns out, silvers algorithm already solves the deadlock issue, so there is no point
 		of redoing the stuff.
 	*/
+	if (!Invalid()){ // Since the invalid element throws empty paths, blocking should not be ran
+		Blocking();
+	}
 	
-	Blocking();
 	solveConflicts();
+}
+
+bool MAPF::Invalid(){
+	bool result = false;
+	for (unsigned int i = 0; i < players.size(); i++){
+		if (!players[i].hasValidSolution()){
+			result = true;
+			Conflicted c;
+			c.type = INVALID;
+			agent_conflicts.push_back(c);
+			break;
+		}
+	}
+
+	return result;
 }
 
 
@@ -431,9 +507,14 @@ void MAPF::solveConflicts(){
 		cout << "Conflicts found! Solving them!" << endl;
 		//Now lets solve each conflict 1 by 1
 		Conflicted c = agent_conflicts[i];
-		ConflictSolver(c);
+		if (c.type == INVALID) SolveInvalidConflict();
+		else ConflictSolver(c);
 	}
-	
+}
+
+void MAPF::SolveInvalidConflict(){
+	algorithm_type = 2; // Force to move by CBS after this
+	StartCBSPathFinding(); // Slve the whole problem as CBS
 }
 
 
@@ -890,10 +971,15 @@ bool MAPF::ValidMap(){
 	}
 
 	// Check if all the elements reached their destination
-	bool result = (players[0].getDestination() == players[0].getPath()[players[0].pathSize() -1]);
+	bool result = false;
+	if(players[0].pathSize() > 0) result = (players[0].getDestination() == players[0].getPath()[players[0].pathSize() - 1]);
 	for (unsigned int i = 1; i < players.size(); i++){
 		if (!result) break;
-		result = (players[i].getDestination() == players[i].getPath()[players[i].pathSize() - 1]);
+		if (players[i].pathSize() > 0) result = (players[i].getDestination() == players[i].getPath()[players[i].pathSize() - 1]);
+		else {
+			result = false;  
+			break;
+		}
 	}
 
 	
