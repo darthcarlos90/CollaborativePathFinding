@@ -36,7 +36,7 @@ void Menu::RunTests(){
 	fileManager = new FileManager("test.txt");
 	const clock_t total_time = clock();
 	for (int i = 2; i <= 13; i++){
-	
+		fileManager->myfile << "Testcase: " << i - 1 << endl;
 		MAPF m(8, 8, i);
 		//PrintAlgorithmMenu();
 		// Run same test for different algorithms

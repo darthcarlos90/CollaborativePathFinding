@@ -2,6 +2,7 @@
 #include "FileManager.h"
 #include "ConstraintTree.h"
 #include <functional>
+#include <time.h>
 
 /*
 	Class MAPF

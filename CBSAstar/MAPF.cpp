@@ -61,12 +61,16 @@ MAPF::MAPF(int size_x, int size_y, int max_players){
 
 	// We now have an emty map, next step is create the agents and set them goals
 	for (int i = 0; i < n_players; i++){
+		srand(clock() / CLOCKS_PER_SEC);
 		Location start_location(std::rand() % size_x, std::rand() % size_y);
 		while (map->getValueAt(start_location) != 0){
+			srand(clock() / CLOCKS_PER_SEC);
 			start_location = Location(std::rand() % size_x, std::rand() % size_y);
 		}
+		srand(clock() / CLOCKS_PER_SEC);
 		Location end_location(std::rand() % size_x, std::rand() % size_y);
 		while (map->getValueAt(end_location) != 0 || end_location == start_location){
+			srand(clock() / CLOCKS_PER_SEC);
 			end_location = Location(std::rand() % size_x, std::rand() % size_y);
 		}
 
@@ -90,7 +94,7 @@ MAPF::MAPF(int size_x, int size_y, int max_players){
 	// Once that the random players where created, it is time to create a random number of obstacles
 	do{
 		// Add obstacles to the map
-		AddMapObstacles(biggerManhattan);
+		AddMapObstacles((biggerManhattan * players.size()) / 2);
 		// if it is an invalid map, create a new one
 	} while (!ValidMap());
 	resetEntities(); // to clear all the paths
@@ -112,12 +116,16 @@ MAPF::~MAPF(void){
 
 
 void MAPF::addRandomPlayer(){
+	srand(clock() / CLOCKS_PER_SEC);
 	Location start_location(std::rand() % map->getXValue(), std::rand() % map->getYValue());
 	while (map->getValueAt(start_location) != 0){
+		srand(clock() / CLOCKS_PER_SEC);
 		start_location = Location(std::rand() % map->getXValue(), std::rand() % map->getYValue());
 	}
+	srand(clock() / CLOCKS_PER_SEC);
 	Location end_location(std::rand() % map->getXValue(), std::rand() % map->getYValue());
 	while (map->getValueAt(end_location) != 0){
+		srand(clock() / CLOCKS_PER_SEC);
 		end_location = Location(std::rand() % map->getXValue(), std::rand() % map->getYValue());
 	}
 
@@ -168,12 +176,15 @@ void MAPF::Start(int type){
 		cout << "Calculating Routes" << endl;
 		switch (type){
 		case 1: // 1 means normal silvers calculations
+			cout << "Calculating using Silver's algorithm." << endl;
 			StartSilversPathFinding();
 			break;
 		case 2: // 2 means cbs calculation
+			cout << "Calculating using CBS algorithm." << endl;
 			StartCBSPathFinding();
 			break;
 		case 3: // 3 means hybrid
+			cout << "Calculating using Hybrid algorithm." << endl;
 			StartHybridPathFinding();
 			break;
 		}
@@ -185,6 +196,7 @@ void MAPF::Start(int type){
 
 void MAPF::StartSilversPathFinding(){
 	for (unsigned int i = 0; i < players.size(); i++){
+		cout << "Calculating " << i << " path." << endl;
 		players[i].executeTimeSpaceAstar(0); // because element 0 is the starting position
 		paths.push_back(players[i].getPath());
 	}
@@ -508,6 +520,12 @@ void MAPF::solveConflicts(){
 		//Now lets solve each conflict 1 by 1
 		Conflicted c = agent_conflicts[i];
 		if (c.type == INVALID) SolveInvalidConflict();
+		else if (c.type == BLOCKING_MULTIPLE){
+			cout << "Algorithm can detect, but not solve this blockings" << endl;
+			for (unsigned int i = 0; i < players.size(); i++){
+				players[i].setValidPath(false);
+			}
+		}
 		else ConflictSolver(c);
 	}
 }
@@ -939,7 +957,7 @@ void MAPF::AddMapObstacles(int limit){
 	int size_y = map->getYValue();
 	
 	map->cleanObstacles();
-
+	srand(clock() / CLOCKS_PER_SEC);
 	int upperObstacleLimit = (size_x * size_y) - limit;
 	int obstacleNumber = std::rand() % upperObstacleLimit;
 
@@ -951,6 +969,7 @@ void MAPF::AddMapObstacles(int limit){
 		while (map->getValueAt(obstacleLocation) != 0){
 			// If not, change it until a valuable location is found
 			obstacleLocation = Location(std::rand() % size_x, std::rand() % size_y);
+			cout << *map->getData() << endl<< endl;
 		}
 
 		// Set that location to an obstacle

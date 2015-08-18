@@ -51,14 +51,18 @@ public:
 	vector<Location> endings;
 	ofstream myfile;
 	Matrix<int>* data;// I feel I'm gonna regret making this public 
+
+	
 	
 	
 	void closeFile();
 
 private:
 	void readData(std::string filename);
-	std::string outputFile;
+	bool fileExists(std::string &filename); // Checks if the file exists
 	
+	
+	std::string outputFile;
 	bool outputClosed;
 	
 };

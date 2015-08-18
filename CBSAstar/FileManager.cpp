@@ -9,7 +9,9 @@ FileManager::FileManager(std::string file, bool time_space){
 // Used to create a file writer
 FileManager::FileManager(std::string outputFile){
 	this->outputFile = outputFile; // Set The output file
-	myfile.open(outputFile);
+	if (fileExists(this->outputFile)){
+		myfile.open(outputFile, std::ios::app);
+	}else myfile.open(outputFile);
 	outputClosed = false;
 }
 
@@ -138,4 +140,9 @@ void FileManager::closeFile(){
 		myfile.close();
 		outputClosed = true;
 	}
+}
+
+bool FileManager::fileExists(std::string &filename){
+	ifstream infile(filename.c_str());
+	return infile.good();
 }
