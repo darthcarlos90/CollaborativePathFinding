@@ -13,6 +13,8 @@ public:
 private:
 	// Private Methos
 	void RunTests();
+	void RunObstacleLessTests();
+	void RunObstacleTests();
 	void LoadMap();
 	void LoadManualMap();
 	void PrintMainMenu();

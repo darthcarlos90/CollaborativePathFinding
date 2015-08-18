@@ -50,7 +50,8 @@ MAPF::MAPF(string filename){
 }
 
 //Constructor that asks the user what are the specifications of the grid and randomly creates it
-MAPF::MAPF(int size_x, int size_y, int max_players){
+MAPF::MAPF(int size_x, int size_y, bool obstacles, int max_players):
+obstacles(obstacles){
 	// Create the map of the size selected
 	map = new Map(size_x, size_y);
 	broken = false;
@@ -85,19 +86,22 @@ MAPF::MAPF(int size_x, int size_y, int max_players){
 		players.push_back(agent);
 		
 	}
-	int biggerManhattan = 0;
-	for (unsigned int i = 0; i < players.size(); i++){
-		if (players[i].getManhattanBetweenNodes() > biggerManhattan)
-			biggerManhattan = players[i].getManhattanBetweenNodes();
+	if (obstacles){
+		int biggerManhattan = 0;
+		for (unsigned int i = 0; i < players.size(); i++){
+			if (players[i].getManhattanBetweenNodes() > biggerManhattan)
+				biggerManhattan = players[i].getManhattanBetweenNodes();
+		}
+		cout << "Number of players: " << n_players << endl;
+		// Once that the random players where created, it is time to create a random number of obstacles
+		do{
+			// Add obstacles to the map
+			AddMapObstacles((biggerManhattan * players.size()) / 2);
+			// if it is an invalid map, create a new one
+		} while (!ValidMap());
+		resetEntities(); // to clear all the paths
 	}
-	cout << "Number of players: " << n_players << endl;
-	// Once that the random players where created, it is time to create a random number of obstacles
-	do{
-		// Add obstacles to the map
-		AddMapObstacles((biggerManhattan * players.size()) / 2);
-		// if it is an invalid map, create a new one
-	} while (!ValidMap());
-	resetEntities(); // to clear all the paths
+	
 	system("cls"); 
 	map->printData();
 

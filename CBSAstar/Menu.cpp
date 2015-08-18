@@ -33,19 +33,39 @@ void Menu::Execute(){
 }
 
 void Menu::RunTests(){
-	fileManager = new FileManager("test.txt");
+	system("cls");
+	cout << "Select a type of tests to run: " << endl;
+	cout << "1) Tests maps with no obstacles." << endl;
+	cout << "2) Tests maps with obstacles." << endl;
+	int option;
+	cin >> option;
+	switch (option){
+	case 1:
+		RunObstacleLessTests();
+		break;
+	case 2:
+		RunObstacleTests();
+		break;
+	default:
+		cout << "Wrong option, select again." << endl;
+		RunTests();
+		break;
+	}
+	
+}
+
+void Menu::RunObstacleTests(){
+	fileManager = new FileManager("ObstacleTests.txt");
 	const clock_t total_time = clock();
 	for (int i = 2; i <= 13; i++){
 		fileManager->myfile << "Testcase: " << i - 1 << endl;
-		MAPF m(8, 8, i);
-		//PrintAlgorithmMenu();
+		MAPF m(8, 8,true, i);
 		// Run same test for different algorithms
 		fileManager->myfile << "Map: " << endl;
 		fileManager->myfile << m.getMatrix() << endl;
 		fileManager->myfile << "Number of players " << m.numberPlayers() << endl;
 		m.PrintPlayers(fileManager->myfile);
 		for (int index = 1; index <= 3; index++){
-			// TODO: Change so that after the paths have been calculated, go back to starting position and recalculate route.
 			//Load the routes for the entities
 			fileManager->myfile << "< ======================================================================== >" << endl;
 			switch (index){
@@ -69,7 +89,7 @@ void Menu::RunTests(){
 			cout << "Saving information into file" << endl;
 
 			m.PrintPaths(fileManager->myfile);
-			
+
 			fileManager->myfile << "Time taken to calculate paths: " << calculation_time << "s" << endl;
 			fileManager->myfile << "Time taken to progress through the path " << moving_time << "s" << endl;
 			fileManager->myfile << "Total time of execution for this map " << calculation_time + moving_time << "s" << endl;
@@ -78,6 +98,62 @@ void Menu::RunTests(){
 			m.resetEntities();
 			m.cleanReservationsConstraints();
 		}
+	}
+	float total_running_time = float(clock() - total_time) / CLOCKS_PER_SEC;
+	fileManager->myfile << "Total running time: " << total_running_time << endl;
+	fileManager->closeFile();
+	system("pause");
+}
+
+void Menu::RunObstacleLessTests(){
+	fileManager = new FileManager("NoObstaclesResults.txt");
+	const clock_t total_time = clock();
+	for (int i = 2; i <= 13; i++){
+		
+		for (int testcases = 1; testcases <= 1000; testcases++){
+			fileManager->myfile << "Testcase: " << testcases << endl;
+			MAPF m(8, 8, false, i);
+			// Run same test for different algorithms
+			fileManager->myfile << "Map: " << endl;
+			fileManager->myfile << m.getMatrix() << endl;
+			fileManager->myfile << "Number of players " << m.numberPlayers() << endl;
+			m.PrintPlayers(fileManager->myfile);
+			for (int index = 1; index <= 3; index++){
+				//Load the routes for the entities
+				fileManager->myfile << "< ======================================================================== >" << endl;
+				switch (index){
+				case 1:
+					fileManager->myfile << "Silver's Algorith Results:" << endl;
+					break;
+				case 2:
+					fileManager->myfile << "CBS Results:" << endl;
+					break;
+				case 3:
+					fileManager->myfile << "Hybrid results:" << endl;
+				}
+				const clock_t begin_time = clock();
+				m.Start(index);
+				float calculation_time = float(clock() - begin_time) / CLOCKS_PER_SEC;
+				const clock_t progress_time = clock();
+				m.MoveEntities(true);
+				float moving_time = float(clock() - progress_time) / CLOCKS_PER_SEC;
+
+				cout << "Finished" << endl;
+				cout << "Saving information into file" << endl;
+
+				m.PrintPaths(fileManager->myfile);
+
+				fileManager->myfile << "Time taken to calculate paths: " << calculation_time << "s" << endl;
+				fileManager->myfile << "Time taken to progress through the path " << moving_time << "s" << endl;
+				fileManager->myfile << "Total time of execution for this map " << calculation_time + moving_time << "s" << endl;
+				m.printCosts(fileManager->myfile);
+				fileManager->myfile << endl;
+				m.resetEntities();
+				m.cleanReservationsConstraints();
+			}
+
+		}
+		
 	}
 	float total_running_time = float(clock() - total_time) / CLOCKS_PER_SEC;
 	fileManager->myfile << "Total running time: " << total_running_time << endl;

@@ -13,7 +13,7 @@
 class MAPF{
 public:
 	MAPF(string filename); // inputs information from a map (for static maps)
-	MAPF(int size_x, int size_y, int max_players = 2); //inputs for random generation of map (for dynamic maps)
+	MAPF(int size_x, int size_y, bool obstacles, int max_players = 2); //inputs for random generation of map (for dynamic maps)
 	~MAPF(void); //Destructor
 	
 	/*
@@ -111,4 +111,5 @@ private:
 	vector<vector<Node>> paths; // This is used to analyze the paths looking for conflicts
 
 	int algorithm_type;
+	bool obstacles;
 };
