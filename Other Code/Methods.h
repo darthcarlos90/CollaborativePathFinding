@@ -817,3 +817,60 @@ void CBTNode::SolveDeadLock(){
 	}
 
 }
+
+
+
+/*
+	Another path validation method
+*/
+
+void MAPF::validateSilversPaths(){
+	// Check tha paths for some left oput bugs from silvers
+	unsigned int largestSize = 0;
+	bool validPaths = true;
+	// Get the largest pathsize
+	for (unsigned int i = 0; i < players.size(); i++){
+		if (players[i].pathSize() > largestSize){
+			largestSize = players[i].pathSize();
+		}
+		validPaths = validPaths && players[i].hasValidSolution();
+	}
+
+	if (validPaths){
+		for (unsigned int i = 0; i < players.size(); i++){
+			if (players[i].pathSize() != largestSize){
+				int difference = largestSize - players[i].pathSize();
+				for (int j = 0; j < difference; j++){
+					// Push to the back of the route the element of the last index
+					// First calculate the correct values in case of need
+					Node toAdd = players[i].getPath()[players[i].pathSize() - 1];
+					players[i].PushElementAtTheBackOfRoute(toAdd);
+				}
+				// Update the paths vector
+				paths[i] = players[i].getPath();
+			}
+		}
+
+
+		for (unsigned int index = 0; index < largestSize; index++){
+			for (unsigned int i = 0; i < paths.size(); i++){
+				for (unsigned int j = 0; j < paths.size(); j++){
+					if (i != j){
+						if (paths[i][index] == paths[j][index]){
+							players[i].setValidPath(false);
+							players[j].setValidPath(false);
+							break;
+						}
+					}
+				}
+			}
+		}
+
+		for (unsigned int i = 0; i < players.size(); i++){
+			players[i].SanitizePath();
+			paths[i] = players[i].getPath();
+		}
+	}
+	
+
+}

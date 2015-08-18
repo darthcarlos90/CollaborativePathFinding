@@ -86,6 +86,9 @@ public:
 
 	// This method balances the paths of the agents so a proper check coudld be done
 	int BalancePaths();
+
+	// Get the number of agents in this node
+	int NumberAgents() { return agents.size(); }
 	
 
 private:

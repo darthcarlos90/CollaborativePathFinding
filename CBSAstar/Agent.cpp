@@ -243,7 +243,6 @@ void Agent::move(unsigned int t){
 	*/
 	if (actualNode == destination && t >= time_route.size()) {
 		active = false; //we reached the end of the route 
-		reserveDestination();
 	}
 	else {
 		actualNode = time_route[t];
@@ -911,13 +910,6 @@ void Agent::reserveRoute(int starting_time){
 			//If it is not reserved, reserve it
 			map->reserve(reservation_time, time_route[i], id);
 			reservation_time++;
-			// If it is destination, lets reserve it for another D steps
-			if (time_route[i] == destination){
-				for (unsigned int diff = 0; diff < steps_limit; diff++){
-					map->reserve(reservation_time + diff, destination, id);
-				}
-				last_reserved = reservation_time + steps_limit;
-			}
 		}
 	}
 
@@ -953,13 +945,6 @@ void Agent::reserveRoute(int starting_time){
 
 }
 
-void Agent::reserveDestination(){
-	for (unsigned int i = 0; i < steps_limit; i++){
-		map->reserve(last_reserved + i, destination, id);
-	}
-
-	last_reserved = last_reserved + steps_limit;
-}
 
 bool Agent::FindNodeAtList(Node n, vector<Node> list){
 	//return std::binary_search(list.begin(), list.end(), n);

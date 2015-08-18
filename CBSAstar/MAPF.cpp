@@ -46,6 +46,7 @@ MAPF::MAPF(string filename){
 	
 	algorithm_type = 0;
 	
+	obstacles = true;
 
 }
 
@@ -209,64 +210,19 @@ void MAPF::StartSilversPathFinding(){
 }
 
 void MAPF::validateSilversPaths(){
-	// Check tha paths for some left oput bugs from silvers
-	unsigned int largestSize = 0;
-	bool validPaths = true;
-	// Get the largest pathsize
-	for (unsigned int i = 0; i < players.size(); i++){
-		if (players[i].pathSize() > largestSize){
-			largestSize = players[i].pathSize();
-		}
-		validPaths = validPaths && players[i].hasValidSolution();
-	}
-
-	if (validPaths){
+	RevisePaths(false);// If there is any conflict, then break everything
+	if (agent_conflicts.size() > 0){
 		for (unsigned int i = 0; i < players.size(); i++){
-			if (players[i].pathSize() != largestSize){
-				int difference = largestSize - players[i].pathSize();
-				for (int j = 0; j < difference; j++){
-					// Push to the back of the route the element of the last index
-					// First calculate the correct values in case of need
-					Node toAdd = players[i].getPath()[players[i].pathSize() - 1];
-					players[i].PushElementAtTheBackOfRoute(toAdd);
-				}
-				// Update the paths vector
-				paths[i] = players[i].getPath();
-			}
-		}
-
-
-		for (unsigned int index = 0; index < largestSize; index++){
-			for (unsigned int i = 0; i < paths.size(); i++){
-				for (unsigned int j = 0; j < paths.size(); j++){
-					if (i != j){
-						if (paths[i][index] == paths[j][index]){
-							players[i].setValidPath(false);
-							players[j].setValidPath(false);
-							break;
-						}
-					}
-				}
-			}
-		}
-
-		for (unsigned int i = 0; i < players.size(); i++){
-			players[i].SanitizePath();
-			paths[i] = players[i].getPath();
+			players[i].setValidPath(false);
 		}
 	}
-	
 
 }
 
 void MAPF::StartCBSPathFinding(){
 	
 	if (RunCBSUsingPlayers(players)){
-		for (unsigned int i = 0; i < players.size(); i++){
-			players[i].setPath(tree->getSolution()->getPathAt(i));
-			paths.push_back(players[i].getPath());
-			players[i].setValidPath(true);
-		}
+		getCBSPaths(true);
 	}
 
 }
@@ -275,7 +231,7 @@ void MAPF::StartHybridPathFinding(){
 	// Do pathfinding as silvers would do
 	StartSilversPathFinding();
 	// Now check for any inconsistency
-	RevisePaths();
+	RevisePaths(true);
 }
 
 bool MAPF::CBSHelper(){
@@ -327,7 +283,19 @@ bool MAPF::RunCBSUsingPlayers(vector<Agent> agents){
 	//insert the root into the tree
 	tree->insertRoot(root);
 	
-	return CBSHelper();
+	bool proceedExecution = true;
+	if (obstacles){
+		getCBSPaths(false);
+		MultipleBlocking();
+		if (agent_conflicts.size() > 0) proceedExecution = false;
+		paths.clear();
+	}
+
+	if (proceedExecution){
+
+		return CBSHelper();
+	}
+	else return false;
 }
 
 void MAPF::MoveEntities( bool automatic){
@@ -379,7 +347,7 @@ void MAPF::MoveBySilvers(bool hybrid, bool automatic){
 				players[i].SetPathVerificationFlag(false);
 			}
 			//Now revise the paths if hybrid movement
-			if(hybrid)RevisePaths();
+			if(hybrid)RevisePaths(true);
 			else validateSilversPaths();
 		}
 
@@ -440,7 +408,7 @@ void MAPF::MoveByCBS(bool automatic){
 }
 
 //This method will check for any conflicts with the paths of the agents
-void MAPF::RevisePaths(){
+void MAPF::RevisePaths(bool solve_conflicts){
 	cout << "Checking the path for any conflict" << endl;
 	/*
 		Fix: Also remove the part where the dead lock is solved by some other element.
@@ -453,7 +421,7 @@ void MAPF::RevisePaths(){
 		Blocking();
 	}
 	
-	solveConflicts();
+	if(solve_conflicts)solveConflicts();
 }
 
 bool MAPF::Invalid(){
@@ -525,9 +493,14 @@ void MAPF::solveConflicts(){
 		Conflicted c = agent_conflicts[i];
 		if (c.type == INVALID) SolveInvalidConflict();
 		else if (c.type == BLOCKING_MULTIPLE){
-			cout << "Algorithm can detect, but not solve this blockings" << endl;
-			for (unsigned int i = 0; i < players.size(); i++){
-				players[i].setValidPath(false);
+			if (obstacles){
+				//TODO: Add multiple solver
+			}
+			else {
+				cout << "Algorithm can detect, but not solve this blockings" << endl;
+				for (unsigned int i = 0; i < players.size(); i++){
+					players[i].setValidPath(false);
+				}
 			}
 		}
 		else ConflictSolver(c);
@@ -1043,4 +1016,13 @@ void MAPF::resetEntities(){
 
 void MAPF::cleanReservationsConstraints(){
 	map->cleanConstraintsReservations();
+}
+
+void MAPF::getCBSPaths(bool validPath){
+	CBTNode* solution = tree->getSolution();
+	for (unsigned int i = 0; i < solution->NumberAgents(); i++){
+		players[i].setPath(solution->getPathAt(i));
+		paths.push_back(players[i].getPath());
+		if(validPath) players[i].setValidPath(true);
+	}
 }

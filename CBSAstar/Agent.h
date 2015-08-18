@@ -222,7 +222,6 @@ private:
 
 	int FindNumberOcurrancesCAT(Location location);
 
-	void reserveDestination();
 
 	
 	

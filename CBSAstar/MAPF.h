@@ -24,7 +24,8 @@ public:
 	void Start(int type);
 	void MoveEntities(bool automatic); //The type thing is temporal
 	//This method will revise the paths in look for any conflict
-	void RevisePaths();
+	// If boolean is true, it will not only revise,m but solve the conflicts
+	void RevisePaths(bool solve_conflicts);
 
 	bool isBroken() { return broken; }
 	void printCosts(ostream& out);
@@ -93,6 +94,9 @@ private:
 	bool ValidMap();
 
 	void validateSilversPaths();
+
+	//Helper function to retrieve CBS paths
+	void getCBSPaths(bool validPath);
 
 
 	//TODO: Keep adding more elements throught the development of this project.
