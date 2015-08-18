@@ -63,16 +63,16 @@ obstacles(obstacles){
 
 	// We now have an emty map, next step is create the agents and set them goals
 	for (int i = 0; i < n_players; i++){
-		srand(clock() / CLOCKS_PER_SEC);
+		srand((clock() / CLOCKS_PER_SEC) + i);
 		Location start_location(std::rand() % size_x, std::rand() % size_y);
 		while (map->getValueAt(start_location) != 0){
-			srand(clock() / CLOCKS_PER_SEC);
+			srand(clock() / CLOCKS_PER_SEC + (i * 2));
 			start_location = Location(std::rand() % size_x, std::rand() % size_y);
 		}
-		srand(clock() / CLOCKS_PER_SEC);
+		srand(clock() / CLOCKS_PER_SEC + (i * 3));
 		Location end_location(std::rand() % size_x, std::rand() % size_y);
 		while (map->getValueAt(end_location) != 0 || end_location == start_location){
-			srand(clock() / CLOCKS_PER_SEC);
+			srand(clock() / CLOCKS_PER_SEC + (i * 4));
 			end_location = Location(std::rand() % size_x, std::rand() % size_y);
 		}
 
