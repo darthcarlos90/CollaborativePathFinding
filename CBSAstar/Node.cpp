@@ -143,6 +143,7 @@ bool Node::operator!=(const Node& n)const{
 }
 
 void Node::setParent(Node value){
+	//TODO CHECK THE HAS PARENT TRUE AND FALSING
 	if (!has_parent){
 		parent = new Node();
 	}
