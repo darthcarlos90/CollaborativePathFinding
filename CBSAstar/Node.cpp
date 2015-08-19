@@ -61,14 +61,15 @@ Node::Node(const Node& n){
 	type = n.getType();
 	x = n.getX();
 	y = n.getY();
+	if (this->hasParent){
+		delete parent;
+	}
+	has_parent = false;
+	parent = NULL;
 	if (n.hasParent()){
-		has_parent = false;
 		this->setParent(n.getParent());
 	}
-	else { 
-		parent = NULL; 
-		this->has_parent = false;
-	}
+	
 	this->my_location = n.getLocation();
 	this->depth = n.depth;
 }
@@ -81,14 +82,14 @@ Node& Node::operator= (const Node& n){
 	type = n.getType();
 	x = n.getX();
 	y = n.getY();
+	if (this->hasParent){
+		delete parent;
+	}
+	parent = NULL;
+	this->has_parent = false;
 	if (n.hasParent()){
-		has_parent = false;
 		//we are setting a new parent, so we need to set it false to allocate new memory
 		this->setParent(n.getParent());
-	}
-	else {
-		parent = NULL;
-		this->has_parent = false;
 	}
 	this->my_location = n.getLocation();
 	this->depth = n.depth;
