@@ -186,6 +186,7 @@ void Menu::LoadMap(){
 	cout << "15) Unsolvable testcase." << endl;
 	cout << "16) Random generated testcase." << endl;
 	cout << "17) No obstacles generated debug testcase, 3 agents." << endl;
+	cout << "18) Small box, 3 agents." << endl;
 	
 	//getline(cin, filename);
 	
@@ -241,6 +242,9 @@ void Menu::LoadMap(){
 		break;
 	case 17:
 		filename = "testcasetest.txt";
+		break;
+	case 18:
+		filename = "smthg.txt";
 		break;
 	}
 

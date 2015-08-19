@@ -1,16 +1,16 @@
-﻿Build started 19/08/2015 21:25:56.
+﻿Build started 19/08/2015 22:01:28.
      1>Project "H:\Dissertation\Dissertation\example code\CollaborativePathFinding\CBSAstar\CBSAstar.vcxproj" on node 2 (Build target(s)).
      1>ClCompile:
          C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /sdl /Od /Oy- /D WIN32 /D _DEBUG /D _CONSOLE /D _LIB /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt MAPF.cpp ReservationTable.cpp
          MAPF.cpp
-     1>h:\dissertation\dissertation\example code\collaborativepathfinding\cbsastar\mapf.cpp(570): warning C4018: '>' : signed/unsigned mismatch
-     1>h:\dissertation\dissertation\example code\collaborativepathfinding\cbsastar\mapf.cpp(687): warning C4018: '<' : signed/unsigned mismatch
-     1>h:\dissertation\dissertation\example code\collaborativepathfinding\cbsastar\mapf.cpp(705): warning C4018: '<' : signed/unsigned mismatch
-     1>h:\dissertation\dissertation\example code\collaborativepathfinding\cbsastar\mapf.cpp(778): warning C4018: '<=' : signed/unsigned mismatch
-     1>h:\dissertation\dissertation\example code\collaborativepathfinding\cbsastar\mapf.cpp(928): warning C4258: 'i' : definition from the for loop is ignored; the definition from the enclosing scope is used
-                 h:\dissertation\dissertation\example code\collaborativepathfinding\cbsastar\mapf.cpp(922) : definition of 'i' ignored
-                 h:\dissertation\dissertation\example code\collaborativepathfinding\cbsastar\mapf.cpp(888) : definition of 'i' used
-     1>h:\dissertation\dissertation\example code\collaborativepathfinding\cbsastar\mapf.cpp(1119): warning C4018: '<' : signed/unsigned mismatch
+     1>h:\dissertation\dissertation\example code\collaborativepathfinding\cbsastar\mapf.cpp(573): warning C4018: '>' : signed/unsigned mismatch
+     1>h:\dissertation\dissertation\example code\collaborativepathfinding\cbsastar\mapf.cpp(690): warning C4018: '<' : signed/unsigned mismatch
+     1>h:\dissertation\dissertation\example code\collaborativepathfinding\cbsastar\mapf.cpp(708): warning C4018: '<' : signed/unsigned mismatch
+     1>h:\dissertation\dissertation\example code\collaborativepathfinding\cbsastar\mapf.cpp(781): warning C4018: '<=' : signed/unsigned mismatch
+     1>h:\dissertation\dissertation\example code\collaborativepathfinding\cbsastar\mapf.cpp(931): warning C4258: 'i' : definition from the for loop is ignored; the definition from the enclosing scope is used
+                 h:\dissertation\dissertation\example code\collaborativepathfinding\cbsastar\mapf.cpp(925) : definition of 'i' ignored
+                 h:\dissertation\dissertation\example code\collaborativepathfinding\cbsastar\mapf.cpp(891) : definition of 'i' used
+     1>h:\dissertation\dissertation\example code\collaborativepathfinding\cbsastar\mapf.cpp(1122): warning C4018: '<' : signed/unsigned mismatch
          Generating Code...
          Skipping... (no relevant changes detected)
          ReservationTable.cpp
@@ -31,4 +31,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:05.46
+Time Elapsed 00:00:06.01

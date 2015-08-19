@@ -7,7 +7,8 @@ actualNode(location), startingPoint(location)
 	map = m;
 	active = true;
 	this->id = id;
-	this->steps_limit = D;
+	if (D > 5) this->steps_limit = D;
+	else this->steps_limit = 5;
 	this->destination = destination;
 	SIC = 0;
 	map->setElement(actualNode.getX(), actualNode.getY(), id + 2);
@@ -1431,6 +1432,7 @@ void Agent::reserveRouteFromIndex(unsigned int index){
 		else {
 			//Just to test if timed adjacents is failing
 			cout << "Breaking reserve route from index" << endl;
+			validSolution = false;
 		}
 	}
 }

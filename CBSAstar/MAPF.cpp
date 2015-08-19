@@ -494,7 +494,7 @@ void MAPF::solveConflicts(){
 		if (c.type == INVALID) SolveInvalidConflict();
 		else if (c.type == BLOCKING_MULTIPLE){
 			if (obstacles){
-				//TODO: Add multiple solver
+				ConflictSolver(c);
 			}
 			else {
 				cout << "Algorithm can detect, but not solve this blockings" << endl;
@@ -509,7 +509,10 @@ void MAPF::solveConflicts(){
 
 void MAPF::SolveInvalidConflict(){
 	algorithm_type = 2; // Force to move by CBS after this
-	StartCBSPathFinding(); // Slve the whole problem as CBS
+	paths.clear(); // clear paths
+	if (RunCBSUsingPlayers(players, false)){
+		getCBSPaths(true);
+	} // Slve the whole problem as CBS
 }
 
 
