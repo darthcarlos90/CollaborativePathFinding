@@ -236,7 +236,7 @@ int Agent::executebacksearchAstar(Location start, Location finish){
 }
 
 // Move method used by Silvers and Hybrid
-void Agent::move(unsigned int t){
+void Agent::move(unsigned int t, bool obstacles){
 	/*
 	Step 3: Every t, advance one spot in the road.
 	- If d has been reached or we reaced to the end of the road, stop;
@@ -270,7 +270,7 @@ void Agent::move(unsigned int t){
 		TimeSpaceAstarHelper(
 			time_route[time_route.size() - 1].getLocation(), // The las node on the path
 			destination.getLocation(), // The destination of the pathfinding
-			new_starting_time); // So that the reroute starts at the end of the route
+			new_starting_time, obstacles); // So that the reroute starts at the end of the route
 		reserveRouteFromIndex(new_starting_time); // The index will be the last index of the table
 		needsPathVerification = true;
 	}
@@ -285,12 +285,12 @@ void Agent::move(unsigned int t){
 		- starting_time: The time at which we start the pathfinding, so that the next step
 						in the route of the element will be time + 1
 */
-void Agent::executeTimeSpaceAstar(int starting_time){
+void Agent::executeTimeSpaceAstar(int starting_time, bool obstacles){
 	
 	/*
 		Step 1 is described in the function that will execute.
 	*/
-	TimeSpaceAstarHelper(actualNode.getLocation(), destination.getLocation(), starting_time);
+	TimeSpaceAstarHelper(actualNode.getLocation(), destination.getLocation(), starting_time, obstacles);
 	
 	/* 
 		Step 2: Once the route has been found, reserve your path.
@@ -299,7 +299,7 @@ void Agent::executeTimeSpaceAstar(int starting_time){
 	// Now that we have a route, reserve it
 	// If we dont have a valid solution, dont reserve it
 	if (validSolution) {
-		reserveRoute(starting_time);
+		reserveRoute(starting_time, obstacles);
 
 		// Now, if the first element of the time route is not the initial step, add it
 		if (time_route[0] != startingPoint){
@@ -319,16 +319,16 @@ void Agent::executeTimeSpaceAstar(int starting_time){
 	element on the time route, till it finds the end (or reaches the limit of
 	steps).
 */
-void Agent::executeTimeSpaceAstarFromLastIndex(){
+void Agent::executeTimeSpaceAstarFromLastIndex(bool obstacles){
 	int index = time_route.size();
 	TimeSpaceAstarHelper(
 		time_route[time_route.size() - 1].getLocation(), 
 		destination.getLocation(), 
-		time_route.size());
+		time_route.size(), obstacles);
 	reserveRouteFromIndex(index);
 }
 
-void Agent::TimeSpaceAstarHelper(Location start, Location finish, int time){	
+void Agent::TimeSpaceAstarHelper(Location start, Location finish, int time, bool obstacles){	
 	// In case they're not empty
 	time_closedList.clear();
 	time_openList.clear();
@@ -347,7 +347,8 @@ void Agent::TimeSpaceAstarHelper(Location start, Location finish, int time){
 	Node A(0, start); //Let A be the starting point
 
 	A.setG(0);
-	calculateRealHeuristic(&A, finish);
+	if(obstacles) calculateRealHeuristic(&A, finish);
+	else A.calculateManhattanHeuristic(finish);
 	A.calculateF();
 	
 	time_openList.push_back(A); //We put it on the open list
@@ -392,7 +393,7 @@ void Agent::TimeSpaceAstarHelper(Location start, Location finish, int time){
 			we add 1, since we are looking for nodes to be the next step after P.
 		*/
 		int time_span = P.getDepth() + starting_time + 1;
-		vector<Node> adjacents = getTimedAdjacents(P, time_span, finish);
+		vector<Node> adjacents = getTimedAdjacents(P, time_span, finish, obstacles);
 
 		// Add the adjacents to the open list
 		for (unsigned int i = 0; i < adjacents.size(); i++){
@@ -429,7 +430,7 @@ void Agent::TimeSpaceAstarHelper(Location start, Location finish, int time){
 			for (unsigned int i = 0; i < partial_path_nodes.size(); i++){
 				// Get the adjacents of the last node
 				vector<Node> around = getTimedAdjacents(partial_path_nodes[i], 
-					partial_path_nodes[i].getDepth() + 1, finish); // get the adjacents
+					partial_path_nodes[i].getDepth() + 1, finish, obstacles); // get the adjacents
 				
 				clearSpatialLists(true);
 				// This option is our terminal node, calculate route from terminal node to end
@@ -597,7 +598,7 @@ vector<Node> Agent::getAdjacentsWithoutParents(Node element){
 
 //Basically remove all the reserved adjacent nodes
 // TODO: Check if the values given are correct
-std::vector<Node> Agent::getTimedAdjacents(Node element, int res_time, Location ending){
+std::vector<Node> Agent::getTimedAdjacents(Node element, int res_time, Location ending, bool obstacles){
 	//First, get the adjacents of the node
 	std::vector<Node> temp = map->adjacentHelper(element.getLocation());
 	bool reservedElement = false;
@@ -614,7 +615,8 @@ std::vector<Node> Agent::getTimedAdjacents(Node element, int res_time, Location 
 	//Now that we have all the available nodes, we calculate their real heuristic value
 	for (unsigned int i = 0; i < result.size(); i++){
 		
-		calculateRealHeuristic(&result[i], ending);
+		if(obstacles) calculateRealHeuristic(&result[i], ending);
+		else result[i].calculateManhattanHeuristic(ending);
 		//calculate the rest
 		result[i].setParent(element);
 		result[i].calculateG();
@@ -624,7 +626,8 @@ std::vector<Node> Agent::getTimedAdjacents(Node element, int res_time, Location 
 	if (reservedElement){
 		if (!map->isReserved(element, res_time, id)){
 			Node repeatedNode(0, 1, element.getX(), element.getY());
-			calculateRealHeuristic(&repeatedNode, ending);
+			if(obstacles) calculateRealHeuristic(&repeatedNode, ending);
+			else repeatedNode.calculateManhattanHeuristic(ending);
 			repeatedNode.setParent(element);
 			repeatedNode.calculateG();
 			repeatedNode.calculateF();
@@ -850,7 +853,7 @@ void Agent::moveEntity(unsigned int t){
 }
 
 // The starting time means the time t where the agent will start moving
-void Agent::reserveRoute(int starting_time){
+void Agent::reserveRoute(int starting_time, bool obstacles){
 	int reservation_time = starting_time;
 	/*
 		We are going to reserve d nodes, since after d, we are going to replan our route.
@@ -869,43 +872,45 @@ void Agent::reserveRoute(int starting_time){
 		//Check if the node is reserved for this given time
 		// Just in case timedAdjacents failed
 		if (map->isReserved(time_route[i], reservation_time, id)){
-			//If it is reserved
-			if (i > 0){
-				//Check if the node before that is reserved
-				if (map->isReserved(time_route[i - 1], reservation_time, id)){
-					//if your last step is reserved for the next time, replan your route
-					reserved = true;
-					reserved_index = i;
-					break;
-				}
-				else{
-					/*
-					If the last step is not reserved for this time, then modifly the route and wait
-					in the place until the other entity moves.
-					*/
-					vector<Node> temp_route;
+			////If it is reserved
+			//if (i > 0){
+			//	//Check if the node before that is reserved
+			//	if (map->isReserved(time_route[i - 1], reservation_time, id)){
+			//		//if your last step is reserved for the next time, replan your route
+			//		reserved = true;
+			//		reserved_index = i;
+			//		break;
+			//	}
+			//	else{
+			//		/*
+			//		If the last step is not reserved for this time, then modifly the route and wait
+			//		in the place until the other entity moves.
+			//		*/
+			//		vector<Node> temp_route;
 
-					//Get all the nodes before the incident
-					for (int index = 0; index < i; index++){
-						temp_route.push_back(time_route[index]);
-					}
+			//		//Get all the nodes before the incident
+			//		for (int index = 0; index < i; index++){
+			//			temp_route.push_back(time_route[index]);
+			//		}
 
-					//repeat the node so that it can wait on the path, and continue
-					temp_route.push_back(time_route[i - 1]);
+			//		//repeat the node so that it can wait on the path, and continue
+			//		temp_route.push_back(time_route[i - 1]);
 
-					//now finish adding the rest of the elements
-					for (unsigned int index = i; index < time_route.size(); index++){
-						temp_route.push_back(time_route[index]);
-					}
+			//		//now finish adding the rest of the elements
+			//		for (unsigned int index = i; index < time_route.size(); index++){
+			//			temp_route.push_back(time_route[index]);
+			//		}
 
-					//finally, replace the old route with the new one
-					time_route = temp_route;
+			//		//finally, replace the old route with the new one
+			//		time_route = temp_route;
 
-					//Now, reserve the new element
-					map->reserve(reservation_time, time_route[i], id);
-					reservation_time++; // increase the time, dont forget this
-				}
-			}
+			//		//Now, reserve the new element
+			//		map->reserve(reservation_time, time_route[i], id);
+			//		reservation_time++; // increase the time, dont forget this
+			//	}
+			//}
+			validSolution = false;
+			break;
 		}
 		else {
 			//If it is not reserved, reserve it
@@ -930,7 +935,7 @@ void Agent::reserveRoute(int starting_time){
 		TimeSpaceAstarHelper(
 			time_route[time_route.size() - 1].getLocation(), 
 			destination.getLocation(), 
-			time_route.size());
+			time_route.size(), obstacles);
 		// Now from the point you left at reserve your route
 		reserveRouteFromIndex(index_toStart);
 
@@ -1011,16 +1016,17 @@ void Agent::AddNodeToPathAtTimeT(Node n, unsigned int t){
 		cout << "Insertion into the route unsuccesfull, stopping" << endl;
 }
 
-void Agent::ReroutePathUsingSpatialAstar(int time){
-	//Erase all the elements after the time stated
-	time_route.erase(time_route.begin() + (time + 2), time_route.end());
-	//Run astar until the destination from the new spot
-	time_closedList.clear();
-	time_openList.clear();
-	clearSpatialLists(true);
-	TimeSpaceAstarHelper(time_route[time - 1].getLocation(), 
-		destination.getLocation(), time);
-}
+//TODO: Probably not used
+//void Agent::ReroutePathUsingSpatialAstar(int time){
+//	//Erase all the elements after the time stated
+//	time_route.erase(time_route.begin() + (time + 2), time_route.end());
+//	//Run astar until the destination from the new spot
+//	time_closedList.clear();
+//	time_openList.clear();
+//	clearSpatialLists(true);
+//	TimeSpaceAstarHelper(time_route[time - 1].getLocation(), 
+//		destination.getLocation(), time);
+//}
 
 // This method modifies the path so that an element outside of the others path is found
 void Agent::modifyMap(vector <Node> otherPath){
@@ -1354,39 +1360,6 @@ Node Agent::EscapeAstar(Location start){
 	//Once the element has been found, return it
 	return P;
 }
-
-void Agent::MoveToClosestEscapeElement(bool KeepRoute, Location start){
-	
-	//Clear the lists first
-	clearSpatialLists(false);
-	//First, lets get the closest escape Element
-	Node escapeNode = EscapeAstar(start);
-
-	if (!KeepRoute){
-		// If you want to clear the route, clear it and return t to 0
-		time_route.clear();
-	}
-	//Before restarting, we need to prepare the elements for the search
-	// First step, clear the lists
-	time_openList.clear();
-	time_closedList.clear();
-
-	// Since we will use this element twice, a pointer is created
-	Node* lastNode = &time_route[time_route.size() - 1];
-	// Second step, remove the parent of the last element of the route
-	lastNode->clearParent();
-
-	// now we can restart the search, but we look for the escape Node
-	TimeSpaceAstarHelper(
-		lastNode->getLocation(), 
-		escapeNode.getLocation(),
-		time_route.size());
-
-	// Now we have the route to the escape route
-
-	lastNode = NULL; // CLEAN UP
-}
-
 
 
 void Agent::RepeatStepAtIndex(unsigned int index, int times){

@@ -24,7 +24,7 @@ public:
 	void setId(int new_id) { id = new_id; }
 
 	// Moves to the element on the time t
-	void move(unsigned int t);
+	void move(unsigned int t, bool obstacles);
 
 	/*
 		This function moves the entity to the spot their suposed to be on the time t
@@ -48,9 +48,9 @@ public:
 	//Execute spatial Astar until you find certain node
 	int executeSpatialAstarUntilFound(Location start, Node toFind);
 
-	void executeTimeSpaceAstar(int starting_time);
+	void executeTimeSpaceAstar(int starting_time, bool obstacles);
 
-	void executeTimeSpaceAstarFromLastIndex();
+	void executeTimeSpaceAstarFromLastIndex(bool obstacles);
 
 	void calculateRealHeuristic(Node* toCalculate, Location finish);
 
@@ -79,7 +79,7 @@ public:
 	*/
 	std::vector<Node> getAdjacents(Node element, Location ending);
 	std::vector<Node> getTimedAdjacentsWithoutParents(Node location, int time);
-	std::vector<Node> getTimedAdjacents(Node element, int res_time, Location ending);
+	std::vector<Node> getTimedAdjacents(Node element, int res_time, Location ending, bool obstacles);
 	std::vector<Node> getAdjacentsWithoutParents(Node element);
 	std::vector<Node> getAdjacentsonConstraints(Node element, Location endint, vector<Constraint> constraints, int time);
 
@@ -98,15 +98,8 @@ public:
 
 	bool isOnMyRoute(Node n);
 	void AddNodeToPathAtTimeT(Node n, unsigned int t);
-	void ReroutePathUsingSpatialAstar(int time);
+	//void ReroutePathUsingSpatialAstar(int time);
 	void modifyMap(vector <Node> otherPath);
-	/*
-		The parameters:
-		keepRoute: True if you want a completely new route, false if you only want to update
-		the route you already have.
-		time: the current time t to search for adjacents
-	*/
-	void MoveToClosestEscapeElement(bool keepRoute, Location start);
 
 	void ReroutePathUsingCBS();
 
@@ -156,7 +149,7 @@ public:
 
 private:
 	/*Helper functions*/
-	void TimeSpaceAstarHelper(Location start, Location finish, int time);
+	void TimeSpaceAstarHelper(Location start, Location finish, int time, bool obstacles);
 	
 	// Finder methods
 	bool FindNodeAtList(Node n, vector<Node> list);
@@ -170,7 +163,7 @@ private:
 	int GetIndexOfElementAtTimeOpenList(Location element);
 	int GetIndexOfElementAtTimeClosedList(Location element);
 
-	void reserveRoute(int starting_time); // To be used in the Silver's Astar
+	void reserveRoute(int starting_time, bool obstacles); // To be used in the Silver's Astar
 	void reserveRouteFromIndex(unsigned int index);
 	void addToSpatialOpenList(Node n);
 	void addToTimedSpatialOpenList(Node n);// Probably not used, still not gona remove it

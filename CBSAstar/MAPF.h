@@ -28,7 +28,7 @@ public:
 	void RevisePaths(bool solve_conflicts);
 
 	bool isBroken() { return broken; }
-	void printCosts(ostream& out);
+	void printCosts(ostream& out, int *accumCost = NULL);
 
 	Matrix<int> getMatrix() { return *map->getData(); }
 	int numberPlayers() { return players.size(); }

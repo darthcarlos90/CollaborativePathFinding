@@ -1,0 +1,1503 @@
+Testcase: 1
+Map: 
+0,0,0,0,0,3,0,0,
+0,0,0,0,0,0,0,0,
+0,0,0,2,0,0,0,0,
+0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,
+2,0,0,0,0,0,0,0,
+0,0,0,0,0,0,3,0,
+
+Number of players 2
+Player 2: 
+Start Location: (6, 0)
+Destination: (2, 3)
+Player 3: 
+Start Location: (7, 6)
+Destination: (0, 5)
+
+< ======================================================================== >
+Silver's Algorith Results:
+Agent's 2 path:
+t0: ( 6, 0)
+t1: ( 5, 0)
+t2: ( 4, 0)
+t3: ( 3, 0)
+t4: ( 2, 0)
+t5: ( 2, 1)
+t6: ( 2, 2)
+t7: ( 2, 3)
+
+Agent's 3 path:
+t0: ( 7, 6)
+t1: ( 7, 5)
+t2: ( 6, 5)
+t3: ( 5, 5)
+t4: ( 4, 5)
+t5: ( 3, 5)
+t6: ( 2, 5)
+t7: ( 1, 5)
+t8: ( 0, 5)
+
+Time taken to calculate paths: 10.13s
+Time taken to progress through the path 0.015s
+Total time of execution for this map 10.145s
+Player 2 cost: 49
+Player 3 cost: 64
+Total cost: 113
+
+< ======================================================================== >
+CBS Results:
+Agent's 2 path:
+t0: ( 6, 0)
+t1: ( 5, 0)
+t2: ( 4, 0)
+t3: ( 3, 0)
+t4: ( 2, 0)
+t5: ( 2, 1)
+t6: ( 2, 2)
+t7: ( 2, 3)
+
+Agent's 3 path:
+t0: ( 7, 6)
+t1: ( 7, 5)
+t2: ( 6, 5)
+t3: ( 5, 5)
+t4: ( 4, 5)
+t5: ( 3, 5)
+t6: ( 2, 5)
+t7: ( 1, 5)
+t8: ( 0, 5)
+
+Time taken to calculate paths: 0.046s
+Time taken to progress through the path 0.003s
+Total time of execution for this map 0.049s
+Player 2 cost: 49
+Player 3 cost: 64
+Total cost: 121
+
+< ======================================================================== >
+Hybrid results:
+Agent's 2 path:
+t0: ( 6, 0)
+t1: ( 5, 0)
+t2: ( 4, 0)
+t3: ( 3, 0)
+t4: ( 2, 0)
+t5: ( 2, 1)
+t6: ( 2, 2)
+t7: ( 2, 3)
+
+Agent's 3 path:
+t0: ( 7, 6)
+t1: ( 7, 5)
+t2: ( 6, 5)
+t3: ( 5, 5)
+t4: ( 4, 5)
+t5: ( 3, 5)
+t6: ( 2, 5)
+t7: ( 1, 5)
+t8: ( 0, 5)
+
+Time taken to calculate paths: 0.053s
+Time taken to progress through the path 0.003s
+Total time of execution for this map 0.056s
+Player 2 cost: 49
+Player 3 cost: 64
+Total cost: 113
+
+Testcase: 2
+Map: 
+0,3,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,2,
+0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,
+0,0,0,0,2,0,0,0,
+0,0,3,0,0,0,0,0,
+
+Number of players 2
+Player 2: 
+Start Location: (6, 4)
+Destination: (3, 7)
+Player 3: 
+Start Location: (7, 2)
+Destination: (0, 1)
+
+< ======================================================================== >
+Silver's Algorith Results:
+Agent's 2 path:
+t0: ( 6, 4)
+t1: ( 5, 4)
+t2: ( 4, 4)
+t3: ( 3, 4)
+t4: ( 3, 5)
+t5: ( 3, 6)
+t6: ( 3, 7)
+
+Agent's 3 path:
+t0: ( 7, 2)
+t1: ( 7, 1)
+t2: ( 6, 1)
+t3: ( 5, 1)
+t4: ( 4, 1)
+t5: ( 3, 1)
+t6: ( 2, 1)
+t7: ( 1, 1)
+t8: ( 0, 1)
+
+Time taken to calculate paths: 0.05s
+Time taken to progress through the path 0.018s
+Total time of execution for this map 0.068s
+Player 2 cost: 36
+Player 3 cost: 64
+Total cost: 100
+
+< ======================================================================== >
+CBS Results:
+Agent's 2 path:
+t0: ( 6, 4)
+t1: ( 5, 4)
+t2: ( 4, 4)
+t3: ( 3, 4)
+t4: ( 3, 5)
+t5: ( 3, 6)
+t6: ( 3, 7)
+
+Agent's 3 path:
+t0: ( 7, 2)
+t1: ( 7, 1)
+t2: ( 6, 1)
+t3: ( 5, 1)
+t4: ( 4, 1)
+t5: ( 3, 1)
+t6: ( 2, 1)
+t7: ( 1, 1)
+t8: ( 0, 1)
+
+Time taken to calculate paths: 0.038s
+Time taken to progress through the path 0.003s
+Total time of execution for this map 0.041s
+Player 2 cost: 36
+Player 3 cost: 64
+Total cost: 115
+
+< ======================================================================== >
+Hybrid results:
+Agent's 2 path:
+t0: ( 6, 4)
+t1: ( 5, 4)
+t2: ( 4, 4)
+t3: ( 3, 4)
+t4: ( 3, 5)
+t5: ( 3, 6)
+t6: ( 3, 7)
+
+Agent's 3 path:
+t0: ( 7, 2)
+t1: ( 7, 1)
+t2: ( 6, 1)
+t3: ( 5, 1)
+t4: ( 4, 1)
+t5: ( 3, 1)
+t6: ( 2, 1)
+t7: ( 1, 1)
+t8: ( 0, 1)
+
+Time taken to calculate paths: 0.047s
+Time taken to progress through the path 0.003s
+Total time of execution for this map 0.05s
+Player 2 cost: 36
+Player 3 cost: 64
+Total cost: 100
+
+Testcase: 3
+Map: 
+0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,2,
+0,0,0,0,3,3,0,0,
+0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,
+0,0,2,0,0,0,0,0,
+
+Number of players 2
+Player 2: 
+Start Location: (3, 7)
+Destination: (7, 2)
+Player 3: 
+Start Location: (4, 5)
+Destination: (4, 4)
+
+< ======================================================================== >
+Silver's Algorith Results:
+Agent's 2 path:
+t0: ( 3, 7)
+t1: ( 3, 6)
+t2: ( 3, 5)
+t3: ( 3, 4)
+t4: ( 3, 3)
+t5: ( 3, 2)
+t6: ( 4, 2)
+t7: ( 5, 2)
+t8: ( 6, 2)
+t9: ( 7, 2)
+
+Agent's 3 path:
+t0: ( 4, 5)
+t1: ( 4, 4)
+
+Time taken to calculate paths: 0.064s
+Time taken to progress through the path 0.026s
+Total time of execution for this map 0.09s
+Player 2 cost: 81
+Player 3 cost: 1
+Total cost: 82
+
+< ======================================================================== >
+CBS Results:
+Agent's 2 path:
+t0: ( 3, 7)
+t1: ( 3, 6)
+t2: ( 3, 5)
+t3: ( 3, 4)
+t4: ( 3, 3)
+t5: ( 3, 2)
+t6: ( 4, 2)
+t7: ( 5, 2)
+t8: ( 6, 2)
+t9: ( 7, 2)
+
+Agent's 3 path:
+t0: ( 4, 5)
+t1: ( 4, 4)
+
+Time taken to calculate paths: 0.061s
+Time taken to progress through the path 0.002s
+Total time of execution for this map 0.063s
+Player 2 cost: 81
+Player 3 cost: 1
+Total cost: 126
+
+< ======================================================================== >
+Hybrid results:
+Agent's 2 path:
+t0: ( 3, 7)
+t1: ( 3, 6)
+t2: ( 3, 5)
+t3: ( 3, 4)
+t4: ( 3, 3)
+t5: ( 3, 2)
+t6: ( 4, 2)
+t7: ( 5, 2)
+t8: ( 6, 2)
+t9: ( 7, 2)
+
+Agent's 3 path:
+t0: ( 4, 5)
+t1: ( 4, 4)
+
+Time taken to calculate paths: 0.067s
+Time taken to progress through the path 0.003s
+Total time of execution for this map 0.07s
+Player 2 cost: 81
+Player 3 cost: 1
+Total cost: 82
+
+Testcase: 4
+Map: 
+0,3,0,0,0,0,0,0,
+0,0,0,0,0,0,0,3,
+0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,
+0,0,0,0,0,2,0,0,
+0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,
+0,0,2,0,0,0,0,0,
+
+Number of players 2
+Player 2: 
+Start Location: (7, 2)
+Destination: (4, 5)
+Player 3: 
+Start Location: (0, 1)
+Destination: (1, 7)
+
+< ======================================================================== >
+Silver's Algorith Results:
+Agent's 2 path:
+t0: ( 7, 2)
+t1: ( 6, 2)
+t2: ( 5, 2)
+t3: ( 4, 2)
+t4: ( 4, 3)
+t5: ( 4, 4)
+t6: ( 4, 5)
+
+Agent's 3 path:
+t0: ( 0, 1)
+t1: ( 1, 1)
+t2: ( 1, 2)
+t3: ( 1, 3)
+t4: ( 1, 4)
+t5: ( 1, 5)
+t6: ( 1, 6)
+t7: ( 1, 7)
+
+Time taken to calculate paths: 0.036s
+Time taken to progress through the path 0.014s
+Total time of execution for this map 0.05s
+Player 2 cost: 36
+Player 3 cost: 49
+Total cost: 85
+
+< ======================================================================== >
+CBS Results:
+Agent's 2 path:
+t0: ( 7, 2)
+t1: ( 6, 2)
+t2: ( 5, 2)
+t3: ( 4, 2)
+t4: ( 4, 3)
+t5: ( 4, 4)
+t6: ( 4, 5)
+
+Agent's 3 path:
+t0: ( 0, 1)
+t1: ( 1, 1)
+t2: ( 1, 2)
+t3: ( 1, 3)
+t4: ( 1, 4)
+t5: ( 1, 5)
+t6: ( 1, 6)
+t7: ( 1, 7)
+
+Time taken to calculate paths: 0.029s
+Time taken to progress through the path 0.002s
+Total time of execution for this map 0.031s
+Player 2 cost: 36
+Player 3 cost: 49
+Total cost: 92
+
+< ======================================================================== >
+Hybrid results:
+Agent's 2 path:
+t0: ( 7, 2)
+t1: ( 6, 2)
+t2: ( 5, 2)
+t3: ( 4, 2)
+t4: ( 4, 3)
+t5: ( 4, 4)
+t6: ( 4, 5)
+
+Agent's 3 path:
+t0: ( 0, 1)
+t1: ( 1, 1)
+t2: ( 1, 2)
+t3: ( 1, 3)
+t4: ( 1, 4)
+t5: ( 1, 5)
+t6: ( 1, 6)
+t7: ( 1, 7)
+
+Time taken to calculate paths: 0.034s
+Time taken to progress through the path 0.003s
+Total time of execution for this map 0.037s
+Player 2 cost: 36
+Player 3 cost: 49
+Total cost: 85
+
+Testcase: 5
+Map: 
+0,2,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,
+0,0,0,0,3,2,0,0,
+0,0,3,0,0,0,0,0,
+0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,
+
+Number of players 2
+Player 2: 
+Start Location: (4, 5)
+Destination: (0, 1)
+Player 3: 
+Start Location: (4, 4)
+Destination: (5, 2)
+
+< ======================================================================== >
+Silver's Algorith Results:
+Agent's 2 path:
+t0: ( 4, 5)
+t1: ( 4, 4)
+t2: ( 4, 3)
+t3: ( 4, 2)
+t4: ( 4, 1)
+t5: ( 3, 1)
+t6: ( 2, 1)
+t7: ( 1, 1)
+t8: ( 0, 1)
+
+Agent's 3 path:
+t0: ( 4, 4)
+t1: ( 4, 3)
+t2: ( 4, 2)
+t3: ( 5, 2)
+
+Time taken to calculate paths: 0.036s
+Time taken to progress through the path 0.022s
+Total time of execution for this map 0.058s
+Player 2 cost: 64
+Player 3 cost: 9
+Total cost: 73
+
+< ======================================================================== >
+CBS Results:
+Agent's 2 path:
+t0: ( 4, 5)
+t1: ( 4, 4)
+t2: ( 4, 3)
+t3: ( 4, 2)
+t4: ( 4, 1)
+t5: ( 3, 1)
+t6: ( 2, 1)
+t7: ( 1, 1)
+t8: ( 0, 1)
+
+Agent's 3 path:
+t0: ( 4, 4)
+t1: ( 4, 3)
+t2: ( 4, 2)
+t3: ( 5, 2)
+
+Time taken to calculate paths: 0.032s
+Time taken to progress through the path 0.003s
+Total time of execution for this map 0.035s
+Player 2 cost: 64
+Player 3 cost: 9
+Total cost: 103
+
+< ======================================================================== >
+Hybrid results:
+Agent's 2 path:
+t0: ( 4, 5)
+t1: ( 4, 4)
+t2: ( 4, 3)
+t3: ( 4, 2)
+t4: ( 4, 1)
+t5: ( 3, 1)
+t6: ( 2, 1)
+t7: ( 1, 1)
+t8: ( 0, 1)
+
+Agent's 3 path:
+t0: ( 4, 4)
+t1: ( 4, 3)
+t2: ( 4, 2)
+t3: ( 5, 2)
+
+Time taken to calculate paths: 0.041s
+Time taken to progress through the path 0.003s
+Total time of execution for this map 0.044s
+Player 2 cost: 64
+Player 3 cost: 9
+Total cost: 73
+
+Testcase: 6
+Map: 
+0,2,0,0,0,0,0,0,
+0,0,0,0,0,0,0,3,
+0,0,0,0,0,0,3,0,
+0,0,0,0,0,0,0,0,
+0,0,0,0,2,0,0,0,
+0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,
+
+Number of players 2
+Player 2: 
+Start Location: (0, 1)
+Destination: (4, 4)
+Player 3: 
+Start Location: (1, 7)
+Destination: (2, 6)
+
+< ======================================================================== >
+Silver's Algorith Results:
+Agent's 2 path:
+t0: ( 0, 1)
+t1: ( 1, 1)
+t2: ( 2, 1)
+t3: ( 3, 1)
+t4: ( 4, 1)
+t5: ( 4, 2)
+t6: ( 4, 3)
+t7: ( 4, 4)
+
+Agent's 3 path:
+t0: ( 1, 7)
+t1: ( 1, 6)
+t2: ( 2, 6)
+
+Time taken to calculate paths: 0.022s
+Time taken to progress through the path 0.02s
+Total time of execution for this map 0.042s
+Player 2 cost: 49
+Player 3 cost: 4
+Total cost: 53
+
+< ======================================================================== >
+CBS Results:
+Agent's 2 path:
+t0: ( 0, 1)
+t1: ( 1, 1)
+t2: ( 2, 1)
+t3: ( 3, 1)
+t4: ( 4, 1)
+t5: ( 4, 2)
+t6: ( 4, 3)
+t7: ( 4, 4)
+
+Agent's 3 path:
+t0: ( 1, 7)
+t1: ( 1, 6)
+t2: ( 2, 6)
+
+Time taken to calculate paths: 0.023s
+Time taken to progress through the path 0.003s
+Total time of execution for this map 0.026s
+Player 2 cost: 49
+Player 3 cost: 4
+Total cost: 78
+
+< ======================================================================== >
+Hybrid results:
+Agent's 2 path:
+t0: ( 0, 1)
+t1: ( 1, 1)
+t2: ( 2, 1)
+t3: ( 3, 1)
+t4: ( 4, 1)
+t5: ( 4, 2)
+t6: ( 4, 3)
+t7: ( 4, 4)
+
+Agent's 3 path:
+t0: ( 1, 7)
+t1: ( 1, 6)
+t2: ( 2, 6)
+
+Time taken to calculate paths: 0.025s
+Time taken to progress through the path 0.003s
+Total time of execution for this map 0.028s
+Player 2 cost: 49
+Player 3 cost: 4
+Total cost: 53
+
+Testcase: 7
+Map: 
+0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,2,
+0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,
+0,0,0,0,2,0,0,0,
+0,0,3,0,0,0,0,0,
+0,3,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,
+
+Number of players 2
+Player 2: 
+Start Location: (4, 4)
+Destination: (1, 7)
+Player 3: 
+Start Location: (5, 2)
+Destination: (6, 1)
+
+< ======================================================================== >
+Silver's Algorith Results:
+Agent's 2 path:
+t0: ( 4, 4)
+t1: ( 3, 4)
+t2: ( 2, 4)
+t3: ( 1, 4)
+t4: ( 1, 5)
+t5: ( 1, 6)
+t6: ( 1, 7)
+
+Agent's 3 path:
+t0: ( 5, 2)
+t1: ( 5, 1)
+t2: ( 6, 1)
+
+Time taken to calculate paths: 0.013s
+Time taken to progress through the path 0.017s
+Total time of execution for this map 0.03s
+Player 2 cost: 36
+Player 3 cost: 4
+Total cost: 40
+
+< ======================================================================== >
+CBS Results:
+Agent's 2 path:
+t0: ( 4, 4)
+t1: ( 3, 4)
+t2: ( 2, 4)
+t3: ( 1, 4)
+t4: ( 1, 5)
+t5: ( 1, 6)
+t6: ( 1, 7)
+
+Agent's 3 path:
+t0: ( 5, 2)
+t1: ( 5, 1)
+t2: ( 6, 1)
+
+Time taken to calculate paths: 0.014s
+Time taken to progress through the path 0.003s
+Total time of execution for this map 0.017s
+Player 2 cost: 36
+Player 3 cost: 4
+Total cost: 58
+
+< ======================================================================== >
+Hybrid results:
+Agent's 2 path:
+t0: ( 4, 4)
+t1: ( 3, 4)
+t2: ( 2, 4)
+t3: ( 1, 4)
+t4: ( 1, 5)
+t5: ( 1, 6)
+t6: ( 1, 7)
+
+Agent's 3 path:
+t0: ( 5, 2)
+t1: ( 5, 1)
+t2: ( 6, 1)
+
+Time taken to calculate paths: 0.019s
+Time taken to progress through the path 0.003s
+Total time of execution for this map 0.022s
+Player 2 cost: 36
+Player 3 cost: 4
+Total cost: 40
+
+Testcase: 8
+Map: 
+0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,2,
+0,0,0,0,0,0,3,0,
+0,0,0,0,3,0,0,0,
+0,0,0,0,0,0,0,0,
+0,0,2,0,0,0,0,0,
+0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,
+
+Number of players 2
+Player 2: 
+Start Location: (1, 7)
+Destination: (5, 2)
+Player 3: 
+Start Location: (2, 6)
+Destination: (3, 4)
+
+< ======================================================================== >
+Silver's Algorith Results:
+Agent's 2 path:
+t0: ( 1, 7)
+t1: ( 1, 6)
+t2: ( 1, 5)
+t3: ( 1, 4)
+t4: ( 1, 3)
+t5: ( 1, 2)
+t6: ( 2, 2)
+t7: ( 3, 2)
+t8: ( 4, 2)
+t9: ( 5, 2)
+
+Agent's 3 path:
+t0: ( 2, 6)
+t1: ( 2, 5)
+t2: ( 2, 4)
+t3: ( 3, 4)
+
+Time taken to calculate paths: 0.066s
+Time taken to progress through the path 0.03s
+Total time of execution for this map 0.096s
+Player 2 cost: 81
+Player 3 cost: 9
+Total cost: 90
+
+< ======================================================================== >
+CBS Results:
+Agent's 2 path:
+t0: ( 1, 7)
+t1: ( 1, 6)
+t2: ( 1, 5)
+t3: ( 1, 4)
+t4: ( 1, 3)
+t5: ( 1, 2)
+t6: ( 2, 2)
+t7: ( 3, 2)
+t8: ( 4, 2)
+t9: ( 5, 2)
+
+Agent's 3 path:
+t0: ( 2, 6)
+t1: ( 2, 5)
+t2: ( 2, 4)
+t3: ( 3, 4)
+
+Time taken to calculate paths: 0.062s
+Time taken to progress through the path 0.003s
+Total time of execution for this map 0.065s
+Player 2 cost: 81
+Player 3 cost: 9
+Total cost: 129
+
+< ======================================================================== >
+Hybrid results:
+Agent's 2 path:
+t0: ( 1, 7)
+t1: ( 1, 6)
+t2: ( 1, 5)
+t3: ( 1, 4)
+t4: ( 1, 3)
+t5: ( 1, 2)
+t6: ( 2, 2)
+t7: ( 3, 2)
+t8: ( 4, 2)
+t9: ( 5, 2)
+
+Agent's 3 path:
+t0: ( 2, 6)
+t1: ( 2, 5)
+t2: ( 2, 4)
+t3: ( 3, 4)
+
+Time taken to calculate paths: 0.071s
+Time taken to progress through the path 0.003s
+Total time of execution for this map 0.074s
+Player 2 cost: 81
+Player 3 cost: 9
+Total cost: 90
+
+Testcase: 9
+Map: 
+0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,2,0,
+0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,
+0,0,2,0,0,0,0,0,
+0,3,0,0,0,0,0,0,
+0,0,0,0,0,0,0,3,
+
+Number of players 2
+Player 2: 
+Start Location: (5, 2)
+Destination: (2, 6)
+Player 3: 
+Start Location: (6, 1)
+Destination: (7, 7)
+
+< ======================================================================== >
+Silver's Algorith Results:
+Agent's 2 path:
+t0: ( 5, 2)
+t1: ( 4, 2)
+t2: ( 3, 2)
+t3: ( 2, 2)
+t4: ( 2, 3)
+t5: ( 2, 4)
+t6: ( 2, 5)
+t7: ( 2, 6)
+
+Agent's 3 path:
+t0: ( 6, 1)
+t1: ( 7, 1)
+t2: ( 7, 2)
+t3: ( 7, 3)
+t4: ( 7, 4)
+t5: ( 7, 5)
+t6: ( 7, 6)
+t7: ( 7, 7)
+
+Time taken to calculate paths: 0.038s
+Time taken to progress through the path 0.016s
+Total time of execution for this map 0.054s
+Player 2 cost: 49
+Player 3 cost: 49
+Total cost: 98
+
+< ======================================================================== >
+CBS Results:
+Agent's 2 path:
+t0: ( 5, 2)
+t1: ( 4, 2)
+t2: ( 3, 2)
+t3: ( 2, 2)
+t4: ( 2, 3)
+t5: ( 2, 4)
+t6: ( 2, 5)
+t7: ( 2, 6)
+
+Agent's 3 path:
+t0: ( 6, 1)
+t1: ( 7, 1)
+t2: ( 7, 2)
+t3: ( 7, 3)
+t4: ( 7, 4)
+t5: ( 7, 5)
+t6: ( 7, 6)
+t7: ( 7, 7)
+
+Time taken to calculate paths: 0.031s
+Time taken to progress through the path 0.003s
+Total time of execution for this map 0.034s
+Player 2 cost: 49
+Player 3 cost: 49
+Total cost: 98
+
+< ======================================================================== >
+Hybrid results:
+Agent's 2 path:
+t0: ( 5, 2)
+t1: ( 4, 2)
+t2: ( 3, 2)
+t3: ( 2, 2)
+t4: ( 2, 3)
+t5: ( 2, 4)
+t6: ( 2, 5)
+t7: ( 2, 6)
+
+Agent's 3 path:
+t0: ( 6, 1)
+t1: ( 7, 1)
+t2: ( 7, 2)
+t3: ( 7, 3)
+t4: ( 7, 4)
+t5: ( 7, 5)
+t6: ( 7, 6)
+t7: ( 7, 7)
+
+Time taken to calculate paths: 0.043s
+Time taken to progress through the path 0.003s
+Total time of execution for this map 0.046s
+Player 2 cost: 49
+Player 3 cost: 49
+Total cost: 98
+
+Testcase: 10
+Map: 
+0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,2,0,
+0,0,0,3,3,0,0,0,
+0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,
+0,2,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,
+
+Number of players 2
+Player 2: 
+Start Location: (2, 6)
+Destination: (6, 1)
+Player 3: 
+Start Location: (3, 4)
+Destination: (3, 3)
+
+< ======================================================================== >
+Silver's Algorith Results:
+Agent's 2 path:
+t0: ( 2, 6)
+t1: ( 2, 5)
+t2: ( 2, 4)
+t3: ( 2, 3)
+t4: ( 2, 2)
+t5: ( 2, 1)
+t6: ( 3, 1)
+t7: ( 4, 1)
+t8: ( 5, 1)
+t9: ( 6, 1)
+
+Agent's 3 path:
+t0: ( 3, 4)
+t1: ( 3, 3)
+
+Time taken to calculate paths: 0.066s
+Time taken to progress through the path 0.027s
+Total time of execution for this map 0.093s
+Player 2 cost: 81
+Player 3 cost: 1
+Total cost: 82
+
+< ======================================================================== >
+CBS Results:
+Agent's 2 path:
+t0: ( 2, 6)
+t1: ( 2, 5)
+t2: ( 2, 4)
+t3: ( 2, 3)
+t4: ( 2, 2)
+t5: ( 2, 1)
+t6: ( 3, 1)
+t7: ( 4, 1)
+t8: ( 5, 1)
+t9: ( 6, 1)
+
+Agent's 3 path:
+t0: ( 3, 4)
+t1: ( 3, 3)
+
+Time taken to calculate paths: 0.061s
+Time taken to progress through the path 0.003s
+Total time of execution for this map 0.064s
+Player 2 cost: 81
+Player 3 cost: 1
+Total cost: 126
+
+< ======================================================================== >
+Hybrid results:
+Agent's 2 path:
+t0: ( 2, 6)
+t1: ( 2, 5)
+t2: ( 2, 4)
+t3: ( 2, 3)
+t4: ( 2, 2)
+t5: ( 2, 1)
+t6: ( 3, 1)
+t7: ( 4, 1)
+t8: ( 5, 1)
+t9: ( 6, 1)
+
+Agent's 3 path:
+t0: ( 3, 4)
+t1: ( 3, 3)
+
+Time taken to calculate paths: 0.068s
+Time taken to progress through the path 0.002s
+Total time of execution for this map 0.07s
+Player 2 cost: 81
+Player 3 cost: 1
+Total cost: 82
+
+Testcase: 11
+Map: 
+0,0,0,0,0,0,3,0,
+0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,
+0,0,0,0,2,0,0,0,
+0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,
+0,2,0,0,0,0,0,0,
+0,0,0,0,0,0,0,3,
+
+Number of players 2
+Player 2: 
+Start Location: (6, 1)
+Destination: (3, 4)
+Player 3: 
+Start Location: (7, 7)
+Destination: (0, 6)
+
+< ======================================================================== >
+Silver's Algorith Results:
+Agent's 2 path:
+t0: ( 6, 1)
+t1: ( 5, 1)
+t2: ( 4, 1)
+t3: ( 3, 1)
+t4: ( 3, 2)
+t5: ( 3, 3)
+t6: ( 3, 4)
+
+Agent's 3 path:
+t0: ( 7, 7)
+t1: ( 7, 6)
+t2: ( 6, 6)
+t3: ( 5, 6)
+t4: ( 4, 6)
+t5: ( 3, 6)
+t6: ( 2, 6)
+t7: ( 1, 6)
+t8: ( 0, 6)
+
+Time taken to calculate paths: 0.05s
+Time taken to progress through the path 0.015s
+Total time of execution for this map 0.065s
+Player 2 cost: 36
+Player 3 cost: 64
+Total cost: 100
+
+< ======================================================================== >
+CBS Results:
+Agent's 2 path:
+t0: ( 6, 1)
+t1: ( 5, 1)
+t2: ( 4, 1)
+t3: ( 3, 1)
+t4: ( 3, 2)
+t5: ( 3, 3)
+t6: ( 3, 4)
+
+Agent's 3 path:
+t0: ( 7, 7)
+t1: ( 7, 6)
+t2: ( 6, 6)
+t3: ( 5, 6)
+t4: ( 4, 6)
+t5: ( 3, 6)
+t6: ( 2, 6)
+t7: ( 1, 6)
+t8: ( 0, 6)
+
+Time taken to calculate paths: 0.041s
+Time taken to progress through the path 0.003s
+Total time of execution for this map 0.044s
+Player 2 cost: 36
+Player 3 cost: 64
+Total cost: 115
+
+< ======================================================================== >
+Hybrid results:
+Agent's 2 path:
+t0: ( 6, 1)
+t1: ( 5, 1)
+t2: ( 4, 1)
+t3: ( 3, 1)
+t4: ( 3, 2)
+t5: ( 3, 3)
+t6: ( 3, 4)
+
+Agent's 3 path:
+t0: ( 7, 7)
+t1: ( 7, 6)
+t2: ( 6, 6)
+t3: ( 5, 6)
+t4: ( 4, 6)
+t5: ( 3, 6)
+t6: ( 2, 6)
+t7: ( 1, 6)
+t8: ( 0, 6)
+
+Time taken to calculate paths: 0.045s
+Time taken to progress through the path 0.003s
+Total time of execution for this map 0.048s
+Player 2 cost: 36
+Player 3 cost: 64
+Total cost: 100
+
+Testcase: 12
+Map: 
+0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,
+0,0,0,3,2,0,0,0,
+0,3,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,2,
+
+Number of players 2
+Player 2: 
+Start Location: (3, 4)
+Destination: (7, 7)
+Player 3: 
+Start Location: (3, 3)
+Destination: (4, 1)
+
+< ======================================================================== >
+Silver's Algorith Results:
+Agent's 2 path:
+t0: ( 3, 4)
+t1: ( 4, 4)
+t2: ( 5, 4)
+t3: ( 6, 4)
+t4: ( 7, 4)
+t5: ( 7, 5)
+t6: ( 7, 6)
+t7: ( 7, 7)
+
+Agent's 3 path:
+t0: ( 3, 3)
+t1: ( 3, 2)
+t2: ( 3, 1)
+t3: ( 4, 1)
+
+Time taken to calculate paths: 0.02s
+Time taken to progress through the path 0.018s
+Total time of execution for this map 0.038s
+Player 2 cost: 49
+Player 3 cost: 9
+Total cost: 58
+
+< ======================================================================== >
+CBS Results:
+Agent's 2 path:
+t0: ( 3, 4)
+t1: ( 4, 4)
+t2: ( 5, 4)
+t3: ( 6, 4)
+t4: ( 7, 4)
+t5: ( 7, 5)
+t6: ( 7, 6)
+t7: ( 7, 7)
+
+Agent's 3 path:
+t0: ( 3, 3)
+t1: ( 3, 2)
+t2: ( 3, 1)
+t3: ( 4, 1)
+
+Time taken to calculate paths: 0.019s
+Time taken to progress through the path 0.003s
+Total time of execution for this map 0.022s
+Player 2 cost: 49
+Player 3 cost: 9
+Total cost: 80
+
+< ======================================================================== >
+Hybrid results:
+Agent's 2 path:
+t0: ( 3, 4)
+t1: ( 4, 4)
+t2: ( 5, 4)
+t3: ( 6, 4)
+t4: ( 7, 4)
+t5: ( 7, 5)
+t6: ( 7, 6)
+t7: ( 7, 7)
+
+Agent's 3 path:
+t0: ( 3, 3)
+t1: ( 3, 2)
+t2: ( 3, 1)
+t3: ( 4, 1)
+
+Time taken to calculate paths: 0.026s
+Time taken to progress through the path 0.002s
+Total time of execution for this map 0.028s
+Player 2 cost: 49
+Player 3 cost: 9
+Total cost: 58
+
+Testcase: 13
+Map: 
+0,0,0,0,0,0,3,0,
+0,0,0,0,0,3,0,0,
+0,0,0,0,0,0,0,0,
+0,0,0,2,0,0,0,0,
+0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,2,
+
+Number of players 2
+Player 2: 
+Start Location: (7, 7)
+Destination: (3, 3)
+Player 3: 
+Start Location: (0, 6)
+Destination: (1, 5)
+
+< ======================================================================== >
+Silver's Algorith Results:
+Agent's 2 path:
+t0: ( 7, 7)
+t1: ( 7, 6)
+t2: ( 7, 5)
+t3: ( 7, 4)
+t4: ( 7, 3)
+t5: ( 6, 3)
+t6: ( 5, 3)
+t7: ( 4, 3)
+t8: ( 3, 3)
+
+Agent's 3 path:
+t0: ( 0, 6)
+t1: ( 0, 5)
+t2: ( 1, 5)
+
+Time taken to calculate paths: 0.033s
+Time taken to progress through the path 0.021s
+Total time of execution for this map 0.054s
+Player 2 cost: 64
+Player 3 cost: 4
+Total cost: 68
+
+< ======================================================================== >
+CBS Results:
+Agent's 2 path:
+t0: ( 7, 7)
+t1: ( 7, 6)
+t2: ( 7, 5)
+t3: ( 7, 4)
+t4: ( 7, 3)
+t5: ( 6, 3)
+t6: ( 5, 3)
+t7: ( 4, 3)
+t8: ( 3, 3)
+
+Agent's 3 path:
+t0: ( 0, 6)
+t1: ( 0, 5)
+t2: ( 1, 5)
+
+Time taken to calculate paths: 0.033s
+Time taken to progress through the path 0.003s
+Total time of execution for this map 0.036s
+Player 2 cost: 64
+Player 3 cost: 4
+Total cost: 101
+
+< ======================================================================== >
+Hybrid results:
+Agent's 2 path:
+t0: ( 7, 7)
+t1: ( 7, 6)
+t2: ( 7, 5)
+t3: ( 7, 4)
+t4: ( 7, 3)
+t5: ( 6, 3)
+t6: ( 5, 3)
+t7: ( 4, 3)
+t8: ( 3, 3)
+
+Agent's 3 path:
+t0: ( 0, 6)
+t1: ( 0, 5)
+t2: ( 1, 5)
+
+Time taken to calculate paths: 0.035s
+Time taken to progress through the path 0.003s
+Total time of execution for this map 0.038s
+Player 2 cost: 64
+Player 3 cost: 4
+Total cost: 68
+
+Testcase: 14
+Map: 
+0,0,0,0,0,0,2,0,
+0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,
+0,0,0,2,0,0,0,0,
+0,3,0,0,0,0,0,0,
+3,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,
+
+Number of players 2
+Player 2: 
+Start Location: (3, 3)
+Destination: (0, 6)
+Player 3: 
+Start Location: (4, 1)
+Destination: (5, 0)
+
+< ======================================================================== >
+Silver's Algorith Results:
+Agent's 2 path:
+t0: ( 3, 3)
+t1: ( 2, 3)
+t2: ( 1, 3)
+t3: ( 0, 3)
+t4: ( 0, 4)
+t5: ( 0, 5)
+t6: ( 0, 6)
+
+Agent's 3 path:
+t0: ( 4, 1)
+t1: ( 4, 0)
+t2: ( 5, 0)
+
+Time taken to calculate paths: 0.01s
+Time taken to progress through the path 0.017s
+Total time of execution for this map 0.027s
+Player 2 cost: 36
+Player 3 cost: 4
+Total cost: 40
+
+< ======================================================================== >
+CBS Results:
+Agent's 2 path:
+t0: ( 3, 3)
+t1: ( 2, 3)
+t2: ( 1, 3)
+t3: ( 0, 3)
+t4: ( 0, 4)
+t5: ( 0, 5)
+t6: ( 0, 6)
+
+Agent's 3 path:
+t0: ( 4, 1)
+t1: ( 4, 0)
+t2: ( 5, 0)
+
+Time taken to calculate paths: 0.015s
+Time taken to progress through the path 0.003s
+Total time of execution for this map 0.018s
+Player 2 cost: 36
+Player 3 cost: 4
+Total cost: 58
+
+< ======================================================================== >
+Hybrid results:
+Agent's 2 path:
+t0: ( 3, 3)
+t1: ( 2, 3)
+t2: ( 1, 3)
+t3: ( 0, 3)
+t4: ( 0, 4)
+t5: ( 0, 5)
+t6: ( 0, 6)
+
+Agent's 3 path:
+t0: ( 4, 1)
+t1: ( 4, 0)
+t2: ( 5, 0)
+
+Time taken to calculate paths: 0.018s
+Time taken to progress through the path 0.002s
+Total time of execution for this map 0.02s
+Player 2 cost: 36
+Player 3 cost: 4
+Total cost: 40
+
+Testcase: 15
+Testcase: 1
+Map: 
+0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,2,
+0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,
+0,0,0,0,2,0,0,0,
+0,3,3,0,0,0,0,0,
+0,0,0,0,0,0,0,0,
+
+Number of players 2
+Player 2: 
+Start Location: (5, 4)
+Destination: (1, 7)
+Player 3: 
+Start Location: (6, 2)
+Destination: (6, 1)
+
+< ======================================================================== >
+Silver's Algorith Results:
+Agent's 2 path:
+t0: ( 5, 4)
+t1: ( 4, 4)
+t2: ( 3, 4)
+t3: ( 2, 4)
+t4: ( 1, 4)
+t5: ( 1, 5)
+t6: ( 1, 6)
+t7: ( 1, 7)
+
+Agent's 3 path:
+t0: ( 6, 2)
+t1: ( 6, 1)
+
+Time taken to calculate paths: 0.578s
+Time taken to progress through the path 0.523s
+Total time of execution for this map 1.101s
+Player 2 cost: 7
+Player 3 cost: 1
+Total cost: 8
+
+< ======================================================================== >
+CBS Results:
+Agent's 2 path:
+t0: ( 5, 4)
+t1: ( 4, 4)
+t2: ( 3, 4)
+t3: ( 2, 4)
+t4: ( 1, 4)
+t5: ( 1, 5)
+t6: ( 1, 6)
+t7: ( 1, 7)
+
+Agent's 3 path:
+t0: ( 6, 2)
+t1: ( 6, 1)
+
+Time taken to calculate paths: 0.827s
+Time taken to progress through the path 0.506s
+Total time of execution for this map 1.333s
+Player 2 cost: 7
+Player 3 cost: 1
+Total cost: 8
+
+< ======================================================================== >
+Hybrid results:
+Agent's 2 path:
+t0: ( 5, 4)
+t1: ( 4, 4)
+t2: ( 3, 4)
+t3: ( 2, 4)
+t4: ( 1, 4)
+t5: ( 1, 5)
+t6: ( 1, 6)
+t7: ( 1, 7)
+
+Agent's 3 path:
+t0: ( 6, 2)
+t1: ( 6, 1)
+
+Time taken to calculate paths: 0.678s
+Time taken to progress through the path 0.556s
+Total time of execution for this map 1.234s
+Player 2 cost: 7
+Player 3 cost: 1
+Total cost: 8
+
+Testcase: 2
+Map: 
+0,2,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,
+0,0,0,0,0,2,0,0,
+0,0,3,0,3,0,0,0,
+0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,
+
+Number of players 2
+Player 2: 
+Start Location: (4, 5)
+Destination: (0, 1)
+Player 3: 
+Start Location: (5, 4)
+Destination: (5, 2)
+
+< ======================================================================== >
+Silver's Algorith Results:
+Agent's 2 path:
+t0: ( 4, 5)
+t1: ( 4, 4)
+t2: ( 4, 3)
+t3: ( 4, 2)
+t4: ( 4, 1)
+t5: ( 3, 1)
+t6: ( 2, 1)
+t7: ( 1, 1)
+t8: ( 0, 1)
+
+Agent's 3 path:
+t0: ( 5, 4)
+t1: ( 5, 3)
+t2: ( 5, 2)
+
+Time taken to calculate paths: 0.538s
+Time taken to progress through the path 0.625s
+Total time of execution for this map 1.163s
+Player 2 cost: 8
+Player 3 cost: 2
+Total cost: 10
+

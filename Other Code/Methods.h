@@ -874,3 +874,49 @@ void MAPF::validateSilversPaths(){
 	
 
 }
+
+
+
+/*
+		The parameters:
+		keepRoute: True if you want a completely new route, false if you only want to update
+		the route you already have.
+		time: the current time t to search for adjacents
+	*/
+	void MoveToClosestEscapeElement(bool keepRoute, Location start);
+
+/*
+	Gets you to the closest escape element that you can find or something
+*/
+
+void Agent::MoveToClosestEscapeElement(bool KeepRoute, Location start){
+	
+	//Clear the lists first
+	clearSpatialLists(false);
+	//First, lets get the closest escape Element
+	Node escapeNode = EscapeAstar(start);
+
+	if (!KeepRoute){
+		// If you want to clear the route, clear it and return t to 0
+		time_route.clear();
+	}
+	//Before restarting, we need to prepare the elements for the search
+	// First step, clear the lists
+	time_openList.clear();
+	time_closedList.clear();
+
+	// Since we will use this element twice, a pointer is created
+	Node* lastNode = &time_route[time_route.size() - 1];
+	// Second step, remove the parent of the last element of the route
+	lastNode->clearParent();
+
+	// now we can restart the search, but we look for the escape Node
+	TimeSpaceAstarHelper(
+		lastNode->getLocation(), 
+		escapeNode.getLocation(),
+		time_route.size());
+
+	// Now we have the route to the escape route
+
+	lastNode = NULL; // CLEAN UP
+}

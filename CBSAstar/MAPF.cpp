@@ -202,7 +202,7 @@ void MAPF::Start(int type){
 void MAPF::StartSilversPathFinding(bool hybrid){
 	for (unsigned int i = 0; i < players.size(); i++){
 		cout << "Calculating " << i << " path." << endl;
-		players[i].executeTimeSpaceAstar(0); // because element 0 is the starting position
+		players[i].executeTimeSpaceAstar(0, obstacles); // because element 0 is the starting position
 		paths.push_back(players[i].getPath());
 	}
 
@@ -325,7 +325,7 @@ void MAPF::MoveBySilvers(bool hybrid, bool automatic){
 		finished = players[0].finished();
 		for (unsigned int i = 0; i < players.size(); i++){
 			if (players[i].hasValidSolution()){
-				players[i].move(time); // The element at i will be the element at time = i + 1
+				players[i].move(time, obstacles); // The element at i will be the element at time = i + 1
 				if (i > 0) finished = finished && players[i].finished();
 				verify = verify || players[i].NeedsPathVerification(); // When An element just updated its path
 				map->setElement(players[i].getLocation(), (players[i].getId() + 2)); // Uncoment for clean whatever
@@ -687,7 +687,7 @@ void MAPF::ConflictSolver(Conflicted c){
 	vector<vector<Node>> partialPaths;
 	CBTNode* solutionNode = tree->getSolution();
 	solutionNode->SanitizePaths();
-	for (unsigned int i = 0; i < solutionNode->NumberAgents(); i++){
+	for (int i = 0; i < solutionNode->NumberAgents(); i++){
 		partialPaths.push_back(solutionNode->getPathAt(i));
 	}
 
@@ -705,7 +705,7 @@ void MAPF::ConflictSolver(Conflicted c){
 	vector<Node> new_path2;
 
 	// First get all the elements before the agent got into the danger zone
-	for (int i = 0; i < otherIndexes.size(); i++){
+	for (unsigned int i = 0; i < otherIndexes.size(); i++){
 		vector<Node> temp;
 		for (unsigned int j = 0; j < c.time; j++){
 			temp.push_back(paths[otherIndexes[i]][j]);
@@ -778,7 +778,7 @@ bool MAPF::AddOtherPlayersToConflict(vector<int> &agentIndexes, int start_time, 
 
 		if (!exists && i != agentToMove){
 			int startIndex = 0;
-			for (unsigned int index = start_time; index <= longest_time; index++){
+			for ( int index = start_time; index <= longest_time; index++){
 				if (map->getValueAt(paths[i][index].getLocation()) == -1){
 					startIndex = index;
 					agentIndexes.push_back(i);
@@ -916,22 +916,22 @@ void MAPF::MultipleBlocking(){
 				// The agents involved
 				c.agents.push_back(players[i].getId()); // so the first agent to be on the agents vector is the blocking one
 				// Push the rest of the agents
-				for (unsigned int i = 0; i < blockedEntities.size(); i++){
-					c.agents.push_back(blockedEntities[i]);
+				for (unsigned int index = 0; index < blockedEntities.size(); index++){
+					c.agents.push_back(blockedEntities[index]);
 				}
 
 				// The time previous to the earliest block
 				unsigned int smallestTime = time_of_block[0];
-				for (unsigned int i = 1; i < time_of_block.size(); i++){
-					if (time_of_block[i] < smallestTime) smallestTime = time_of_block[i];
+				for (unsigned int index = 1; index < time_of_block.size(); index++){
+					if (time_of_block[index] < smallestTime) smallestTime = time_of_block[index];
 				}
 				c.time = smallestTime - 1;
 
 				// the locations previous to the first block
 				if (smallestTime < players[i].pathSize()) c.locations.push_back(paths[i][smallestTime].getLocation());
 				else c.locations.push_back(destination.getLocation());
-				for (unsigned int i = 0; i < blockedEntities.size(); i++){
-					int index = getIndexOfAgent(blockedEntities[i]);
+				for (unsigned int indice = 0; indice < blockedEntities.size(); indice++){
+					int index = getIndexOfAgent(blockedEntities[indice]);
 					c.locations.push_back(paths[index][smallestTime].getLocation());
 				}
 				
@@ -1082,23 +1082,16 @@ bool MAPF::ValidMap(){
 	return result;
 }
 
-void MAPF::printCosts(ostream& out){
+void MAPF::printCosts(ostream& out, int *accumCost){
 	for (unsigned int i = 0; i < players.size(); i++){
-		out << "Player " << players[i].getId() << " cost: " << players[i].getSic() << endl;
+		out << "Player " << players[i].getId() << " cost: " << players[i].pathSize() - 1 << endl;
 	}
 	int total_cost = 0;
-	switch (algorithm_type){
-	case 1:
-	case 3:
-		for(unsigned int i = 0; i < players.size(); i++){
-			total_cost += players[i].getSic();
-		}
-		out << "Total cost: " << total_cost << endl;
-		break;
-	case 2:
-		out << "Total cost: " << tree->getSolution()->getCost() << endl;
-		break;
+	for(unsigned int i = 0; i < players.size(); i++){
+		total_cost += players[i].pathSize() - 1;
 	}
+	out << "Total cost: " << total_cost << endl;
+	if (accumCost) *accumCost += total_cost;
 }
 
 /*
@@ -1119,7 +1112,7 @@ void MAPF::cleanReservationsConstraints(){
 
 void MAPF::getCBSPaths(bool validPath){
 	CBTNode* solution = tree->getSolution();
-	for (unsigned int i = 0; i < solution->NumberAgents(); i++){
+	for (int i = 0; i < solution->NumberAgents(); i++){
 		players[i].setPath(solution->getPathAt(i));
 		paths.push_back(players[i].getPath());
 		if(validPath) players[i].setValidPath(true);
