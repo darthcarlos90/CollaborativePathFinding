@@ -156,7 +156,7 @@ void CBTNode::ExpandNode(){
 			children.push_back(child);
 		}
 		else {
-			cout << "We have a constraint at a time 0." << endl;
+			//cout << "We have a constraint at a time 0." << endl;
 		}
 	}
 
@@ -209,10 +209,6 @@ void CBTNode::countPossibleConflicts(){
 void CBTNode::CreateConflict(unsigned int time_ocurrence, Location location, vector<int> users){
 	conflict.empty = false;
 	conflict.replan_flag = false;
-
-	if (location == Location(1, 9)){
-		cout << "testing" << endl;
-	}
 
 	bool blockingConflict = false;
 	int blockingUser = -1;

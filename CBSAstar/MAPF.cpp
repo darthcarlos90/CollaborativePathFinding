@@ -93,7 +93,7 @@ obstacles(obstacles){
 			if (players[i].getManhattanBetweenNodes() > biggerManhattan)
 				biggerManhattan = players[i].getManhattanBetweenNodes();
 		}
-		cout << "Number of players: " << n_players << endl;
+		//cout << "Number of players: " << n_players << endl;
 		// Once that the random players where created, it is time to create a random number of obstacles
 		do{
 			// Add obstacles to the map
@@ -201,7 +201,7 @@ void MAPF::Start(int type){
 
 void MAPF::StartSilversPathFinding(bool hybrid){
 	for (unsigned int i = 0; i < players.size(); i++){
-		cout << "Calculating " << i << " path." << endl;
+		//cout << "Calculating " << i << " path." << endl;
 		players[i].executeTimeSpaceAstar(0, obstacles); // because element 0 is the starting position
 		paths.push_back(players[i].getPath());
 	}
@@ -333,7 +333,7 @@ void MAPF::MoveBySilvers(bool hybrid, bool automatic){
 			else {
 				finished = true;
 				validSolution = false;
-				cout << "Could not find a proper route. Exiting." << endl;
+				//cout << "Could not find a proper route. Exiting." << endl;
 				break;
 			}
 			
@@ -401,7 +401,7 @@ void MAPF::MoveByCBS(bool automatic){
 
 	}
 	else {
-		cout << "SOLUTION NOT FOUND." << endl;
+		if(!automatic) cout << "SOLUTION NOT FOUND." << endl;
 		if (!automatic)system("pause");
 	}
 	
@@ -409,7 +409,7 @@ void MAPF::MoveByCBS(bool automatic){
 
 //This method will check for any conflicts with the paths of the agents
 void MAPF::RevisePaths(bool solve_conflicts){
-	cout << "Checking the path for any conflict" << endl;
+	//cout << "Checking the path for any conflict" << endl;
 	/*
 		Fix: Also remove the part where the dead lock is solved by some other element.
 		Date:02/06/2015
@@ -644,8 +644,8 @@ void MAPF::ConflictSolver(Conflicted c){
 			// If weve got the whole map, break
 			if (submap.getXValue() == map->getXValue() && submap.getYValue() == map->getYValue()) break;
 		}
-		system("cls");
-		cout << *submap.getData() << endl;
+		//system("cls");
+		//cout << *submap.getData() << endl;
 
 		// When the map has been modified, call the submethods we are creating
 		agents.clear();// clear the agents
@@ -1045,7 +1045,7 @@ void MAPF::AddMapObstacles(int limit){
 		while (map->getValueAt(obstacleLocation) != 0){
 			// If not, change it until a valuable location is found
 			obstacleLocation = Location(std::rand() % size_x, std::rand() % size_y);
-			cout << *map->getData() << endl<< endl;
+			//cout << *map->getData() << endl<< endl;
 		}
 
 		// Set that location to an obstacle

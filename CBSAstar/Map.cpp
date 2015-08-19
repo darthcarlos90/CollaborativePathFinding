@@ -4,7 +4,7 @@ Map::Map(Matrix<int>* mat){
 	if (mat){
 		data = mat;
 		//findNodes(); //Only for use in spatial Astar, not this new method :D
-		cout << *data << endl;
+		//cout << *data << endl;
 		has_data = true;
 	}
 	else {
@@ -249,8 +249,8 @@ Matrix<int> Map::getSubData(int lowerX, int lowerY, int upperX, int upperY){
 		y = 0;
 	}
 	//Uncomment for debugging
-	cout << *data;
-	cout << matrix;
+	//cout << *data;
+	//cout << matrix;
 	
 	return matrix;
 
