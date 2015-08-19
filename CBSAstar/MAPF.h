@@ -43,7 +43,7 @@ public:
 
 private:
 	void StartCBSPathFinding();
-	void StartSilversPathFinding();
+	void StartSilversPathFinding(bool hybrid);
 	void StartHybridPathFinding();
 
 	void MoveBySilvers(bool hybrid, bool automatic);
@@ -75,7 +75,7 @@ private:
 	int GetIndexAtArray(vector<Node> list, Location val); //This searches element by element, so first make sure the element is there
 
 	// Returns false if a solution couldnt be found using CBS
-	bool RunCBSUsingPlayers(vector<Agent> agents);
+	bool RunCBSUsingPlayers(vector<Agent> agents, bool runPathVerification);
 
 	//Method that solves the conflicts on the list using CBS
 	void solveConflicts();

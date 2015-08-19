@@ -182,7 +182,7 @@ void MAPF::Start(int type){
 		switch (type){
 		case 1: // 1 means normal silvers calculations
 			cout << "Calculating using Silver's algorithm." << endl;
-			StartSilversPathFinding();
+			StartSilversPathFinding(false);
 			break;
 		case 2: // 2 means cbs calculation
 			cout << "Calculating using CBS algorithm." << endl;
@@ -199,14 +199,14 @@ void MAPF::Start(int type){
 	}
 }
 
-void MAPF::StartSilversPathFinding(){
+void MAPF::StartSilversPathFinding(bool hybrid){
 	for (unsigned int i = 0; i < players.size(); i++){
 		cout << "Calculating " << i << " path." << endl;
 		players[i].executeTimeSpaceAstar(0); // because element 0 is the starting position
 		paths.push_back(players[i].getPath());
 	}
 
-	validateSilversPaths();
+	if(!hybrid) validateSilversPaths();
 }
 
 void MAPF::validateSilversPaths(){
@@ -221,7 +221,7 @@ void MAPF::validateSilversPaths(){
 
 void MAPF::StartCBSPathFinding(){
 	
-	if (RunCBSUsingPlayers(players)){
+	if (RunCBSUsingPlayers(players, true)){
 		getCBSPaths(true);
 	}
 
@@ -229,7 +229,7 @@ void MAPF::StartCBSPathFinding(){
 
 void MAPF::StartHybridPathFinding(){
 	// Do pathfinding as silvers would do
-	StartSilversPathFinding();
+	StartSilversPathFinding(true);
 	// Now check for any inconsistency
 	RevisePaths(true);
 }
@@ -262,7 +262,7 @@ bool MAPF::CBSHelper(){
 	return solutionFound;
 }
 
-bool MAPF::RunCBSUsingPlayers(vector<Agent> agents){
+bool MAPF::RunCBSUsingPlayers(vector<Agent> agents, bool runPathverification){
 	//Create the constraint tree
 	tree = new ConstraintTree();
 
@@ -284,7 +284,7 @@ bool MAPF::RunCBSUsingPlayers(vector<Agent> agents){
 	tree->insertRoot(root);
 	
 	bool proceedExecution = true;
-	if (obstacles){
+	if (obstacles && runPathverification){
 		getCBSPaths(false);
 		MultipleBlocking();
 		if (agent_conflicts.size() > 0) proceedExecution = false;
@@ -584,7 +584,7 @@ void MAPF::ConflictSolver(Conflicted c){
 	
 	int expansionCounter = 0;
 	// Run CBS to try to find a solution for this problem
-	while (!RunCBSUsingPlayers(agents)){
+	while (!RunCBSUsingPlayers(agents, false)){
 		// If the map has reached the size of the real map, run once
 		if (submap.getXValue() == map->getXValue() && submap.getYValue() == map->getYValue()){
 			expansionCounter++;
@@ -822,6 +822,7 @@ void MAPF::MultipleBlocking(){
 		Node destination = players[i].getDestination();
 		int blockedElements = 0;
 		Conflicted c;
+		//vector<int> blockedElements;
 		for (unsigned int j = 0; j < paths.size(); j++){
 			if (i != j){
 				if (DetectBlockingHelper(i, j, destination)){

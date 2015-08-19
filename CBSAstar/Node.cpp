@@ -61,9 +61,6 @@ Node::Node(const Node& n){
 	type = n.getType();
 	x = n.getX();
 	y = n.getY();
-	if (this->hasParent){
-		delete parent;
-	}
 	has_parent = false;
 	parent = NULL;
 	if (n.hasParent()){
@@ -82,7 +79,7 @@ Node& Node::operator= (const Node& n){
 	type = n.getType();
 	x = n.getX();
 	y = n.getY();
-	if (this->hasParent){
+	if (this->has_parent){
 		delete parent;
 	}
 	parent = NULL;
