@@ -253,11 +253,6 @@ void CBTNode::CreateConflict(unsigned int time_ocurrence, Location location, vec
 void CBTNode::CreateSpecialConflict(unsigned int time, vector<Location> locations, vector<int> users){
 	conflict.replan_flag = true;
 	conflict.empty = false;
-	for (unsigned int i = 0; i < locations.size(); i++){
-		if (locations[i] == Location(1, 9)){
-			cout << "testing" << endl;
-		}
-	}
 	
 
 	bool blockingConflict = false;
@@ -270,10 +265,8 @@ void CBTNode::CreateSpecialConflict(unsigned int time, vector<Location> location
 	bool comparison2 = (locations[1] == destination2) || (locations[0] == destination2);
 
 	// This is the cause of all evil
-
 	if (comparison1 && comparison2){
 		// If both are trying to get to their destination, stop, should let the other one pass first
-		
 		for (unsigned int i = 0; i < users.size(); i++){
 			Location destination_location = agents[users[i]].getDestinationLocation();
 			Location otherLocation;
@@ -313,7 +306,6 @@ void CBTNode::CreateSpecialConflict(unsigned int time, vector<Location> location
 
 
 			// TODO: uncomment or comment if necesary, lets just assume you cant occupy before the destination
-
 			if ((locations[1] == agents[users[i]].getDestinationLocation()) || (locations[0] == agents[users[i]].getDestinationLocation())){
 				if (agents[users[i]].debugNumberOfAdjacents()){
 					blockingConflict = true;
@@ -331,13 +323,13 @@ void CBTNode::CreateSpecialConflict(unsigned int time, vector<Location> location
 			conflict.users.clear();
 
 			Location destination = agents[users[blockingEntity]].getDestinationLocation();
-			if (agents[users[blockingEntity]].getLocationAtTime(time) == destination){
+			
+			if ((agents[users[blockingEntity]].getLocationAtTime(time) == destination) && time != 0) {
 				conflict.times.push_back(time);
 			} else conflict.times.push_back(time + 1);
 			
 
 			conflict.users.push_back(users[blockingEntity]);
-			//conflict.users.push_back(users[blockingEntity]);
 
 			/*if (blockingEntity == 0){
 				conflict.locations.push_back(locations[0]);
@@ -347,11 +339,19 @@ void CBTNode::CreateSpecialConflict(unsigned int time, vector<Location> location
 				conflict.locations.push_back(locations[1]);
 				conflict.locations.push_back(locations[0]);
 			}*/
-
-			if (locations[0] == destination){
-				conflict.locations.push_back(locations[0]);
+			if (time != 0){
+				if (locations[0] == destination){
+					conflict.locations.push_back(locations[0]);
+				}
+				else conflict.locations.push_back(locations[1]);
 			}
-			else conflict.locations.push_back(locations[1]);
+			else {
+				if (locations[0] == destination){
+					conflict.locations.push_back(locations[1]);
+				}
+				else conflict.locations.push_back(locations[0]);
+			}
+			
 			swapcounter = 0;
 			
 			

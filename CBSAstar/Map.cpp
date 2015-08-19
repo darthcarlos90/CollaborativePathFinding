@@ -271,10 +271,22 @@ std::vector<Constraint> Map::GetReservationTableConstraints(){
 }
 
 Map Map::createSubMap(vector<Location> locations, Location* difference){
-	
-	/*
-	Get the row where the blocking element is.
-	*/
+	Matrix<int>* subdata = new Matrix<int>();
+	//Now we can return a map based on the subdata
+	if (difference) {
+		*subdata = CreateSubData(locations, difference);
+	}
+	else {
+		*subdata = CreateSubData(locations);
+	}
+
+	Map submap(subdata);
+	//return the result
+	return submap;
+}
+
+Matrix<int> Map::CreateSubData(vector<Location> locations, Location* difference){
+
 	Location lowerBounds = locations[0];
 	Location upperBounds = locations[0];
 
@@ -290,34 +302,27 @@ Map Map::createSubMap(vector<Location> locations, Location* difference){
 		if (upperBounds.y < locations[i].y)
 			upperBounds.y = locations[i].y;
 	}
-	
+
 	/*
-		There are some situations, where leaving the exact size of the submap may 
+		There are some situations, where leaving the exact size of the submap may
 		cause deadlocks to happen. To make solution simpler, the map will be
-		expanded a bit.
+		expanded a bit. Also, it gives more moving options to the agents in case
+		of small places (like only two square maps).
 	*/
 
 	if(upperBounds.x < data->get_x_size() - 1)upperBounds.x = upperBounds.x + 1;
 	if(upperBounds.y < data->get_y_size() - 1)upperBounds.y = upperBounds.y + 1;
 	if(lowerBounds.x > 0) lowerBounds.x = lowerBounds.x - 1;
 	if(lowerBounds.y > 0)lowerBounds.y = lowerBounds.y - 1;
-
-	//Now that we have the bounds of our submap, we can create the matrix with the data
-	Matrix<int> *subdata = new Matrix<int>();
-	*subdata = getSubData(lowerBounds.x, lowerBounds.y, upperBounds.x, upperBounds.y);
-
-	//Now we can return a map based on the subdata
-	Map submap(subdata);
-
-	subdata = NULL;
-
 	// If there is a pointer, lets feed it data
 	if (difference){
 		*difference = lowerBounds;
 	}
 
-	//return the result
-	return submap;
+	//Now that we have the bounds of our submap, we can create the matrix with the data
+	
+	Matrix<int> result = getSubData(lowerBounds.x, lowerBounds.y, upperBounds.x, upperBounds.y);
+	return result;
 }
 
 Matrix<int> Map::expandMap(int old_x, int old_y, Location pastDifference, Location * difference){

@@ -514,54 +514,102 @@ void MAPF::SolveInvalidConflict(){
 
 
 void MAPF::ConflictSolver(Conflicted c){
-	// The type of blocking element is detected, now lets solve it
-	int indexToMove = getIndexOfAgent(c.agents[0]);
-	int indexOther = getIndexOfAgent(c.agents[1]);
+
+	// Conflict detected, lets solve it
+	int indexToMove = getIndexOfAgent(c.agents[0]); // first agent is the one to move
+	vector<int> otherIndexes;
 
 
 	// References to make life easier
 	Agent &toMove = players[indexToMove];
-	Agent &otherAgent = players[indexOther];
+	// A vector of pointers to the other elements in order to easily modify their data
+	vector<Agent*> otherAgents;
+	for (unsigned int i = 1; i < c.agents.size(); i++){
+		int index = getIndexOfAgent(c.agents[i]);
+		otherIndexes.push_back(index);
+		otherAgents.push_back(&players[index]);
+	}
 
 	// This wll be used to transform coordinates from bbig map to small map and vicecersa
 	Location exchange_rate;
-	
+
 
 	// Let's build the submap
 	Map submap = map->createSubMap(c.locations, &exchange_rate);
 	/*
 		Until the number of spaces is bigger than the number of obstacles, or it
 		reaches its total size. This just in case we have a narrow path element.
-	*/
-	while (submap.getNumberObstacles() > submap.getNumberSpaces() &&
-		map->NumberAdjacents(toMove.getDestinationLocation()) <= 2){
+		*/
+	while (submap.getNumberObstacles() > submap.getNumberSpaces() && map->NumberAdjacents(toMove.getDestinationLocation()) <= 2){
+		
 		submap.setData(map->expandMap(submap.getXValue() - 1, submap.getYValue() - 1, exchange_rate, &exchange_rate));
-		// If weve got the whole map, break
+		
 		if (submap.getXValue() == map->getXValue() && submap.getYValue() == map->getYValue()) break;
 	}
 	
-	int time_index = -1;
-	int exit_index = -1;
-	// Get the indexes of when the other element gets in and out of the submap
-	GetIndexHelper(indexOther, &time_index, &exit_index, submap.getXValue(), submap.getYValue());
-
-	Location agentLocation1 = paths[indexOther][time_index].getLocation();
-	Location agentExitLocation = paths[indexOther][exit_index].getLocation();
-	Location agentLocation2;
-	if (toMove.pathSize() <= time_index)	agentLocation2 = c.locations[0];
-	else agentLocation2 = paths[indexToMove][time_index].getLocation();
-	Location agentDestination2 = players[indexToMove].getDestination().getLocation();
 	
+	vector<int> exit_indexes;
+		
+	// Get the indexes of when the other element gets in and out of the submap
+	GetIndexHelper(otherIndexes, &exit_indexes, submap.getXValue(), submap.getYValue(), c.time);
+	
+	//Now that the map was created, and the indexes located, check if there is any other agent, not involved in the
+	// conflict, but that goes through the critical area when the conflict is being solved
+	int largestExit = exit_indexes[0];
+	for (unsigned int i = 1; i < exit_indexes.size(); i++){
+		if (largestExit < exit_indexes[i]) largestExit = exit_indexes[i];
+	}
+
+	int actualTime = c.time;
+	vector<int> newAgentIndexes;
+	while (AddOtherPlayersToConflict(otherIndexes, c.time, largestExit, exit_indexes, indexToMove, &actualTime, newAgentIndexes)){
+		for (unsigned int i = 0; i < newAgentIndexes.size(); i++){
+			otherAgents.push_back(&players[newAgentIndexes[i]]);
+		}
+		
+		if (actualTime > c.time){
+			// If the new agents added get into the conflict after the time, expand the map
+			for (unsigned int i = 0; i < newAgentIndexes.size(); i++){
+				c.locations.push_back(paths[newAgentIndexes[i]][c.time].getLocation());
+			}
+
+			//Now that weve got the new locations, expand the map
+			submap.setData(map->CreateSubData(c.locations, &exchange_rate));
+			//recalculate the exit indexes
+			GetIndexHelper(otherIndexes, &exit_indexes, submap.getXValue(), submap.getYValue(), c.time);
+
+			/*
+				Because if we expand the map, there may be some other agents that got dragged into the conflict *sight*, we need
+				to run this again until no other element is added, or untill all agents are on the conflict.
+			*/
+		}
+	}
+
+	map->cleanMap(); // finished using the -1
+
+	vector<Location> agentLocations;
+	vector<Location> exitLocations;
+	for (unsigned int i = 0; i < otherIndexes.size(); i++){
+		agentLocations.push_back(paths[otherIndexes[i]][c.time].getLocation());
+		exitLocations.push_back(paths[otherIndexes[i]][exit_indexes[i]].getLocation());
+	}
+
+	Location agentLocation2 = c.locations[0]; // the first location is always the one of the element to move
+	Location agentDestination2 = players[indexToMove].getDestination().getLocation();
+
 	// Lambda function for easiness to read, and for a better administration
-	std::function<void(void)> updateLocationValues = 
-		[&agentLocation1, &agentExitLocation, &agentLocation2, &agentDestination2, &exchange_rate]{
+	std::function<void(void)> updateLocationValues =
+		[&agentLocations, &exitLocations, &agentLocation2, &agentDestination2, &exchange_rate]{
 
-		agentLocation1.x = agentLocation1.x - exchange_rate.x;
-		agentLocation1.y = agentLocation1.y - exchange_rate.y;
-
-		agentExitLocation.x = agentExitLocation.x - exchange_rate.x;
-		agentExitLocation.y = agentExitLocation.y - exchange_rate.y;
-
+		for (unsigned int i = 0; i < agentLocations.size(); i++){
+			agentLocations[i].x = agentLocations[i].x - exchange_rate.x;
+			agentLocations[i].y = agentLocations[i].y - exchange_rate.y;
+		}
+		for (unsigned int i = 0; i < exitLocations.size(); i++){
+			exitLocations[i].x = exitLocations[i].x - exchange_rate.x;
+			exitLocations[i].y = exitLocations[i].y - exchange_rate.y;
+		}
+		
 
 		agentLocation2.x = agentLocation2.x - exchange_rate.x;
 		agentLocation2.y = agentLocation2.y - exchange_rate.y;
@@ -570,200 +618,219 @@ void MAPF::ConflictSolver(Conflicted c){
 		agentDestination2.x = agentDestination2.x - exchange_rate.x;
 		agentDestination2.y = agentDestination2.y - exchange_rate.y;
 	};
-	
+
 	updateLocationValues();
-	
-	Agent partialAgent1(Node(0, agentLocation1), Node(0, agentExitLocation), &submap, 0, 5); // Move to the exit location
-	Agent partialAgent2(Node(0, agentLocation2), Node(0, agentDestination2), &submap, 1, 5); // Move to its destination, let CBS do the magic
+
+	vector<Agent> agents;
+	for (unsigned int i = 0; i < otherIndexes.size(); i++){
+		agents.push_back(Agent(Node(0, agentLocations[i]), Node(0, exitLocations[i]), &submap, i + 1, 5));
+	}
+
+	Agent partialAgent2(Node(0, agentLocation2), Node(0, agentDestination2), &submap, 0, 5); // Move to its destination, let CBS do the magic
 
 	// Run the CBS only for these agents
-	vector<Agent> agents;
-	agents.push_back(partialAgent1);
 	agents.push_back(partialAgent2);
 
-	
-	int expansionCounter = 0;
+
 	// Run CBS to try to find a solution for this problem
 	while (!RunCBSUsingPlayers(agents, false)){
-		// If the map has reached the size of the real map, run once
-		if (submap.getXValue() == map->getXValue() && submap.getYValue() == map->getYValue()){
-			expansionCounter++;
-		}
 
-		// If it is the second time we try to run the CBS with the submap with the size of the map
-		// Then there is no solution
-		if (expansionCounter < 1){
+		submap.setData(map->expandMap(submap.getXValue() - 1, submap.getYValue() - 1, exchange_rate, &exchange_rate));
+		while (submap.getNumberObstacles() > submap.getNumberSpaces() && map->NumberAdjacents(toMove.getDestinationLocation()) <= 2){
 			submap.setData(map->expandMap(submap.getXValue() - 1, submap.getYValue() - 1, exchange_rate, &exchange_rate));
-			while (submap.getNumberObstacles() > submap.getNumberSpaces() &&
-				map->NumberAdjacents(toMove.getDestinationLocation()) <= 2){
-				submap.setData(map->expandMap(submap.getXValue() - 1, submap.getYValue() - 1, exchange_rate, &exchange_rate));
-				// If weve got the whole map, break
-				if (submap.getXValue() == map->getXValue() && submap.getYValue() == map->getYValue()) break;
-			}
-			system("cls");
-			cout << *submap.getData() << endl;
-			
-			// When the map has been modified, call the submethods we are creating
-			agents.clear();// clear the agents
-			
-			// update the indexes
-			GetIndexHelper(indexOther, &time_index, &exit_index, submap.getXValue(), submap.getYValue());
-			
-			// update the locations
-			agentLocation1 = paths[indexOther][time_index].getLocation();
-			agentExitLocation = paths[indexOther][exit_index].getLocation();
-			if (toMove.pathSize() <= time_index)	agentLocation2 = c.locations[0];
-			else agentLocation2 = paths[indexToMove][time_index].getLocation();
-			agentDestination2 = players[indexToMove].getDestination().getLocation();
-			
-			// update the values
-			updateLocationValues();
-			
-			//update the agents
-			Agent partialAgent1 (Node(0, agentLocation1), Node(0, agentExitLocation), &submap, 0, 5);
-			Agent partialAgent2(Node(0, agentLocation2), Node(0, agentDestination2), &submap, 1, 5);
-			
-			agents.push_back(partialAgent1);
-			agents.push_back(partialAgent2);
+			// If weve got the whole map, break
+			if (submap.getXValue() == map->getXValue() && submap.getYValue() == map->getYValue()) break;
+		}
+		system("cls");
+		cout << *submap.getData() << endl;
 
+		// When the map has been modified, call the submethods we are creating
+		agents.clear();// clear the agents
+
+			
+		exit_indexes.clear();
+			
+		GetIndexHelper(otherIndexes, &exit_indexes, submap.getXValue(), submap.getYValue(), c.time);
+
+		agentLocations.clear();
+		exitLocations.clear();
+
+		// update the locations
+		for (unsigned int i = 0; i < otherIndexes.size(); i++){
+			agentLocations.push_back(paths[otherIndexes[i]][c.time].getLocation());
+			exitLocations.push_back(paths[otherIndexes[i]][exit_indexes[i]].getLocation());
 		}
-		else {
-			break;
+
+		agentLocation2 = c.locations[0]; // the first location is always the one of the element to move
+		agentDestination2 = players[indexToMove].getDestination().getLocation();
+
+		// update the values
+		updateLocationValues();
+
+		//update the agents
+		for (unsigned int i = 0; i < otherIndexes.size(); i++){
+			agents.push_back(Agent(Node(0, agentLocations[i]), Node(0, exitLocations[i]), &submap, 0, 5));
 		}
-		
+		Agent partialAgent2(Node(0, agentLocation2), Node(0, agentDestination2), &submap, 1, 5);
+		agents.push_back(partialAgent2);
+
 	}
-	// TODO: What happens when a soultion cant be found
-	int limit = tree->getSolution()->BalancePaths();
-	// Get the partial paths
-	vector<Node> escapePath1 = tree->getSolution()->getPathAt(0);
-	vector<Node> escapePath2 = tree->getSolution()->getPathAt(1);
 
+	// TODO: What happens when a soultion cant be found
+
+	
+	
+	// Get the partial paths
+	vector<vector<Node>> partialPaths;
+	CBTNode* solutionNode = tree->getSolution();
+	solutionNode->SanitizePaths();
+	for (unsigned int i = 0; i < solutionNode->NumberAgents(); i++){
+		partialPaths.push_back(solutionNode->getPathAt(i));
+	}
 
 	// Both routes are supposed to be of the same size, so we will transform the coordinates to correct coordinates
-	for (unsigned int i = 0; i < limit; i++){
-		escapePath1[i].ConvertToMapCoordinates(exchange_rate);
-		escapePath2[i].ConvertToMapCoordinates(exchange_rate);
-	}
-	
-	bool comparison = toMove.pathSize() <= time_index;
-	// Once the paths have been calculated, now we can update the paths of the agents (converting them to normal coordinates)
-	vector<Node> new_path;
-	vector<Node> new_path2;
-	
-	// First get all the elements before the agent got into the danger zone
-	for (int i = 0; i < time_index; i++){
-		new_path.push_back(paths[indexOther][i]);
-		if (!comparison) new_path2.push_back(paths[indexToMove][i]);
+	for (unsigned int index = 0; index < partialPaths.size(); index++){
+		for (unsigned int i = 0; i < partialPaths[index].size(); i++){
+			partialPaths[index][i].ConvertToMapCoordinates(exchange_rate);
+		}
 	}
 
-	
+
+	bool comparison = toMove.pathSize() <= c.time;
+	// Once the paths have been calculated, now we can update the paths of the agents (converting them to normal coordinates)
+	vector<vector<Node>> new_paths;
+	vector<Node> new_path2;
+
+	// First get all the elements before the agent got into the danger zone
+	for (int i = 0; i < otherIndexes.size(); i++){
+		vector<Node> temp;
+		for (unsigned int j = 0; j < c.time; j++){
+			temp.push_back(paths[otherIndexes[i]][j]);
+		}
+		new_paths.push_back(temp);
+	}
+
+	if (!comparison){
+		for (unsigned int i = 0; i < c.time; i++){
+			new_path2.push_back(paths[indexToMove][i]);
+		}
+	}
+	else{
+		// Fill the route with elements so they can wait a bit
+		int difference = c.time - toMove.pathSize();
+		for (int i = 0; i < difference; i++){
+			toMove.PushElementAtTheBackOfRoute(paths[indexToMove][paths[indexToMove].size() - 1]);
+		}
+	}
+
 
 	// Now, update paths with the elements of the escape routes
-	for (unsigned int i = 0; i < limit; i++){
-		new_path.push_back(escapePath1[i]);
-		if (comparison)	toMove.PushElementAtTheBackOfRoute(escapePath2[i]);
-		else new_path2.push_back(escapePath2[i]);
-		
-	}
-	
-
-	// Finish updating the path of the element that is following its path
-	for (unsigned int i = exit_index; i < otherAgent.pathSize(); i++){
-		new_path.push_back(paths[indexOther][i]);
+	for (unsigned int i = 0; i < otherIndexes.size(); i++){
+		for (unsigned int index = 0; index < partialPaths[i].size(); index++){
+			new_paths[i].push_back(partialPaths[i][index]);
+		}
 	}
 
-	otherAgent.setPath(new_path); //Update the path directly to the agent
+	for (unsigned int i = 0; i < partialPaths[partialPaths.size() - 1].size(); i++){
+		if (comparison)	toMove.PushElementAtTheBackOfRoute(partialPaths[partialPaths.size() - 1][i]);
+		else new_path2.push_back(partialPaths[partialPaths.size() - 1][i]);
+	}
+
+	for (unsigned int index = 0; index < otherIndexes.size(); index++){
+		// Finish updating the path of the element that is following its path
+		for (unsigned int i = exit_indexes[otherIndexes[index]] + 1; i < paths[otherIndexes[index]].size(); i++){
+			new_paths[otherIndexes[index]].push_back(paths[otherIndexes[index]][i]);
+		}
+	}
+
+	//Update the agents
+	for (unsigned int i = 0; i < otherIndexes.size(); i++){
+		otherAgents[i]->setPath(new_paths[otherIndexes[i]]);
+		otherAgents[i]->SanitizePath();
+		paths[otherIndexes[i]] = otherAgents[i]->getPath();
+	}
+
 	if (!comparison) toMove.setPath(new_path2);
+	
 	//Clean the maps
-	otherAgent.SanitizePath();
 	toMove.SanitizePath();
 
 	//Update the paths
-	paths[indexOther] = otherAgent.getPath();
 	paths[indexToMove] = toMove.getPath();
 	submap.clearData();// manually destroy the map
-
 	
-	
-
 }
 
-void MAPF::GetIndexHelper( int indexOther, int *time_index, int *exit_index, int submapSizeX, int submapSizeY){
-	// Get at what step does the element enters the submap (And the location)
-	*time_index = -1;
-	*exit_index = -1;
-	
-	
-	if (time > 0){
-		if (submapSizeX == map->getXValue() && submapSizeY == map->getYValue()){
-			// If the size of the map is the same as the submap, force values
-			*time_index = time;
-			*exit_index = -1;
-		}
-		else {
-			// The for loop will start at the current time
-			for (unsigned int i = time; i < paths[indexOther].size(); i++){
-				// If the element of the map at that location is -1, we find the danger zone
-				if (map->getValueAt(paths[indexOther][i].getLocation()) == -1){
-					*time_index = i;
-					break;
-				}
-			}
 
-			if (*time_index == -1){
-				*time_index = time - 1;
-			}
-
-		}
-		
-	}
-	else {
-		if (submapSizeX == map->getXValue() && submapSizeY == map->getYValue()){
-			// If the size of the map is the same as the submap, force values
-			*time_index = -1;
-			*exit_index = -1;
-		}
-		else {
-			for (unsigned int i = 0; i < paths[indexOther].size(); i++){
-				// If the element of the map at that location is -1, we find the danger zone
-				if (map->getValueAt(paths[indexOther][i].getLocation()) == -1){
-					*time_index = i;
-					break;
-				}
-			}
-		}
-
-		/*
-		If the time index is still -1, it means that the submap covers the whole map!
-		Therefore the starting index will be 0
-		*/
-		if (*time_index == -1){
-			*time_index = 0;
-		}
-
-	}
-
-	if (!(submapSizeX == map->getXValue() && submapSizeY == map->getYValue())){
-		// Now we need to get the index where the element is out of the submap zone
-		for (unsigned int i = *time_index; i < paths[indexOther].size(); i++){
-			if (map->getValueAt(paths[indexOther][i].getLocation()) != -1){
-				*exit_index = i - 1;
+bool MAPF::AddOtherPlayersToConflict(vector<int> &agentIndexes, int start_time, int longest_time, vector<int> &exit_indexes, int agentToMove, int *smallestStart, vector<int> &newAgentIndexes) {
+	bool result = false;
+	for (unsigned int i = 0; i < players.size(); i++){
+		bool exists = false;
+		for (unsigned int j = 0; j < agentIndexes.size(); j++){
+			if (i == agentIndexes[j] || i == agentToMove){
+				exists = true;
 				break;
 			}
 		}
+
+		if (!exists && i != agentToMove){
+			int startIndex = 0;
+			for (unsigned int index = start_time; index <= longest_time; index++){
+				if (map->getValueAt(paths[i][index].getLocation()) == -1){
+					startIndex = index;
+					agentIndexes.push_back(i);
+					newAgentIndexes.push_back(i);
+					result = true;
+					break;
+				}
+			}
+
+			int exitIndex = -1;
+			for (unsigned int index = startIndex; index < paths[i].size(); index++){
+				if (map->getValueAt(paths[i][index].getLocation()) != -1){
+					exitIndex = index - 1;
+					break;
+				}
+			}
+
+			if (exitIndex == -1){
+				exit_indexes.push_back(paths[i].size() - 1);
+			}
+			else exit_indexes.push_back(exitIndex);
+		
+			if (startIndex < *smallestStart) *smallestStart = startIndex;
+		}
 	}
 
-	/*
-	Again, if the exit index is -1 it means that the submap is the whole map,
-	or the destination of the entity is part of the submap, that is why the exit index
-	will be the last element of the path
-	*/
-	if (*exit_index == -1){
-		*exit_index = paths[indexOther].size() - 1;
-	}
+ 	
+	
+	return result;
+}
 
-	//clean the map of the -1
-	map->cleanMap();
+void MAPF::GetIndexHelper(vector<int> otherIndexes, vector<int> *exit_indexes, int submapSizeX, int submapSizeY, unsigned int start_time){
+	//TODO: Debug this
+	for (unsigned int index_others = 0; index_others < otherIndexes.size(); index_others++){
+		int indexOther = otherIndexes[index_others];
+		
+		if (submapSizeX == map->getXValue() && submapSizeY == map->getYValue()){
+			// If the size of the map is the same as the submap, force values
+			exit_indexes->push_back(paths[indexOther].size() - 1);
+		} else {
+			bool valueFound = false;
+			// Now we need to get the index where the element is out of the submap zone
+			for (unsigned int i = start_time; i < paths[indexOther].size(); i++){
+				if (map->getValueAt(paths[indexOther][i].getLocation()) != -1){
+					exit_indexes->push_back(i - 1);
+					valueFound = true;
+					break;
+				}
+			}
+			if (!valueFound){
+				exit_indexes->push_back(paths[indexOther].size() - 1);
+			}
+		}
+		
+	}
 }
 
 /*
@@ -820,27 +887,51 @@ void MAPF::MultipleBlocking(){
 	// TODO: Debug this
 	for (unsigned int i = 0; i < players.size(); i++){ // This for is to see through the players
 		Node destination = players[i].getDestination();
-		int blockedElements = 0;
 		Conflicted c;
-		//vector<int> blockedElements;
+		vector<int> blockedEntities;
+		vector<unsigned int> time_of_block;
 		for (unsigned int j = 0; j < paths.size(); j++){
 			if (i != j){
-				if (DetectBlockingHelper(i, j, destination)){
-					blockedElements++;
-					c.agents.push_back(players[j].getId());
+				unsigned int timeOcurrance = 0;
+				if (DetectBlockingHelper(i, j, destination, &timeOcurrance)){
+					blockedEntities.push_back(players[j].getId());
+					time_of_block.push_back(timeOcurrance);
 				}
 			}
 		}
 		// If this element is blocking various paths
-		if (blockedElements > 1){
+		if (blockedEntities.size() > 1){
 			/*
 			After a multiple block has been identified, now I need to check if this multiple block is not part of a bigger multiple block.
 			If it is already part of a multiple block, dont add it to the conflicts, otherwise add it.
 			*/
 			bool conflictRegistered = false;
-			if (!AlreadyOnConflict(c.agents, BLOCKING_MULTIPLE)){
+			if (!AlreadyOnConflict(blockedEntities, BLOCKING_MULTIPLE)){
+				// The type of blocking
 				c.type = BLOCKING_MULTIPLE;
-				c.agents.push_back(players[i].getId());
+				
+				// The agents involved
+				c.agents.push_back(players[i].getId()); // so the first agent to be on the agents vector is the blocking one
+				// Push the rest of the agents
+				for (unsigned int i = 0; i < blockedEntities.size(); i++){
+					c.agents.push_back(blockedEntities[i]);
+				}
+
+				// The time previous to the earliest block
+				unsigned int smallestTime = time_of_block[0];
+				for (unsigned int i = 1; i < time_of_block.size(); i++){
+					if (time_of_block[i] < smallestTime) smallestTime = time_of_block[i];
+				}
+				c.time = smallestTime - 1;
+
+				// the locations previous to the first block
+				if (smallestTime < players[i].pathSize()) c.locations.push_back(paths[i][smallestTime].getLocation());
+				else c.locations.push_back(destination.getLocation());
+				for (unsigned int i = 0; i < blockedEntities.size(); i++){
+					int index = getIndexOfAgent(blockedEntities[i]);
+					c.locations.push_back(paths[index][smallestTime].getLocation());
+				}
+				
 				agent_conflicts.push_back(c);
 			}
 		}
@@ -858,29 +949,33 @@ void MAPF::SimpleBlocking(){
 				if (DetectBlockingHelper(i, j, destination, &timeOcurrance)){		
 					
 					Conflicted c;
-					//The first player to be added is the player that needs to move
-					c.agents.push_back(players[i].getId());
+
+					// The type of blocking
+					if (map->adjacentHelper(destination.getLocation()).size() > 2){
+						// If there are more than 2 adjacents to this node, we have a simple blocking state
+						c.type = BLOCKING_SIMPLE;
+					}
+					else{
+						// Else, we have a narrowpath blocking
+						c.type = BLOCKING_COMPLEX;
+					}
+
+					// The agents involved
+					c.agents.push_back(players[i].getId()); //The first player to be added is the player that needs to move
 					c.agents.push_back(players[j].getId());
 
 					// Now, check if this simple blocking is not just part of a multiple blocking
 					if (!AlreadyOnConflict(c.agents, BLOCKING_MULTIPLE)){
+						// If they werent, keep adding
+						
+						// The time previous to the block
+						c.time = timeOcurrance - 1;
+
 						// The locations of the elements that will be needed for the creation of the submap
-						c.locations.push_back(destination.getLocation()); // First the blocking element
-						if (timeOcurrance + 1 < paths[j].size()){
-							c.locations.push_back(paths[j][timeOcurrance + 1].getLocation()); // Second the blocked element
-						}
-						else c.locations.push_back(destination.getLocation());
+						if (players[i].pathSize() > c.time) c.locations.push_back(paths[i][c.time].getLocation());
+						else c.locations.push_back(destination.getLocation()); // First the blocking element
 
-						c.times.push_back(timeOcurrance); 
-
-						if (map->adjacentHelper(destination.getLocation()).size() > 2){
-							// If there are more than 2 adjacents to this node, we have a simple blocking state
-							c.type = BLOCKING_SIMPLE;
-						}
-						else{
-							// Else, we have a narrowpath blocking
-							c.type = BLOCKING_COMPLEX;
-						}
+						c.locations.push_back(paths[j][timeOcurrance - 1].getLocation()); // Second the blocked element
 
 
 						agent_conflicts.push_back(c); // Add it to the conflicts that need to be solved

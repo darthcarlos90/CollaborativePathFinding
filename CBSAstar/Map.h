@@ -57,7 +57,8 @@ public:
 			- Node difference: The difference should help transform from normal map
 				coordinates to submap coordinates.
 	*/
-	Map createSubMap(vector<Location> location, Location* difference = NULL);
+	Map createSubMap(vector<Location> locations, Location* difference = NULL);
+	Matrix<int> CreateSubData(vector<Location> locations, Location* difference = NULL);
 
 	// If the solution couldnt be found with the map size, make it bigger
 	Matrix<int> expandMap(int old_x, int old_y, Location pastDifference, Location * difference = NULL);

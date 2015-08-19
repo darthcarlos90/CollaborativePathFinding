@@ -89,6 +89,9 @@ public:
 
 	// Get the number of agents in this node
 	int NumberAgents() { return agents.size(); }
+
+	// The oposite of the above
+	void SanitizePaths();
 	
 
 private:
@@ -104,8 +107,7 @@ private:
 	void UpdateCAT();
 	
 	
-	// The oposite of the above
-	void SanitizePaths();
+	
 
 	void countPossibleConflicts();
 	
