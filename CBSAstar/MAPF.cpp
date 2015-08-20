@@ -505,6 +505,12 @@ void MAPF::solveConflicts(){
 		}
 		else ConflictSolver(c);
 	}
+	if (agent_conflicts.size() > 0){
+		agent_conflicts.clear();
+		RevisePaths(true);
+	}
+	
+
 }
 
 void MAPF::SolveInvalidConflict(){
@@ -517,7 +523,9 @@ void MAPF::SolveInvalidConflict(){
 
 
 void MAPF::ConflictSolver(Conflicted c){
-
+	if (players.size() == 10){
+		cout << "show me a move!";
+	}
 	// Conflict detected, lets solve it
 	int indexToMove = getIndexOfAgent(c.agents[0]); // first agent is the one to move
 	vector<int> otherIndexes;
@@ -563,22 +571,44 @@ void MAPF::ConflictSolver(Conflicted c){
 		if (largestExit < exit_indexes[i]) largestExit = exit_indexes[i];
 	}
 
-	int actualTime = c.time;
+	int smallestIndexCreated = -1;
+	int largestIndexCreated = -1;
 	vector<int> newAgentIndexes;
-	while (AddOtherPlayersToConflict(otherIndexes, c.time, largestExit, exit_indexes, indexToMove, &actualTime, newAgentIndexes)){
+	while (AddOtherPlayersToConflict(otherIndexes, c.time, largestExit, exit_indexes, indexToMove, &smallestIndexCreated, &largestIndexCreated, newAgentIndexes)){
 		for (unsigned int i = 0; i < newAgentIndexes.size(); i++){
 			otherAgents.push_back(&players[newAgentIndexes[i]]);
 		}
 		
-		if (actualTime > c.time){
+		if (smallestIndexCreated < c.time){
+			c.time = smallestIndexCreated;
+			c.locations.clear();
+			c.locations.push_back(paths[indexToMove][c.time].getLocation());
+			// If the new agents added get into the conflict after the time, expand the map
+			for (unsigned int i = 0; i < otherIndexes.size(); i++){
+				c.locations.push_back(paths[otherIndexes[i]][c.time].getLocation());
+			}
+			
+			//Now that weve got the new locations, expand the map
+			submap.setData(map->CreateSubData(c.locations, &exchange_rate));
+			//recalculate the exit indexes
+			exit_indexes.clear();
+			GetIndexHelper(otherIndexes, &exit_indexes, submap.getXValue(), submap.getYValue(), c.time);
+		} else if (largestIndexCreated > c.time){
 			// If the new agents added get into the conflict after the time, expand the map
 			for (unsigned int i = 0; i < newAgentIndexes.size(); i++){
+				if (paths[newAgentIndexes[i]].size() <= c.time){
+					while (players[newAgentIndexes[i]].pathSize() <= c.time){
+						players[newAgentIndexes[i]].RepeatLastElement();
+					}
+					paths[newAgentIndexes[i]] = players[newAgentIndexes[i]].getPath();
+				}
 				c.locations.push_back(paths[newAgentIndexes[i]][c.time].getLocation());
 			}
 
 			//Now that weve got the new locations, expand the map
 			submap.setData(map->CreateSubData(c.locations, &exchange_rate));
 			//recalculate the exit indexes
+			exit_indexes.clear();
 			GetIndexHelper(otherIndexes, &exit_indexes, submap.getXValue(), submap.getYValue(), c.time);
 
 			/*
@@ -586,6 +616,9 @@ void MAPF::ConflictSolver(Conflicted c){
 				to run this again until no other element is added, or untill all agents are on the conflict.
 			*/
 		}
+		// reset values
+		smallestIndexCreated = -1;
+		largestIndexCreated = -1;
 	}
 
 	map->cleanMap(); // finished using the -1
@@ -593,6 +626,12 @@ void MAPF::ConflictSolver(Conflicted c){
 	vector<Location> agentLocations;
 	vector<Location> exitLocations;
 	for (unsigned int i = 0; i < otherIndexes.size(); i++){
+		if (paths[otherIndexes[i]].size() <= c.time){
+			while (players[otherIndexes[i]].pathSize() <= c.time){
+				players[otherIndexes[i]].RepeatLastElement();
+			}
+			paths[otherIndexes[i]] = players[otherIndexes[i]].getPath();
+		}
 		agentLocations.push_back(paths[otherIndexes[i]][c.time].getLocation());
 		exitLocations.push_back(paths[otherIndexes[i]][exit_indexes[i]].getLocation());
 	}
@@ -741,14 +780,14 @@ void MAPF::ConflictSolver(Conflicted c){
 
 	for (unsigned int index = 0; index < otherIndexes.size(); index++){
 		// Finish updating the path of the element that is following its path
-		for (unsigned int i = exit_indexes[otherIndexes[index]] + 1; i < paths[otherIndexes[index]].size(); i++){
-			new_paths[otherIndexes[index]].push_back(paths[otherIndexes[index]][i]);
+		for (unsigned int i = exit_indexes[index] + 1; i < paths[otherIndexes[index]].size(); i++){
+			new_paths[index].push_back(paths[otherIndexes[index]][i]);
 		}
 	}
 
 	//Update the agents
 	for (unsigned int i = 0; i < otherIndexes.size(); i++){
-		otherAgents[i]->setPath(new_paths[otherIndexes[i]]);
+		otherAgents[i]->setPath(new_paths[i]);
 		otherAgents[i]->SanitizePath();
 		paths[otherIndexes[i]] = otherAgents[i]->getPath();
 	}
@@ -765,8 +804,10 @@ void MAPF::ConflictSolver(Conflicted c){
 }
 
 
-bool MAPF::AddOtherPlayersToConflict(vector<int> &agentIndexes, int start_time, int longest_time, vector<int> &exit_indexes, int agentToMove, int *smallestStart, vector<int> &newAgentIndexes) {
+bool MAPF::AddOtherPlayersToConflict(vector<int> &agentIndexes, int start_time, int longest_time, vector<int> &exit_indexes, int agentToMove, int *smallestStart, int *biggest,vector<int> &newAgentIndexes) {
 	bool result = false;
+	int smallestIndex = -1;
+	int largestIndex = -1;
 	for (unsigned int i = 0; i < players.size(); i++){
 		bool exists = false;
 		for (unsigned int j = 0; j < agentIndexes.size(); j++){
@@ -777,35 +818,69 @@ bool MAPF::AddOtherPlayersToConflict(vector<int> &agentIndexes, int start_time, 
 		}
 
 		if (!exists && i != agentToMove){
-			int startIndex = 0;
-			for ( int index = start_time; index <= longest_time; index++){
-				if (map->getValueAt(paths[i][index].getLocation()) == -1){
-					startIndex = index;
+			int startIndex = -1;
+			if (paths[i].size() <= start_time){
+				if (map->getValueAt(players[i].getDestinationLocation()) == -1){
+					// if the destination is on the critical zone, this element participates on the conflict
+					startIndex = start_time;
 					agentIndexes.push_back(i);
 					newAgentIndexes.push_back(i);
 					result = true;
-					break;
+					// fill the route until start time
+					int difference = start_time - paths[i].size();
+					for (int k = 0; k < difference; k++){
+						players[i].PushElementAtTheBackOfRoute(paths[i][paths[i].size() - 1]);
+					}
+					//update
+					paths[i] = players[i].getPath();
 				}
 			}
-
-			int exitIndex = -1;
-			for (unsigned int index = startIndex; index < paths[i].size(); index++){
-				if (map->getValueAt(paths[i][index].getLocation()) != -1){
-					exitIndex = index - 1;
-					break;
+			else if(paths[i].size() <= longest_time) {
+				for (int index = start_time; index < paths[i].size(); index++){
+					if (map->getValueAt(paths[i][index].getLocation()) == -1){
+						startIndex = index;
+						agentIndexes.push_back(i);
+						newAgentIndexes.push_back(i);
+						result = true;
+						break;
+					}
 				}
 			}
-
-			if (exitIndex == -1){
-				exit_indexes.push_back(paths[i].size() - 1);
+			else {
+				for (int index = start_time; index <= longest_time; index++){
+					if (map->getValueAt(paths[i][index].getLocation()) == -1){
+						startIndex = index;
+						agentIndexes.push_back(i);
+						newAgentIndexes.push_back(i);
+						result = true;
+						break;
+					}
+				}
 			}
-			else exit_indexes.push_back(exitIndex);
-		
-			if (startIndex < *smallestStart) *smallestStart = startIndex;
+			if (startIndex != -1){
+				int exitIndex = -1;
+				for (unsigned int index = startIndex; index < paths[i].size(); index++){
+					if (map->getValueAt(paths[i][index].getLocation()) != -1){
+						exitIndex = index - 1;
+						break;
+					}
+				}
+
+				if (exitIndex == -1){
+					exit_indexes.push_back(paths[i].size() - 1);
+				}
+				else exit_indexes.push_back(exitIndex);
+				if (smallestIndex == -1) smallestIndex = startIndex;
+				else if (smallestIndex > startIndex) smallestIndex = startIndex;
+				if (largestIndex == -1) largestIndex = startIndex;
+				else if (largestIndex < startIndex) largestIndex = startIndex;
+			}
+			
 		}
 	}
 
- 	
+	*smallestStart = smallestIndex;
+	*biggest = largestIndex;
 	
 	return result;
 }
@@ -864,7 +939,8 @@ bool MAPF::AlreadyOnConflict(vector<int> agents, int type){
 // This method simply calls the helper methods for blocking
 void MAPF::Blocking(){
 	MultipleBlocking();
-	SimpleBlocking();
+	// If there was a conflict found, first solve it and then find more conflicts
+	if (agent_conflicts.size() == 0) SimpleBlocking();
 }
 
 // A helper function for the helper functions. 
@@ -982,10 +1058,12 @@ void MAPF::SimpleBlocking(){
 
 
 						agent_conflicts.push_back(c); // Add it to the conflicts that need to be solved
+						break;
 					}
 				}
 			}
 		}
+		if (agent_conflicts.size() > 0) break;
 
 	}
 }

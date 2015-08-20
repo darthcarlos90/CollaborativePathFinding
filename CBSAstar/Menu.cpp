@@ -121,7 +121,7 @@ void Menu::RunObstacleLessTests(){
 		float sumSilvers = 0.0f;
 		float sumCBS = 0.0f;
 		float sumHyb = 0.0f;
-		for (int testcases = 1; testcases <= 1000; testcases++){
+		for (int testcases = 1; testcases <= 1; testcases++){
 			fileManager->myfile << "Testcase: " << testcases << endl;
 			MAPF m(8, 8, false, i);
 			// Run same test for different algorithms

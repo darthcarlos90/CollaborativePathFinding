@@ -107,6 +107,7 @@ public:
 	void RepeatStepAtIndex(unsigned int index, int times);
 
 	void PushElementAtTheBackOfRoute(Node val);
+	void RepeatLastElement();
 	unsigned int pathSize() { return time_route.size(); }
 
 	Node GetEscapeNodeNotOnRoute(Location start, vector<Node> path, bool lowerThan);

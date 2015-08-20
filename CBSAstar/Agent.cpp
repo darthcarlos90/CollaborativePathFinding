@@ -1562,3 +1562,7 @@ int Agent::FindNumberOcurrancesCAT(Location location) {
 
 	return result;
 }
+
+void Agent::RepeatLastElement(){
+	time_route.push_back(time_route[time_route.size() - 1]);
+}
