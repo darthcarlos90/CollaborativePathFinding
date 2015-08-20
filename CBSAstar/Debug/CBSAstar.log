@@ -1,15 +1,15 @@
-﻿Build started 20/08/2015 14:27:56.
+﻿Build started 20/08/2015 15:38:37.
      1>Project "H:\Dissertation\Dissertation\example code\CollaborativePathFinding\CBSAstar\CBSAstar.vcxproj" on node 2 (Build target(s)).
      1>ClCompile:
          C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /sdl /Od /Oy- /D WIN32 /D _DEBUG /D _CONSOLE /D _LIB /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt MAPF.cpp ReservationTable.cpp
          MAPF.cpp
-     1>h:\dissertation\dissertation\example code\collaborativepathfinding\cbsastar\mapf.cpp(582): warning C4018: '<' : signed/unsigned mismatch
-     1>h:\dissertation\dissertation\example code\collaborativepathfinding\cbsastar\mapf.cpp(596): warning C4018: '>' : signed/unsigned mismatch
-     1>h:\dissertation\dissertation\example code\collaborativepathfinding\cbsastar\mapf.cpp(696): warning C4018: '<' : signed/unsigned mismatch
-     1>h:\dissertation\dissertation\example code\collaborativepathfinding\cbsastar\mapf.cpp(711): warning C4018: '>' : signed/unsigned mismatch
-     1>h:\dissertation\dissertation\example code\collaborativepathfinding\cbsastar\mapf.cpp(892): warning C4018: '<=' : signed/unsigned mismatch
-     1>h:\dissertation\dissertation\example code\collaborativepathfinding\cbsastar\mapf.cpp(908): warning C4018: '<=' : signed/unsigned mismatch
-     1>h:\dissertation\dissertation\example code\collaborativepathfinding\cbsastar\mapf.cpp(909): warning C4018: '<' : signed/unsigned mismatch
+     1>h:\dissertation\dissertation\example code\collaborativepathfinding\cbsastar\mapf.cpp(590): warning C4018: '<' : signed/unsigned mismatch
+     1>h:\dissertation\dissertation\example code\collaborativepathfinding\cbsastar\mapf.cpp(604): warning C4018: '>' : signed/unsigned mismatch
+     1>h:\dissertation\dissertation\example code\collaborativepathfinding\cbsastar\mapf.cpp(704): warning C4018: '<' : signed/unsigned mismatch
+     1>h:\dissertation\dissertation\example code\collaborativepathfinding\cbsastar\mapf.cpp(719): warning C4018: '>' : signed/unsigned mismatch
+     1>h:\dissertation\dissertation\example code\collaborativepathfinding\cbsastar\mapf.cpp(900): warning C4018: '<=' : signed/unsigned mismatch
+     1>h:\dissertation\dissertation\example code\collaborativepathfinding\cbsastar\mapf.cpp(916): warning C4018: '<=' : signed/unsigned mismatch
+     1>h:\dissertation\dissertation\example code\collaborativepathfinding\cbsastar\mapf.cpp(917): warning C4018: '<' : signed/unsigned mismatch
          Generating Code...
          Skipping... (no relevant changes detected)
          ReservationTable.cpp
@@ -30,4 +30,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:05.62
+Time Elapsed 00:00:06.69

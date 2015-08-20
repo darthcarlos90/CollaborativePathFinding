@@ -1,6 +1,6 @@
 #include "Menu.h"
 
-#define TOTAL_TESTCASES 2
+#define TOTAL_TESTCASES 6
 
 Menu::Menu(void){
 	cout << "Welcome" << endl;

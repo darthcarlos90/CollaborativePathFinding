@@ -505,6 +505,14 @@ void MAPF::solveConflicts(){
 		}
 		else ConflictSolver(c);
 	}
+	// Update paths
+	for (unsigned int i = 0; i < players.size(); i++){
+		if (players[i].pathSize() != paths[i].size()){
+			paths[i] = players[i].getPath();
+		}
+	}
+
+
 	if (agent_conflicts.size() > 0){
 		agent_conflicts.clear();
 		RevisePaths(true);
@@ -644,21 +652,21 @@ void MAPF::ConflictSolver(Conflicted c){
 		[&agentLocations, &exitLocations, &agentLocation2, &agentDestination2, &exchange_rate]{
 
 		for (unsigned int i = 0; i < agentLocations.size(); i++){
-			agentLocations[i].x = agentLocations[i].x - exchange_rate.x;
-			agentLocations[i].y = agentLocations[i].y - exchange_rate.y;
+			if (agentLocations[i].x >= exchange_rate.x) agentLocations[i].x = agentLocations[i].x - exchange_rate.x;
+			if (agentLocations[i].y >= exchange_rate.y) agentLocations[i].y = agentLocations[i].y - exchange_rate.y;
 		}
 		for (unsigned int i = 0; i < exitLocations.size(); i++){
-			exitLocations[i].x = exitLocations[i].x - exchange_rate.x;
-			exitLocations[i].y = exitLocations[i].y - exchange_rate.y;
+			if (exitLocations[i].x >= exchange_rate.x) exitLocations[i].x = exitLocations[i].x - exchange_rate.x;
+			if (exitLocations[i].y >= exchange_rate.y) exitLocations[i].y = exitLocations[i].y - exchange_rate.y;
 		}
 		
 
-		agentLocation2.x = agentLocation2.x - exchange_rate.x;
-		agentLocation2.y = agentLocation2.y - exchange_rate.y;
+		if (agentLocation2.x >= exchange_rate.x) agentLocation2.x = agentLocation2.x - exchange_rate.x;
+		if (agentLocation2.y >= exchange_rate.y) agentLocation2.y = agentLocation2.y - exchange_rate.y;
 
 
-		agentDestination2.x = agentDestination2.x - exchange_rate.x;
-		agentDestination2.y = agentDestination2.y - exchange_rate.y;
+		if (agentDestination2.x >= exchange_rate.x) agentDestination2.x = agentDestination2.x - exchange_rate.x;
+		if (agentDestination2.y >= exchange_rate.y)agentDestination2.y = agentDestination2.y - exchange_rate.y;
 	};
 
 	updateLocationValues();
@@ -956,7 +964,6 @@ bool MAPF::AddOtherPlayersToConflict(vector<int> &agentIndexes, int start_time, 
 }
 
 void MAPF::GetIndexHelper(vector<int> otherIndexes, vector<int> *exit_indexes, int submapSizeX, int submapSizeY, unsigned int start_time){
-	//TODO: Debug this
 	for (unsigned int index_others = 0; index_others < otherIndexes.size(); index_others++){
 		int indexOther = otherIndexes[index_others];
 		
