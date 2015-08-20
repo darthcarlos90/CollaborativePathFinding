@@ -39,6 +39,7 @@ public:
 	void PrintPaths(ostream& out);
 
 	void cleanReservationsConstraints();
+	bool valid();
 	
 
 private:

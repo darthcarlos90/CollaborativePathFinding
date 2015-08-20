@@ -146,6 +146,8 @@ public:
 
 
 	Location getLocationAtTime(int time){ return time_route[time].getLocation(); }
+
+	int getMapNodes() { return map->getXValue() * map->getYValue(); }
 	
 
 private:

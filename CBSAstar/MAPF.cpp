@@ -673,133 +673,203 @@ void MAPF::ConflictSolver(Conflicted c){
 	// Run the CBS only for these agents
 	agents.push_back(partialAgent2);
 
-
+	
 	// Run CBS to try to find a solution for this problem
+	bool submapSizeBig = false;
 	while (!RunCBSUsingPlayers(agents, false)){
-
-		submap.setData(map->expandMap(submap.getXValue() - 1, submap.getYValue() - 1, exchange_rate, &exchange_rate));
-		while (submap.getNumberObstacles() > submap.getNumberSpaces() && map->NumberAdjacents(toMove.getDestinationLocation()) <= 2){
+		if (!submapSizeBig){
 			submap.setData(map->expandMap(submap.getXValue() - 1, submap.getYValue() - 1, exchange_rate, &exchange_rate));
-			// If weve got the whole map, break
-			if (submap.getXValue() == map->getXValue() && submap.getYValue() == map->getYValue()) break;
+			while (submap.getNumberObstacles() > submap.getNumberSpaces() && map->NumberAdjacents(toMove.getDestinationLocation()) <= 2){
+				submap.setData(map->expandMap(submap.getXValue() - 1, submap.getYValue() - 1, exchange_rate, &exchange_rate));
+				// If weve got the whole map, break
+				if (submap.getXValue() == map->getXValue() && submap.getYValue() == map->getYValue()) break;
+			}
+
+			int smallestIndexCreated = -1;
+			int largestIndexCreated = -1;
+			vector<int> newAgentIndexes;
+			while (AddOtherPlayersToConflict(otherIndexes, c.time, largestExit, exit_indexes, indexToMove, &smallestIndexCreated, &largestIndexCreated, newAgentIndexes)){
+				for (unsigned int i = 0; i < newAgentIndexes.size(); i++){
+					otherAgents.push_back(&players[newAgentIndexes[i]]);
+				}
+
+				if (smallestIndexCreated < c.time){
+					c.time = smallestIndexCreated;
+					c.locations.clear();
+					c.locations.push_back(paths[indexToMove][c.time].getLocation());
+					// If the new agents added get into the conflict after the time, expand the map
+					for (unsigned int i = 0; i < otherIndexes.size(); i++){
+						c.locations.push_back(paths[otherIndexes[i]][c.time].getLocation());
+					}
+
+					//Now that weve got the new locations, expand the map
+					submap.setData(map->CreateSubData(c.locations, &exchange_rate));
+					//recalculate the exit indexes
+					exit_indexes.clear();
+					GetIndexHelper(otherIndexes, &exit_indexes, submap.getXValue(), submap.getYValue(), c.time);
+				}
+				else if (largestIndexCreated > c.time){
+					// If the new agents added get into the conflict after the time, expand the map
+					for (unsigned int i = 0; i < newAgentIndexes.size(); i++){
+						if (paths[newAgentIndexes[i]].size() <= c.time){
+							while (players[newAgentIndexes[i]].pathSize() <= c.time){
+								players[newAgentIndexes[i]].RepeatLastElement();
+							}
+							paths[newAgentIndexes[i]] = players[newAgentIndexes[i]].getPath();
+						}
+						c.locations.push_back(paths[newAgentIndexes[i]][c.time].getLocation());
+					}
+
+					//Now that weve got the new locations, expand the map
+					submap.setData(map->CreateSubData(c.locations, &exchange_rate));
+					//recalculate the exit indexes
+					exit_indexes.clear();
+					GetIndexHelper(otherIndexes, &exit_indexes, submap.getXValue(), submap.getYValue(), c.time);
+
+					/*
+					Because if we expand the map, there may be some other agents that got dragged into the conflict *sight*, we need
+					to run this again until no other element is added, or untill all agents are on the conflict.
+					*/
+				}
+				// reset values
+				smallestIndexCreated = -1;
+				largestIndexCreated = -1;
+			}
+			//system("cls");
+			//cout << *submap.getData() << endl;
+
+			// When the map has been modified, call the submethods we are creating
+			agents.clear();// clear the agents
+
+
+			exit_indexes.clear();
+
+			GetIndexHelper(otherIndexes, &exit_indexes, submap.getXValue(), submap.getYValue(), c.time);
+
+			agentLocations.clear();
+			exitLocations.clear();
+
+			// update the locations
+			for (unsigned int i = 0; i < otherIndexes.size(); i++){
+				if (paths[otherIndexes[i]].size() <= c.time){
+					while (players[otherIndexes[i]].pathSize() <= c.time){
+						players[otherIndexes[i]].RepeatLastElement();
+					}
+					paths[otherIndexes[i]] = players[otherIndexes[i]].getPath();
+				}
+				agentLocations.push_back(paths[otherIndexes[i]][c.time].getLocation());
+				exitLocations.push_back(paths[otherIndexes[i]][exit_indexes[i]].getLocation());
+			}
+
+			agentLocation2 = c.locations[0]; // the first location is always the one of the element to move
+			agentDestination2 = players[indexToMove].getDestination().getLocation();
+
+			// update the values
+			updateLocationValues();
+
+			//update the agents
+			for (unsigned int i = 0; i < otherIndexes.size(); i++){
+				agents.push_back(Agent(Node(0, agentLocations[i]), Node(0, exitLocations[i]), &submap, 0, 5));
+			}
+			Agent partialAgent2(Node(0, agentLocation2), Node(0, agentDestination2), &submap, 1, 5);
+			agents.push_back(partialAgent2);
+
+			if (submap.getXValue() == map->getXValue() && submap.getYValue() == map->getYValue()) submapSizeBig = true;
 		}
-		//system("cls");
-		//cout << *submap.getData() << endl;
-
-		// When the map has been modified, call the submethods we are creating
-		agents.clear();// clear the agents
-
-			
-		exit_indexes.clear();
-			
-		GetIndexHelper(otherIndexes, &exit_indexes, submap.getXValue(), submap.getYValue(), c.time);
-
-		agentLocations.clear();
-		exitLocations.clear();
-
-		// update the locations
-		for (unsigned int i = 0; i < otherIndexes.size(); i++){
-			agentLocations.push_back(paths[otherIndexes[i]][c.time].getLocation());
-			exitLocations.push_back(paths[otherIndexes[i]][exit_indexes[i]].getLocation());
+		else {
+			break;
 		}
-
-		agentLocation2 = c.locations[0]; // the first location is always the one of the element to move
-		agentDestination2 = players[indexToMove].getDestination().getLocation();
-
-		// update the values
-		updateLocationValues();
-
-		//update the agents
-		for (unsigned int i = 0; i < otherIndexes.size(); i++){
-			agents.push_back(Agent(Node(0, agentLocations[i]), Node(0, exitLocations[i]), &submap, 0, 5));
-		}
-		Agent partialAgent2(Node(0, agentLocation2), Node(0, agentDestination2), &submap, 1, 5);
-		agents.push_back(partialAgent2);
+		
 
 	}
 
 	// TODO: What happens when a soultion cant be found
+	if (!submapSizeBig){
+		// Get the partial paths
+		vector<vector<Node>> partialPaths;
+		CBTNode* solutionNode = tree->getSolution();
+		solutionNode->SanitizePaths();
+		for (int i = 0; i < solutionNode->NumberAgents(); i++){
+			partialPaths.push_back(solutionNode->getPathAt(i));
+		}
 
+		// Both routes are supposed to be of the same size, so we will transform the coordinates to correct coordinates
+		for (unsigned int index = 0; index < partialPaths.size(); index++){
+			for (unsigned int i = 0; i < partialPaths[index].size(); i++){
+				partialPaths[index][i].ConvertToMapCoordinates(exchange_rate);
+			}
+		}
+
+
+		bool comparison = toMove.pathSize() <= c.time;
+		// Once the paths have been calculated, now we can update the paths of the agents (converting them to normal coordinates)
+		vector<vector<Node>> new_paths;
+		vector<Node> new_path2;
+
+		// First get all the elements before the agent got into the danger zone
+		for (unsigned int i = 0; i < otherIndexes.size(); i++){
+			vector<Node> temp;
+			for (unsigned int j = 0; j < c.time; j++){
+				temp.push_back(paths[otherIndexes[i]][j]);
+			}
+			new_paths.push_back(temp);
+		}
+
+		if (!comparison){
+			for (unsigned int i = 0; i < c.time; i++){
+				new_path2.push_back(paths[indexToMove][i]);
+			}
+		}
+		else{
+			// Fill the route with elements so they can wait a bit
+			int difference = c.time - toMove.pathSize();
+			for (int i = 0; i < difference; i++){
+				toMove.PushElementAtTheBackOfRoute(paths[indexToMove][paths[indexToMove].size() - 1]);
+			}
+		}
+
+
+		// Now, update paths with the elements of the escape routes
+		for (unsigned int i = 0; i < otherIndexes.size(); i++){
+			for (unsigned int index = 0; index < partialPaths[i].size(); index++){
+				new_paths[i].push_back(partialPaths[i][index]);
+			}
+		}
+
+		for (unsigned int i = 0; i < partialPaths[partialPaths.size() - 1].size(); i++){
+			if (comparison)	toMove.PushElementAtTheBackOfRoute(partialPaths[partialPaths.size() - 1][i]);
+			else new_path2.push_back(partialPaths[partialPaths.size() - 1][i]);
+		}
+
+		for (unsigned int index = 0; index < otherIndexes.size(); index++){
+			// Finish updating the path of the element that is following its path
+			for (unsigned int i = exit_indexes[index] + 1; i < paths[otherIndexes[index]].size(); i++){
+				new_paths[index].push_back(paths[otherIndexes[index]][i]);
+			}
+		}
+
+		//Update the agents
+		for (unsigned int i = 0; i < otherIndexes.size(); i++){
+			otherAgents[i]->setPath(new_paths[i]);
+			otherAgents[i]->SanitizePath();
+			paths[otherIndexes[i]] = otherAgents[i]->getPath();
+		}
+
+		if (!comparison) toMove.setPath(new_path2);
+
+		//Clean the maps
+		toMove.SanitizePath();
+
+		//Update the paths
+		paths[indexToMove] = toMove.getPath();
+		submap.clearData();// manually destroy the map
+	}
+	else {
+		SolveInvalidConflict();
+	}
 	
 	
-	// Get the partial paths
-	vector<vector<Node>> partialPaths;
-	CBTNode* solutionNode = tree->getSolution();
-	solutionNode->SanitizePaths();
-	for (int i = 0; i < solutionNode->NumberAgents(); i++){
-		partialPaths.push_back(solutionNode->getPathAt(i));
-	}
-
-	// Both routes are supposed to be of the same size, so we will transform the coordinates to correct coordinates
-	for (unsigned int index = 0; index < partialPaths.size(); index++){
-		for (unsigned int i = 0; i < partialPaths[index].size(); i++){
-			partialPaths[index][i].ConvertToMapCoordinates(exchange_rate);
-		}
-	}
-
-
-	bool comparison = toMove.pathSize() <= c.time;
-	// Once the paths have been calculated, now we can update the paths of the agents (converting them to normal coordinates)
-	vector<vector<Node>> new_paths;
-	vector<Node> new_path2;
-
-	// First get all the elements before the agent got into the danger zone
-	for (unsigned int i = 0; i < otherIndexes.size(); i++){
-		vector<Node> temp;
-		for (unsigned int j = 0; j < c.time; j++){
-			temp.push_back(paths[otherIndexes[i]][j]);
-		}
-		new_paths.push_back(temp);
-	}
-
-	if (!comparison){
-		for (unsigned int i = 0; i < c.time; i++){
-			new_path2.push_back(paths[indexToMove][i]);
-		}
-	}
-	else{
-		// Fill the route with elements so they can wait a bit
-		int difference = c.time - toMove.pathSize();
-		for (int i = 0; i < difference; i++){
-			toMove.PushElementAtTheBackOfRoute(paths[indexToMove][paths[indexToMove].size() - 1]);
-		}
-	}
-
-
-	// Now, update paths with the elements of the escape routes
-	for (unsigned int i = 0; i < otherIndexes.size(); i++){
-		for (unsigned int index = 0; index < partialPaths[i].size(); index++){
-			new_paths[i].push_back(partialPaths[i][index]);
-		}
-	}
-
-	for (unsigned int i = 0; i < partialPaths[partialPaths.size() - 1].size(); i++){
-		if (comparison)	toMove.PushElementAtTheBackOfRoute(partialPaths[partialPaths.size() - 1][i]);
-		else new_path2.push_back(partialPaths[partialPaths.size() - 1][i]);
-	}
-
-	for (unsigned int index = 0; index < otherIndexes.size(); index++){
-		// Finish updating the path of the element that is following its path
-		for (unsigned int i = exit_indexes[index] + 1; i < paths[otherIndexes[index]].size(); i++){
-			new_paths[index].push_back(paths[otherIndexes[index]][i]);
-		}
-	}
-
-	//Update the agents
-	for (unsigned int i = 0; i < otherIndexes.size(); i++){
-		otherAgents[i]->setPath(new_paths[i]);
-		otherAgents[i]->SanitizePath();
-		paths[otherIndexes[i]] = otherAgents[i]->getPath();
-	}
-
-	if (!comparison) toMove.setPath(new_path2);
 	
-	//Clean the maps
-	toMove.SanitizePath();
-
-	//Update the paths
-	paths[indexToMove] = toMove.getPath();
-	submap.clearData();// manually destroy the map
 	
 }
 
@@ -1195,4 +1265,13 @@ void MAPF::getCBSPaths(bool validPath){
 		paths.push_back(players[i].getPath());
 		if(validPath) players[i].setValidPath(true);
 	}
+}
+
+bool MAPF::valid(){
+	bool result = true;
+	for (unsigned int i = 0; i < players.size(); i++){
+		result = result && players[i].hasValidSolution();
+	}
+
+	return result;
 }

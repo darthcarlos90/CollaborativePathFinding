@@ -165,6 +165,17 @@ void CBTNode::ExpandNode(){
 		validNode = false;
 		this->cost = 0;
 	}
+
+	DestroyCycle();
+}
+
+void CBTNode::DestroyCycle(){
+	int size = BalancePaths();
+	int mapsize = agents[0].getMapNodes();
+	if (size > (mapsize)){
+		validNode = false;
+		this->cost = 0;
+	}
 }
 
 void CBTNode::validatePaths(){

@@ -80,7 +80,7 @@ public:
 	int getMainActor() { return main_actor_id; }
 
 	// If this node could find a solution
-	bool isValidNode() { return validNode; }
+	bool isValidNode() { return (validNode && (BalancePaths() < agents[0].getMapNodes())); }
 	
 	int getCATCost() const { return CATCost; }
 
@@ -92,6 +92,12 @@ public:
 
 	// The oposite of the above
 	void SanitizePaths();
+
+	/*
+		If the node got cycled, lets get it out
+	*/
+
+	void DestroyCycle();
 	
 
 private:

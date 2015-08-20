@@ -1,5 +1,7 @@
 #include "Menu.h"
 
+#define TOTAL_TESTCASES 2
+
 Menu::Menu(void){
 	cout << "Welcome" << endl;
 	PrintMainMenu();
@@ -113,6 +115,9 @@ void Menu::RunObstacleLessTests(){
 	vector<float> averageTimeSilvers;
 	vector<float> averageTimeCBS;
 	vector<float> averageTimeHybrid;
+	vector<int> validSolutionsSilvers;
+	vector<int> validSolutionsCBS;
+	vector<int> validSolutionsHybrid;
 	const clock_t total_time = clock();
 	for (int i = 2; i <= 13; i++){
 		int silverWinns = 0;
@@ -121,7 +126,10 @@ void Menu::RunObstacleLessTests(){
 		float sumSilvers = 0.0f;
 		float sumCBS = 0.0f;
 		float sumHyb = 0.0f;
-		for (int testcases = 1; testcases <= 1; testcases++){
+		int validSilv = 0;
+		int validCBS = 0;
+		int validHyb = 0;
+		for (int testcases = 1; testcases <= TOTAL_TESTCASES; testcases++){
 			fileManager->myfile << "Testcase: " << testcases << endl;
 			MAPF m(8, 8, false, i);
 			// Run same test for different algorithms
@@ -162,14 +170,17 @@ void Menu::RunObstacleLessTests(){
 
 				switch (index){
 				case 1:
+					if (m.valid()) validSilv++;
 					sumSilvers += calculation_time;
 					m.printCosts(fileManager->myfile,&silverWinns );
 					break;
 				case 2:
+					if (m.valid()) validCBS++;
 					sumCBS += calculation_time;
 					m.printCosts(fileManager->myfile, &CBSwins);
 					break;
 				case 3:
+					if (m.valid()) validHyb++;
 					sumHyb += calculation_time;
 					m.printCosts(fileManager->myfile, &hybridWins);
 					break;
@@ -182,39 +193,59 @@ void Menu::RunObstacleLessTests(){
 
 		}
 
-		averageTimeSilvers.push_back(sumSilvers / 1000.0f);
-		averageTimeCBS.push_back(sumCBS / 1000.0f);
-		averageTimeHybrid.push_back(sumHyb / 1000.0f);
-		averageCostSilver.push_back((float)silverWinns/1000.0f);
-		averageCostCBS.push_back((float)CBSwins/1000.f);
-		averageCostHybrid.push_back((float)hybridWins / 1000.0f);
+		averageTimeSilvers.push_back(sumSilvers / (float)TOTAL_TESTCASES);
+		averageTimeCBS.push_back(sumCBS / (float)TOTAL_TESTCASES);
+		averageTimeHybrid.push_back(sumHyb / (float)TOTAL_TESTCASES);
+		averageCostSilver.push_back((float)silverWinns / (float)TOTAL_TESTCASES);
+		averageCostCBS.push_back((float)CBSwins / (float)TOTAL_TESTCASES);
+		averageCostHybrid.push_back((float)hybridWins / (float)TOTAL_TESTCASES);
+		validSolutionsSilvers.push_back(((float)validSilv * 100.0f) / (float)TOTAL_TESTCASES);
+		validSolutionsCBS.push_back(((float)validCBS * 100.0f) / (float)TOTAL_TESTCASES);
+		validSolutionsHybrid.push_back(((float)validHyb * 100.0f) / (float)TOTAL_TESTCASES);
 		
 	}
 	float total_running_time = float(clock() - total_time) / CLOCKS_PER_SEC;
-	fileManager->myfile << "Total running time: " << total_running_time << endl;
+	fileManager->myfile << "Total running time: " << total_running_time << endl << endl;
 	fileManager->myfile << "Silvers statistics: " << endl;
+	
 	for (unsigned int i = 0; i < averageTimeSilvers.size(); i++){
-		fileManager->myfile << "For " << i + 2 << "agents, average time " << averageTimeSilvers[i] << endl;
+		fileManager->myfile << "For " << i + 2 << " agents, average time " << averageTimeSilvers[i] << endl;
 	}
+	fileManager->myfile << endl;
 	for (unsigned int i = 0; i < averageCostSilver.size(); i++){
-		fileManager->myfile << "For " << i + 2 << "agents, average cost " << averageCostSilver[i] << endl;
+		fileManager->myfile << "For " << i + 2 << " agents, average cost " << averageCostSilver[i] << endl;
 	}
+	fileManager->myfile << endl;
+	for (unsigned int i = 0; i < validSolutionsSilvers.size(); i++){
+		fileManager->myfile << "For " << i + 2 << " agents, percentage of succes " << validSolutionsSilvers[i] << "%" <<endl;
+	}
+	fileManager->myfile << endl;
 	fileManager->myfile << "CBS statistics: " << endl;
 	for (unsigned int i = 0; i < averageTimeCBS.size(); i++){
-		fileManager->myfile << "For " << i + 2 << "agents, average time " << averageTimeCBS[i] << endl;
+		fileManager->myfile << "For " << i + 2 << " agents, average time " << averageTimeCBS[i] << endl;
 	}
+	fileManager->myfile << endl;
 	for (unsigned int i = 0; i < averageCostCBS.size(); i++){
-		fileManager->myfile << "For " << i + 2 << "agents, average cost " << averageCostCBS[i] << endl;
+		fileManager->myfile << "For " << i + 2 << " agents, average cost " << averageCostCBS[i] << endl;
 	}
-
+	fileManager->myfile << endl;
+	for (unsigned int i = 0; i < validSolutionsCBS.size(); i++){
+		fileManager->myfile << "For " << i + 2 << " agents, percentage of succes " << validSolutionsCBS[i] << "%" << endl;
+	}
+	fileManager->myfile << endl;
 	fileManager->myfile << "Hybrid statistics: " << endl;
 	for (unsigned int i = 0; i < averageTimeHybrid.size(); i++){
-		fileManager->myfile << "For " << i + 2 << "agents, average time " << averageTimeHybrid[i] << endl;
+		fileManager->myfile << "For " << i + 2 << " agents, average time " << averageTimeHybrid[i] << endl;
 	}
+	fileManager->myfile << endl;
 	for (unsigned int i = 0; i < averageCostHybrid.size(); i++){
-		fileManager->myfile << "For " << i + 2 << "agents, average cost " << averageCostHybrid[i] << endl;
+		fileManager->myfile << "For " << i + 2 << " agents, average cost " << averageCostHybrid[i] << endl;
 	}
-
+	fileManager->myfile << endl;
+	for (unsigned int i = 0; i < validSolutionsHybrid.size(); i++){
+		fileManager->myfile << "For " << i + 2 << " agents, percentage of succes " << validSolutionsHybrid[i] << "%" << endl;
+	}
+	
 	fileManager->closeFile();
 	system("pause");
 }
