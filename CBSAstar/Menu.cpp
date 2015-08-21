@@ -1,6 +1,6 @@
 #include "Menu.h"
 
-#define TOTAL_TESTCASES 6
+#define TOTAL_TESTCASES 10
 
 Menu::Menu(void){
 	cout << "Welcome" << endl;
@@ -83,9 +83,9 @@ void Menu::RunObstacleTests(){
 			const clock_t begin_time = clock();
 			m.Start(index);
 			float calculation_time = float(clock() - begin_time) / CLOCKS_PER_SEC;
-			const clock_t progress_time = clock();
-			m.MoveEntities(true);
-			float moving_time = float(clock() - progress_time) / CLOCKS_PER_SEC;
+			//const clock_t progress_time = clock();
+			//m.MoveEntities(true);
+			//float moving_time = float(clock() - progress_time) / CLOCKS_PER_SEC;
 
 			cout << "Finished" << endl;
 			cout << "Saving information into file" << endl;
@@ -93,8 +93,8 @@ void Menu::RunObstacleTests(){
 			m.PrintPaths(fileManager->myfile);
 
 			fileManager->myfile << "Time taken to calculate paths: " << calculation_time << "s" << endl;
-			fileManager->myfile << "Time taken to progress through the path " << moving_time << "s" << endl;
-			fileManager->myfile << "Total time of execution for this map " << calculation_time + moving_time << "s" << endl;
+			//fileManager->myfile << "Time taken to progress through the path " << moving_time << "s" << endl;
+			//fileManager->myfile << "Total time of execution for this map " << calculation_time + moving_time << "s" << endl;
 			m.printCosts(fileManager->myfile);
 			fileManager->myfile << endl;
 			m.resetEntities();
@@ -333,7 +333,7 @@ void Menu::LoadMap(){
 		filename = "testcasetest.txt";
 		break;
 	case 18:
-		filename = "smthg.txt";
+		filename = "debug.txt";
 		break;
 	}
 

@@ -270,11 +270,11 @@ std::vector<Constraint> Map::GetReservationTableConstraints(){
 	return reservationTable.getFullConstraints();
 }
 
-Map Map::createSubMap(vector<Location> locations, Location* difference){
+Map Map::createSubMap(vector<Location> locations, Location* difference, Location* newlowerBounds, Location * newUpperBounds){
 	Matrix<int>* subdata = new Matrix<int>();
 	//Now we can return a map based on the subdata
 	if (difference) {
-		*subdata = CreateSubData(locations, difference);
+		*subdata = CreateSubData(locations, difference, newlowerBounds, newUpperBounds);
 	}
 	else {
 		*subdata = CreateSubData(locations);
@@ -285,7 +285,7 @@ Map Map::createSubMap(vector<Location> locations, Location* difference){
 	return submap;
 }
 
-Matrix<int> Map::CreateSubData(vector<Location> locations, Location* difference){
+Matrix<int> Map::CreateSubData(vector<Location> locations, Location* difference, Location* newlowerBounds, Location * newUpperBounds){
 
 	Location lowerBounds = locations[0];
 	Location upperBounds = locations[0];
@@ -319,14 +319,22 @@ Matrix<int> Map::CreateSubData(vector<Location> locations, Location* difference)
 		*difference = lowerBounds;
 	}
 
+	if (newlowerBounds){
+		*newlowerBounds = lowerBounds;
+	}
+
+	if (newUpperBounds){
+		*newUpperBounds = upperBounds;
+	}
+
 	//Now that we have the bounds of our submap, we can create the matrix with the data
 	
 	Matrix<int> result = getSubData(lowerBounds.x, lowerBounds.y, upperBounds.x, upperBounds.y);
 	return result;
 }
 
-Matrix<int> Map::expandMap(int old_x, int old_y, Location pastDifference, Location * difference){
-	// TODO: Test this
+Matrix<int> Map::expandMap(int old_x, int old_y, Location pastDifference, Location * difference, Location* newlowerBounds1, Location * newUpperBounds1){
+	
 	Location lowerBounds = pastDifference;
 	Location upperBounds = Location(pastDifference.x + old_x, pastDifference.y + old_y);
 	Matrix<int> newData;
@@ -378,6 +386,13 @@ Matrix<int> Map::expandMap(int old_x, int old_y, Location pastDifference, Locati
 	// If there is a pointer, lets feed it data
 	if (difference){
 		*difference = newLowerBounds;
+	}
+	if (newlowerBounds1){
+		*newlowerBounds1 = newLowerBounds;
+	}
+
+	if (newUpperBounds1){
+		*newUpperBounds1 = newUpperBounds;
 	}
 
 	//return the result

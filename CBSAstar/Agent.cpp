@@ -7,8 +7,10 @@ actualNode(location), startingPoint(location)
 	map = m;
 	active = true;
 	this->id = id;
-	if (D > 5) this->steps_limit = D;
-	else this->steps_limit = 5;
+	//if (D > 5) this->steps_limit = D;
+	//else this->steps_limit = 5;
+	// High steps limit, so it actually finds the destination an the first
+	steps_limit = m->getXValue() * m->getYValue();
 	this->destination = destination;
 	SIC = 0;
 	map->setElement(actualNode.getX(), actualNode.getY(), id + 2);

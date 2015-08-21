@@ -505,15 +505,25 @@ void MAPF::solveConflicts(){
 		}
 		else ConflictSolver(c);
 	}
+
 	// Update paths
-	for (unsigned int i = 0; i < players.size(); i++){
-		if (players[i].pathSize() != paths[i].size()){
-			paths[i] = players[i].getPath();
+	if (paths.size() == players.size()){
+		for (unsigned int i = 0; i < players.size(); i++){
+			if (players[i].pathSize() != paths[i].size()){
+				paths[i] = players[i].getPath();
+			}
 		}
 	}
+	else {
+		paths.clear();
+		for (unsigned int i = 0; i < players.size(); i++){
+			paths.push_back(players[i].getPath());
+		}
+	}
+	
 
 
-	if (agent_conflicts.size() > 0){
+	if (agent_conflicts.size() > 0 && (algorithm_type != 2)){
 		agent_conflicts.clear();
 		RevisePaths(true);
 	}
@@ -531,9 +541,9 @@ void MAPF::SolveInvalidConflict(){
 
 
 void MAPF::ConflictSolver(Conflicted c){
-	if (players.size() == 10){
-		cout << "show me a move!";
-	}
+	Location submapLowerBounds;
+	Location submapUpperBouds;
+	
 	// Conflict detected, lets solve it
 	int indexToMove = getIndexOfAgent(c.agents[0]); // first agent is the one to move
 	vector<int> otherIndexes;
@@ -554,14 +564,14 @@ void MAPF::ConflictSolver(Conflicted c){
 
 
 	// Let's build the submap
-	Map submap = map->createSubMap(c.locations, &exchange_rate);
+	Map submap = map->createSubMap(c.locations, &exchange_rate, &submapLowerBounds, &submapUpperBouds);
 	/*
 		Until the number of spaces is bigger than the number of obstacles, or it
 		reaches its total size. This just in case we have a narrow path element.
 		*/
 	while (submap.getNumberObstacles() > submap.getNumberSpaces() && map->NumberAdjacents(toMove.getDestinationLocation()) <= 2){
 		
-		submap.setData(map->expandMap(submap.getXValue() - 1, submap.getYValue() - 1, exchange_rate, &exchange_rate));
+		submap.setData(map->expandMap(submap.getXValue() - 1, submap.getYValue() - 1, exchange_rate, &exchange_rate, &submapLowerBounds, &submapUpperBouds));
 		
 		if (submap.getXValue() == map->getXValue() && submap.getYValue() == map->getYValue()) break;
 	}
@@ -570,7 +580,7 @@ void MAPF::ConflictSolver(Conflicted c){
 	vector<int> exit_indexes;
 		
 	// Get the indexes of when the other element gets in and out of the submap
-	GetIndexHelper(otherIndexes, &exit_indexes, submap.getXValue(), submap.getYValue(), c.time);
+	GetIndexHelper(otherIndexes, &exit_indexes, submap.getXValue(), submap.getYValue(), c.time, submapLowerBounds, submapUpperBouds);
 	
 	//Now that the map was created, and the indexes located, check if there is any other agent, not involved in the
 	// conflict, but that goes through the critical area when the conflict is being solved
@@ -582,7 +592,7 @@ void MAPF::ConflictSolver(Conflicted c){
 	int smallestIndexCreated = -1;
 	int largestIndexCreated = -1;
 	vector<int> newAgentIndexes;
-	while (AddOtherPlayersToConflict(otherIndexes, c.time, largestExit, exit_indexes, indexToMove, &smallestIndexCreated, &largestIndexCreated, newAgentIndexes)){
+	while (AddOtherPlayersToConflict(otherIndexes, c.time, largestExit, exit_indexes, indexToMove, &smallestIndexCreated, &largestIndexCreated, newAgentIndexes, submapLowerBounds, submapUpperBouds)){
 		for (unsigned int i = 0; i < newAgentIndexes.size(); i++){
 			otherAgents.push_back(&players[newAgentIndexes[i]]);
 		}
@@ -597,10 +607,10 @@ void MAPF::ConflictSolver(Conflicted c){
 			}
 			
 			//Now that weve got the new locations, expand the map
-			submap.setData(map->CreateSubData(c.locations, &exchange_rate));
+			submap.setData(map->CreateSubData(c.locations, &exchange_rate, &submapLowerBounds, &submapUpperBouds));
 			//recalculate the exit indexes
 			exit_indexes.clear();
-			GetIndexHelper(otherIndexes, &exit_indexes, submap.getXValue(), submap.getYValue(), c.time);
+			GetIndexHelper(otherIndexes, &exit_indexes, submap.getXValue(), submap.getYValue(), c.time, submapLowerBounds, submapUpperBouds);
 		} else if (largestIndexCreated > c.time){
 			// If the new agents added get into the conflict after the time, expand the map
 			for (unsigned int i = 0; i < newAgentIndexes.size(); i++){
@@ -614,10 +624,10 @@ void MAPF::ConflictSolver(Conflicted c){
 			}
 
 			//Now that weve got the new locations, expand the map
-			submap.setData(map->CreateSubData(c.locations, &exchange_rate));
+			submap.setData(map->CreateSubData(c.locations, &exchange_rate, &submapLowerBounds, &submapUpperBouds));
 			//recalculate the exit indexes
 			exit_indexes.clear();
-			GetIndexHelper(otherIndexes, &exit_indexes, submap.getXValue(), submap.getYValue(), c.time);
+			GetIndexHelper(otherIndexes, &exit_indexes, submap.getXValue(), submap.getYValue(), c.time, submapLowerBounds, submapUpperBouds);
 
 			/*
 				Because if we expand the map, there may be some other agents that got dragged into the conflict *sight*, we need
@@ -629,6 +639,66 @@ void MAPF::ConflictSolver(Conflicted c){
 		largestIndexCreated = -1;
 	}
 
+	map->cleanMap(); // finished using the -1
+
+	// If the map is too small for the agents, expand it.
+	// We will consider that for every agent, there must be at least 2 nodes.
+	int mapsize = submap.getXValue() * submap.getYValue();
+	while (mapsize < ((otherIndexes.size() + 1) * 2)){
+		submap.setData(map->expandMap(submap.getXValue() - 1, submap.getYValue() - 1, exchange_rate, &exchange_rate, &submapLowerBounds, &submapUpperBouds));
+		int largestExit = exit_indexes[0];
+		for (unsigned int i = 1; i < exit_indexes.size(); i++){
+			if (largestExit < exit_indexes[i]) largestExit = exit_indexes[i];
+		}
+		while (AddOtherPlayersToConflict(otherIndexes, c.time, largestExit, exit_indexes, indexToMove, &smallestIndexCreated, &largestIndexCreated, newAgentIndexes, submapLowerBounds, submapUpperBouds)){
+			for (unsigned int i = 0; i < newAgentIndexes.size(); i++){
+				otherAgents.push_back(&players[newAgentIndexes[i]]);
+			}
+
+			if (smallestIndexCreated < c.time){
+				c.time = smallestIndexCreated;
+				c.locations.clear();
+				c.locations.push_back(paths[indexToMove][c.time].getLocation());
+				// If the new agents added get into the conflict after the time, expand the map
+				for (unsigned int i = 0; i < otherIndexes.size(); i++){
+					c.locations.push_back(paths[otherIndexes[i]][c.time].getLocation());
+				}
+
+				//Now that weve got the new locations, expand the map
+				submap.setData(map->CreateSubData(c.locations, &exchange_rate, &submapLowerBounds, &submapUpperBouds));
+				//recalculate the exit indexes
+				exit_indexes.clear();
+				GetIndexHelper(otherIndexes, &exit_indexes, submap.getXValue(), submap.getYValue(), c.time, submapLowerBounds, submapUpperBouds);
+			}
+			else if (largestIndexCreated > c.time){
+				// If the new agents added get into the conflict after the time, expand the map
+				for (unsigned int i = 0; i < newAgentIndexes.size(); i++){
+					if (paths[newAgentIndexes[i]].size() <= c.time){
+						while (players[newAgentIndexes[i]].pathSize() <= c.time){
+							players[newAgentIndexes[i]].RepeatLastElement();
+						}
+						paths[newAgentIndexes[i]] = players[newAgentIndexes[i]].getPath();
+					}
+					c.locations.push_back(paths[newAgentIndexes[i]][c.time].getLocation());
+				}
+
+				//Now that weve got the new locations, expand the map
+				submap.setData(map->CreateSubData(c.locations, &exchange_rate, &submapLowerBounds, &submapUpperBouds));
+				//recalculate the exit indexes
+				exit_indexes.clear();
+				GetIndexHelper(otherIndexes, &exit_indexes, submap.getXValue(), submap.getYValue(), c.time, submapLowerBounds, submapUpperBouds);
+
+				/*
+				Because if we expand the map, there may be some other agents that got dragged into the conflict *sight*, we need
+				to run this again until no other element is added, or untill all agents are on the conflict.
+				*/
+			}
+			// reset values
+			smallestIndexCreated = -1;
+			largestIndexCreated = -1;
+		}
+		if (submap.getXValue() == map->getXValue() && submap.getYValue() == map->getYValue()) break;
+	}
 	map->cleanMap(); // finished using the -1
 
 	vector<Location> agentLocations;
@@ -686,9 +756,9 @@ void MAPF::ConflictSolver(Conflicted c){
 	bool submapSizeBig = false;
 	while (!RunCBSUsingPlayers(agents, false)){
 		if (!submapSizeBig){
-			submap.setData(map->expandMap(submap.getXValue() - 1, submap.getYValue() - 1, exchange_rate, &exchange_rate));
+			submap.setData(map->expandMap(submap.getXValue() - 1, submap.getYValue() - 1, exchange_rate, &exchange_rate, &submapLowerBounds, &submapUpperBouds));
 			while (submap.getNumberObstacles() > submap.getNumberSpaces() && map->NumberAdjacents(toMove.getDestinationLocation()) <= 2){
-				submap.setData(map->expandMap(submap.getXValue() - 1, submap.getYValue() - 1, exchange_rate, &exchange_rate));
+				submap.setData(map->expandMap(submap.getXValue() - 1, submap.getYValue() - 1, exchange_rate, &exchange_rate, &submapLowerBounds, &submapUpperBouds));
 				// If weve got the whole map, break
 				if (submap.getXValue() == map->getXValue() && submap.getYValue() == map->getYValue()) break;
 			}
@@ -696,7 +766,11 @@ void MAPF::ConflictSolver(Conflicted c){
 			int smallestIndexCreated = -1;
 			int largestIndexCreated = -1;
 			vector<int> newAgentIndexes;
-			while (AddOtherPlayersToConflict(otherIndexes, c.time, largestExit, exit_indexes, indexToMove, &smallestIndexCreated, &largestIndexCreated, newAgentIndexes)){
+			int largestExit = exit_indexes[0];
+			for (unsigned int i = 1; i < exit_indexes.size(); i++){
+				if (largestExit < exit_indexes[i]) largestExit = exit_indexes[i];
+			}
+			while (AddOtherPlayersToConflict(otherIndexes, c.time, largestExit, exit_indexes, indexToMove, &smallestIndexCreated, &largestIndexCreated, newAgentIndexes, submapLowerBounds, submapUpperBouds)){
 				for (unsigned int i = 0; i < newAgentIndexes.size(); i++){
 					otherAgents.push_back(&players[newAgentIndexes[i]]);
 				}
@@ -711,10 +785,10 @@ void MAPF::ConflictSolver(Conflicted c){
 					}
 
 					//Now that weve got the new locations, expand the map
-					submap.setData(map->CreateSubData(c.locations, &exchange_rate));
+					submap.setData(map->CreateSubData(c.locations, &exchange_rate, &submapLowerBounds, &submapUpperBouds));
 					//recalculate the exit indexes
 					exit_indexes.clear();
-					GetIndexHelper(otherIndexes, &exit_indexes, submap.getXValue(), submap.getYValue(), c.time);
+					GetIndexHelper(otherIndexes, &exit_indexes, submap.getXValue(), submap.getYValue(), c.time, submapLowerBounds, submapUpperBouds);
 				}
 				else if (largestIndexCreated > c.time){
 					// If the new agents added get into the conflict after the time, expand the map
@@ -729,10 +803,10 @@ void MAPF::ConflictSolver(Conflicted c){
 					}
 
 					//Now that weve got the new locations, expand the map
-					submap.setData(map->CreateSubData(c.locations, &exchange_rate));
+					submap.setData(map->CreateSubData(c.locations, &exchange_rate, &submapLowerBounds, &submapUpperBouds));
 					//recalculate the exit indexes
 					exit_indexes.clear();
-					GetIndexHelper(otherIndexes, &exit_indexes, submap.getXValue(), submap.getYValue(), c.time);
+					GetIndexHelper(otherIndexes, &exit_indexes, submap.getXValue(), submap.getYValue(), c.time, submapLowerBounds, submapUpperBouds);
 
 					/*
 					Because if we expand the map, there may be some other agents that got dragged into the conflict *sight*, we need
@@ -752,7 +826,7 @@ void MAPF::ConflictSolver(Conflicted c){
 
 			exit_indexes.clear();
 
-			GetIndexHelper(otherIndexes, &exit_indexes, submap.getXValue(), submap.getYValue(), c.time);
+			GetIndexHelper(otherIndexes, &exit_indexes, submap.getXValue(), submap.getYValue(), c.time, submapLowerBounds, submapUpperBouds);
 
 			agentLocations.clear();
 			exitLocations.clear();
@@ -777,9 +851,9 @@ void MAPF::ConflictSolver(Conflicted c){
 
 			//update the agents
 			for (unsigned int i = 0; i < otherIndexes.size(); i++){
-				agents.push_back(Agent(Node(0, agentLocations[i]), Node(0, exitLocations[i]), &submap, 0, 5));
+				agents.push_back(Agent(Node(0, agentLocations[i]), Node(0, exitLocations[i]), &submap, i + 1, 5));
 			}
-			Agent partialAgent2(Node(0, agentLocation2), Node(0, agentDestination2), &submap, 1, 5);
+			Agent partialAgent2(Node(0, agentLocation2), Node(0, agentDestination2), &submap, 0, 5);
 			agents.push_back(partialAgent2);
 
 			if (submap.getXValue() == map->getXValue() && submap.getYValue() == map->getYValue()) submapSizeBig = true;
@@ -787,8 +861,8 @@ void MAPF::ConflictSolver(Conflicted c){
 		else {
 			break;
 		}
-		
 
+		map->cleanMap(); // finished using the -1
 	}
 
 	// TODO: What happens when a soultion cant be found
@@ -882,7 +956,7 @@ void MAPF::ConflictSolver(Conflicted c){
 }
 
 
-bool MAPF::AddOtherPlayersToConflict(vector<int> &agentIndexes, int start_time, int longest_time, vector<int> &exit_indexes, int agentToMove, int *smallestStart, int *biggest,vector<int> &newAgentIndexes) {
+bool MAPF::AddOtherPlayersToConflict(vector<int> &agentIndexes, int start_time, int longest_time, vector<int> &exit_indexes, int agentToMove, int *smallestStart, int *biggest, vector<int> &newAgentIndexes, Location lowerbound, Location upperbound) {
 	bool result = false;
 	int smallestIndex = -1;
 	int largestIndex = -1;
@@ -899,22 +973,26 @@ bool MAPF::AddOtherPlayersToConflict(vector<int> &agentIndexes, int start_time, 
 			int startIndex = -1;
 			if (paths[i].size() <= start_time){
 				if (map->getValueAt(players[i].getDestinationLocation()) == -1){
+					Location location = players[i].getDestinationLocation();
+					if (location.x > upperbound.x || location.y > upperbound.y || location.y < lowerbound.y || location.x < lowerbound.x){
+						cout << "HACIENDOLA DE PEDO";
+					}
 					// if the destination is on the critical zone, this element participates on the conflict
 					startIndex = start_time;
 					agentIndexes.push_back(i);
 					newAgentIndexes.push_back(i);
 					result = true;
 					// fill the route until start time
-					int difference = start_time - paths[i].size();
-					for (int k = 0; k < difference; k++){
-						players[i].PushElementAtTheBackOfRoute(paths[i][paths[i].size() - 1]);
+					
+					while (players[i].pathSize() <= start_time){
+						players[i].RepeatLastElement();
 					}
 					//update
 					paths[i] = players[i].getPath();
 				}
 			}
 			else if(paths[i].size() <= longest_time) {
-				for (int index = start_time; index < paths[i].size(); index++){
+				for (unsigned int index = start_time; index < paths[i].size(); index++){
 					if (map->getValueAt(paths[i][index].getLocation()) == -1){
 						startIndex = index;
 						agentIndexes.push_back(i);
@@ -937,23 +1015,32 @@ bool MAPF::AddOtherPlayersToConflict(vector<int> &agentIndexes, int start_time, 
 			}
 			if (startIndex != -1){
 				int exitIndex = -1;
-				for (unsigned int index = startIndex; index < paths[i].size(); index++){
-					if (map->getValueAt(paths[i][index].getLocation()) != -1){
+				for (unsigned int index = startIndex + 1; index < paths[i].size(); index++){
+					Location location = paths[i][index].getLocation();
+					if (map->getValueAt(paths[i][index].getLocation()) != -1 || 
+						(location.x >= upperbound.x || location.y >= upperbound.y || location.x < lowerbound.x || location.y < lowerbound.y)){
 						exitIndex = index - 1;
 						break;
 					}
 				}
 
 				if (exitIndex == -1){
-					exit_indexes.push_back(paths[i].size() - 1);
+					for (unsigned int index = startIndex + 1; index < paths[i].size(); index++){
+						Location location = paths[i][index].getLocation();
+						if (location.x >= upperbound.x || location.y >= upperbound.y || location.x < lowerbound.x || location.y < lowerbound.y){
+							exitIndex = index - 1;
+							break;
+						}
+					}
+					if (exitIndex == -1) exit_indexes.push_back(paths[i].size() - 1);
 				}
 				else exit_indexes.push_back(exitIndex);
+
 				if (smallestIndex == -1) smallestIndex = startIndex;
 				else if (smallestIndex > startIndex) smallestIndex = startIndex;
 				if (largestIndex == -1) largestIndex = startIndex;
 				else if (largestIndex < startIndex) largestIndex = startIndex;
 			}
-			
 		}
 	}
 
@@ -963,28 +1050,47 @@ bool MAPF::AddOtherPlayersToConflict(vector<int> &agentIndexes, int start_time, 
 	return result;
 }
 
-void MAPF::GetIndexHelper(vector<int> otherIndexes, vector<int> *exit_indexes, int submapSizeX, int submapSizeY, unsigned int start_time){
+void MAPF::GetIndexHelper(vector<int> otherIndexes, vector<int> *exit_indexes, int submapSizeX, int submapSizeY, unsigned int start_time, Location lowerbound, Location upperbound){
 	for (unsigned int index_others = 0; index_others < otherIndexes.size(); index_others++){
 		int indexOther = otherIndexes[index_others];
-		
+
 		if (submapSizeX == map->getXValue() && submapSizeY == map->getYValue()){
 			// If the size of the map is the same as the submap, force values
-			exit_indexes->push_back(paths[indexOther].size() - 1);
+			int value = paths[indexOther].size() - 1;
+			exit_indexes->push_back(value);
 		} else {
 			bool valueFound = false;
 			// Now we need to get the index where the element is out of the submap zone
 			for (unsigned int i = start_time; i < paths[indexOther].size(); i++){
 				if (map->getValueAt(paths[indexOther][i].getLocation()) != -1){
+					int value = i - 1;
 					exit_indexes->push_back(i - 1);
 					valueFound = true;
 					break;
 				}
 			}
 			if (!valueFound){
-				exit_indexes->push_back(paths[indexOther].size() - 1);
+				int value = -1;
+				for (unsigned int i = start_time; i < paths[indexOther].size(); i++){
+					Location location = paths[indexOther][i].getLocation();
+					if (location.x < lowerbound.x ||location.y < lowerbound.y || location.x > upperbound.x || location.y > upperbound.y){
+						value = i - 1;
+					}
+				}
+				if (value == -1){
+					value = paths[indexOther].size() - 1;
+					exit_indexes->push_back(value);
+				}
+				else exit_indexes->push_back(value);
 			}
 		}
 		
+	}
+
+	for (unsigned int i = 0; i < exit_indexes->size(); i++){
+		if (players[otherIndexes[i]].pathSize() < (*exit_indexes)[i]){
+			cout << "SAQUITO MAMADOR";
+		}
 	}
 }
 
