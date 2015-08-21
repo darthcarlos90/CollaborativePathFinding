@@ -69,7 +69,7 @@ private:
 	// Here are the helper functions for the conflict solver method
 	//Gets the indexes of when the agents enter and go out of the submap
 	void GetIndexHelper(vector<int> otherIndexes, vector<int> *exit_indexes, int submapSizeX, int submapSizeY, unsigned int start_time, Location lowerbound, Location upperbound);
-	bool AddOtherPlayersToConflict(vector<int> &agentIndexes, int start_time, int, vector<int> &exit_indexes, int agentToMove, int *smallestStart, int*biggest, vector<int> &newAgentIndexes, Location lowerbound, Location upperbound);
+	bool AddOtherPlayersToConflict(vector<int> &agentIndexes, int start_time, int, vector<int> &exit_indexes, int agentToMove, int*biggest, vector<int> &newAgentIndexes, Location lowerbound, Location upperbound);
 	
 	
 	int countCriticalZone(Conflicted c, vector <Node>* criticalZoneNodes = NULL);

@@ -333,7 +333,7 @@ void Menu::LoadMap(){
 		filename = "testcasetest.txt";
 		break;
 	case 18:
-		filename = "debug.txt";
+		filename = "testdeath.txt";
 		break;
 	}
 

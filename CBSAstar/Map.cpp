@@ -239,7 +239,8 @@ Matrix<int> Map::getSubData(int lowerX, int lowerY, int upperX, int upperY){
 		for (int j = lowerY; j <= upperY; j++){
 			if (data->get_element(i, j) != 1){
 				matrix.set_element(x, y, 0);
-				data->set_element(i, j, -1); // Set the data to -1 so that we can later acces it
+				//TODO: Uncoment if something brakes
+				//data->set_element(i, j, -1); // Set the data to -1 so that we can later acces it
 			}
 			else matrix.set_element(x, y, 1);
 			
