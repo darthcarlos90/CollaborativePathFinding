@@ -1,6 +1,6 @@
 #include "Menu.h"
 
-#define TOTAL_TESTCASES 80
+#define TOTAL_TESTCASES 1000
 
 Menu::Menu(void){
 	cout << "Welcome" << endl;
@@ -192,16 +192,33 @@ void Menu::RunObstacleLessTests(){
 			}
 
 		}
-
-		averageTimeSilvers.push_back(sumSilvers / (float)TOTAL_TESTCASES);
-		averageTimeCBS.push_back(sumCBS / (float)TOTAL_TESTCASES);
-		averageTimeHybrid.push_back(sumHyb / (float)TOTAL_TESTCASES);
-		averageCostSilver.push_back((float)silverWinns / (float)TOTAL_TESTCASES);
-		averageCostCBS.push_back((float)CBSwins / (float)TOTAL_TESTCASES);
-		averageCostHybrid.push_back((float)hybridWins / (float)TOTAL_TESTCASES);
-		validSolutionsSilvers.push_back(((float)validSilv * 100.0f) / (float)TOTAL_TESTCASES);
-		validSolutionsCBS.push_back(((float)validCBS * 100.0f) / (float)TOTAL_TESTCASES);
-		validSolutionsHybrid.push_back(((float)validHyb * 100.0f) / (float)TOTAL_TESTCASES);
+		float value = sumSilvers / (float)TOTAL_TESTCASES;
+		fileManager->myfile << "Average Time for silvers " << value << "s" << endl;
+		averageTimeSilvers.push_back(value);
+		value = sumCBS / (float)TOTAL_TESTCASES;
+		fileManager->myfile << "Average Time for CBS " << value << "s" << endl;
+		averageTimeCBS.push_back(value);
+		value = sumHyb / (float)TOTAL_TESTCASES;
+		fileManager->myfile << "Average Time for Hybrid " << value << "s" << endl;
+		averageTimeHybrid.push_back(value);
+		value = (float)silverWinns / (float)TOTAL_TESTCASES;
+		fileManager->myfile << "Average Cost for Silvers " << value << endl;
+		averageCostSilver.push_back(value);
+		value = (float)CBSwins / (float)TOTAL_TESTCASES;
+		fileManager->myfile << "Average Cost for CBS " << value << endl;
+		averageCostCBS.push_back(value);
+		value = (float)hybridWins / (float)TOTAL_TESTCASES;
+		fileManager->myfile << "Average Cost for Hybrid " << value << endl;
+		averageCostHybrid.push_back(value);
+		value = ((float)validSilv * 100.0f) / (float)TOTAL_TESTCASES;
+		fileManager->myfile << "Percentage of succes of Silvers " << value << "%" << endl;
+		validSolutionsSilvers.push_back(value);
+		value = ((float)validCBS * 100.0f) / (float)TOTAL_TESTCASES;
+		fileManager->myfile << "Percentage of succes of CBS " << value << "%" << endl;
+		validSolutionsCBS.push_back(value);
+		value = ((float)validHyb * 100.0f) / (float)TOTAL_TESTCASES;
+		fileManager->myfile << "Percentage of succes of Hybrid " << value << "%" << endl << endl;
+		validSolutionsHybrid.push_back(value);
 		
 	}
 	float total_running_time = float(clock() - total_time) / CLOCKS_PER_SEC;
