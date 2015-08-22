@@ -920,3 +920,184 @@ void Agent::MoveToClosestEscapeElement(bool KeepRoute, Location start){
 
 	lastNode = NULL; // CLEAN UP
 }
+
+
+//TODO: Probably not used
+//void Agent::ReroutePathUsingSpatialAstar(int time){
+//	//Erase all the elements after the time stated
+//	time_route.erase(time_route.begin() + (time + 2), time_route.end());
+//	//Run astar until the destination from the new spot
+//	time_closedList.clear();
+//	time_openList.clear();
+//	clearSpatialLists(true);
+//	TimeSpaceAstarHelper(time_route[time - 1].getLocation(), 
+//		destination.getLocation(), time);
+//}
+
+// TODO: Not used, eliminate soon
+Node GetSimpleEscapeNode(Location start);
+
+/*
+	Returns a simple escape node, meaning, just the cheapest
+	adjacent node to the location given in the parameters.
+*/
+Node Agent::GetSimpleEscapeNode(Location start){
+
+	// A is the node from the location
+	Node A(0, start);
+	A.setG(0);
+	A.setH(0);
+	A.calculateF();
+	
+	Node result;
+
+	// Get the adjacents	
+	vector<Node> adjacents = getAdjacents(A, destination.getLocation());
+	
+	
+	/*
+		Here, we get the biggest element of the list. Why the biggest?
+		Because the buggest means it is the furthest away from the destination.
+		Right? RIIGHT?????
+	*/
+	result = adjacents[adjacents.size() - 1];
+	result.clearParent();
+
+	return result;
+	
+}
+
+Node GetEscapeNodeNotOnRoute(Location start, vector<Node> path, bool lowerThan);
+// Gets an escape route that is not part of the path indicated in the parameters
+Node Agent::GetEscapeNodeNotOnRoute(Location start, vector<Node> path, bool lowerThan){
+	// Clear the lists for a better execution of the algorithm
+	spatial_openList.clear();
+	spatial_closedList.clear();
+
+	
+	
+	bool nodeFound = false;
+	//Let A be the starting point
+	Node A(0, start);
+	// Assign f, g and h values to A
+	A.setG(0);
+	A.setH(0);
+	A.calculateF();
+
+	//Add A to the open list, At this point, A shoul be the only node on the open list
+	spatial_openList.push_back(A);
+	index_lower_spatial_openList = 0;
+
+	Node P;
+	//If the goal was found, break
+	while (!nodeFound){
+
+		// If the open list is empty, no path was found, break
+		if (spatial_openList.size() == 0) break;
+
+		//let p be the best node in the open list
+		/*	Since the openList is sorted every time an item is added, then the best
+		option to select is the first item
+		*/
+		P = spatial_openList[index_lower_spatial_openList];
+		spatial_closedList.push_back(P);
+		UpdateSpatialOpenList();
+
+		// Get Adjacents without parent :D
+		vector<Node> adjacents = getAdjacentsWithoutParents(P);
+		
+
+		for (unsigned int i = 0; i < adjacents.size(); i++){
+			if (!FindNodeAtList(adjacents[i], path)){ // If the node is not part of the others route.
+				bool isOpposite = false;
+				if (lowerThan){
+					if (adjacents[i].getLocation() > start)
+						isOpposite = true;
+				}
+				else {
+					if (adjacents[i].getLocation() < start)
+						isOpposite = true;
+				}
+
+				if (isOpposite){
+					P = adjacents[i]; // Set it to P
+					nodeFound = true; // And break the loop
+					break;
+				}
+			}
+			else addToSpatialOpenList(adjacents[i]);
+		}
+		
+		//std::sort(spatial_openList.begin(), spatial_openList.end());
+	}
+
+	//Once the element has been found, return it
+	return P;
+}
+
+/*
+		This method runs a normal Astar algorithm, and stops until an element out
+		of the critical zone is located, and returns that element.
+	*/
+	Node EscapeAstar(Location start); // The time at which a set of adjacent elements will be found
+	
+Node Agent::EscapeAstar(Location start){
+	int starting_time = time_route.size();
+	bool pathFound = false;
+	//Let A be the starting point
+	Node A(0, start);
+	// Assign f, g and h values to A
+	A.setG(0);
+	/*
+		Fix: When looking for an escape node, the only value that is going to be
+		taken into account is G, not H.
+		Date: 24/06/2015
+		Why?
+		Because we don't actually know what is going to be our destination, so there
+		is no point in setting an H value.
+	*/
+	A.setH(0);
+	A.calculateF();
+
+	//Add A to the open list, At this point, A shoul be the only node on the open list
+	spatial_openList.push_back(A);
+
+	Node P;
+	//If the goal was found, break
+	while (!pathFound){
+
+		// If the open list is empty, no path was found, break
+		if (spatial_openList.size() == 0) break;
+
+		//let p be the best node in the open list
+		/*	Since the openList is sorted every time an item is added, then the best
+		option to select is the first item
+		*/
+		
+		P = spatial_openList[index_lower_spatial_openList];
+		spatial_closedList.push_back(P);
+		UpdateSpatialOpenList();
+
+
+		vector<Node> adjacents = getAdjacentsWithoutParents(P);
+		
+
+		for (unsigned int i = 0; i < adjacents.size(); i++){
+			if (!map->isReserved(adjacents[i], starting_time, id)){ // If we found an empty element
+				P = adjacents[i]; // Set it to P
+				pathFound = true; // And break the loop
+				break;
+			}
+			
+			else {// Else, proceed with the normal Astar
+				addToSpatialOpenList(adjacents[i]);
+			}
+			
+			//std::sort(spatial_openList.begin(), spatial_openList.end());
+		}
+	}
+	//Once the element has been found, return it
+	return P;
+}
+
+

@@ -1,13 +1,11 @@
-﻿Build started 21/08/2015 18:57:23.
+﻿Build started 21/08/2015 21:44:29.
      1>Project "H:\Dissertation\Dissertation\example code\CollaborativePathFinding\CBSAstar\CBSAstar.vcxproj" on node 2 (Build target(s)).
      1>ClCompile:
-         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /sdl /Od /Oy- /D WIN32 /D _DEBUG /D _CONSOLE /D _LIB /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt MAPF.cpp ReservationTable.cpp
-         MAPF.cpp
-     1>h:\dissertation\dissertation\example code\collaborativepathfinding\cbsastar\mapf.cpp(605): warning C4018: '>' : signed/unsigned mismatch
-     1>h:\dissertation\dissertation\example code\collaborativepathfinding\cbsastar\mapf.cpp(635): warning C4018: '<' : signed/unsigned mismatch
-     1>h:\dissertation\dissertation\example code\collaborativepathfinding\cbsastar\mapf.cpp(846): warning C4018: '<=' : signed/unsigned mismatch
-     1>h:\dissertation\dissertation\example code\collaborativepathfinding\cbsastar\mapf.cpp(859): warning C4018: '<=' : signed/unsigned mismatch
-     1>h:\dissertation\dissertation\example code\collaborativepathfinding\cbsastar\mapf.cpp(871): warning C4018: '<=' : signed/unsigned mismatch
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /sdl /Od /Oy- /D WIN32 /D _DEBUG /D _CONSOLE /D _LIB /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt Menu.cpp ReservationTable.cpp
+         Menu.cpp
+     1>h:\dissertation\dissertation\example code\collaborativepathfinding\cbsastar\menu.cpp(202): warning C4244: 'argument' : conversion from 'float' to 'int', possible loss of data
+     1>h:\dissertation\dissertation\example code\collaborativepathfinding\cbsastar\menu.cpp(203): warning C4244: 'argument' : conversion from 'float' to 'int', possible loss of data
+     1>h:\dissertation\dissertation\example code\collaborativepathfinding\cbsastar\menu.cpp(204): warning C4244: 'argument' : conversion from 'float' to 'int', possible loss of data
          Generating Code...
          Skipping... (no relevant changes detected)
          ReservationTable.cpp
@@ -28,4 +26,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:06.58
+Time Elapsed 00:00:05.51

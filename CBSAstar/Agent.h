@@ -109,11 +109,8 @@ public:
 	void PushElementAtTheBackOfRoute(Node val);
 	void RepeatLastElement();
 	unsigned int pathSize() { return time_route.size(); }
-
-	Node GetEscapeNodeNotOnRoute(Location start, vector<Node> path, bool lowerThan);
 	
-	// TODO: Not used, eliminate soon
-	Node GetSimpleEscapeNode(Location start);
+	
 
 	/*
 		This method sets the stepsTaken to steps limit, so that the
@@ -204,13 +201,6 @@ private:
 		this difficult to understand, you can always contact me and I try my best to explain it better :)
 	*/
 	bool FindSpecialCaseCBS(Location location, int t, vector<Constraint> constraints);
-
-
-	/*
-		This method runs a normal Astar algorithm, and stops until an element out
-		of the critical zone is located, and returns that element.
-	*/
-	Node EscapeAstar(Location start); // The time at which a set of adjacent elements will be found
 	
 	bool ConstraintAstar(Location start, Location finish, int starting_time, vector<Constraint> constraints);
 	
