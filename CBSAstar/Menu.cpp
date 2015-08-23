@@ -1,6 +1,8 @@
 #include "Menu.h"
 
 #define TOTAL_TESTCASES 1000
+#define MIN_AGENTS 13
+#define MAX_PLAYERS 13
 
 Menu::Menu(void){
 	cout << "Welcome" << endl;
@@ -59,7 +61,7 @@ void Menu::RunTests(){
 void Menu::RunObstacleTests(){
 	fileManager = new FileManager("ObstacleTests.txt");
 	const clock_t total_time = clock();
-	for (int i = 2; i <= 13; i++){
+	for (int i = MIN_AGENTS; i <= MAX_PLAYERS; i++){
 		fileManager->myfile << "Testcase: " << i - 1 << endl;
 		MAPF m(8, 8,true, i);
 		// Run same test for different algorithms
@@ -119,7 +121,8 @@ void Menu::RunObstacleLessTests(){
 	vector<int> validSolutionsCBS;
 	vector<int> validSolutionsHybrid;
 	const clock_t total_time = clock();
-	for (int i = 2; i <= 13; i++){
+	
+	for (int i = MIN_AGENTS; i <= MAX_PLAYERS; i++){
 		int silverWinns = 0;
 		int CBSwins = 0;
 		int hybridWins = 0;
@@ -187,8 +190,7 @@ void Menu::RunObstacleLessTests(){
 				}
 
 				fileManager->myfile << endl;
-				m.resetEntities();
-				m.cleanReservationsConstraints();
+				m.clean();
 			}
 
 		}

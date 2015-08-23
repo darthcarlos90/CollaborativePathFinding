@@ -40,6 +40,7 @@ public:
 
 	void cleanReservationsConstraints();
 	bool valid();
+	void clean();
 	
 
 private:
@@ -117,4 +118,5 @@ private:
 
 	int algorithm_type;
 	bool obstacles;
+	bool using_tree;
 };

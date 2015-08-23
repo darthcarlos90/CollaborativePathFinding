@@ -47,6 +47,7 @@ MAPF::MAPF(string filename){
 	algorithm_type = 0;
 	
 	obstacles = true;
+	using_tree = false;
 
 }
 
@@ -108,6 +109,7 @@ obstacles(obstacles){
 
 	time = 0;
 	algorithm_type = 0;
+	using_tree = false;
 
 }
 
@@ -116,7 +118,7 @@ MAPF::~MAPF(void){
 	delete fr;
 	delete map;
 	//Dont delete the nodes, thats the tree's job
-	delete tree;
+	if(using_tree)delete tree;
 }
 
 
@@ -265,6 +267,8 @@ bool MAPF::CBSHelper(){
 bool MAPF::RunCBSUsingPlayers(vector<Agent> agents, bool runPathverification){
 	//Create the constraint tree
 	tree = new ConstraintTree();
+
+	using_tree = true;
 
 	//Create the root node
 	root = new CBTNode();
@@ -1255,4 +1259,15 @@ bool MAPF::valid(){
 	}
 
 	return result;
+}
+
+void MAPF::clean(){
+	resetEntities();
+	cleanReservationsConstraints();
+	if (algorithm_type != 1){
+		if (using_tree){
+			delete tree;
+			using_tree = false;
+		}
+	}
 }

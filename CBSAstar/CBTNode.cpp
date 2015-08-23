@@ -264,6 +264,7 @@ void CBTNode::CreateSpecialConflict(unsigned int time, vector<Location> location
 
 	bool blockingConflict = false;
 	int blockingEntity = -1;
+	int other = -1;
 
 	Location destination1 = agents[users[0]].getDestinationLocation();
 	Location destination2 = agents[users[1]].getDestinationLocation();
@@ -319,6 +320,9 @@ void CBTNode::CreateSpecialConflict(unsigned int time, vector<Location> location
 					blockingEntity = i;
 					break;
 				}
+				else {
+					other = i;
+				}
 
 			}
 
@@ -333,7 +337,11 @@ void CBTNode::CreateSpecialConflict(unsigned int time, vector<Location> location
 			
 			if ((agents[users[blockingEntity]].getLocationAtTime(time) == destination) && time != 0) {
 				conflict.times.push_back(time);
-			} else conflict.times.push_back(time + 1);
+			}
+			else {
+				conflict.times.push_back(time + 1);
+				conflict.times.push_back(time + 1);
+			}
 			
 
 			conflict.users.push_back(users[blockingEntity]);
@@ -353,10 +361,15 @@ void CBTNode::CreateSpecialConflict(unsigned int time, vector<Location> location
 				else conflict.locations.push_back(locations[1]);
 			}
 			else {
+				conflict.users.push_back(other);
 				if (locations[0] == destination){
 					conflict.locations.push_back(locations[1]);
+					conflict.locations.push_back(locations[1]);
 				}
-				else conflict.locations.push_back(locations[0]);
+				else {
+					conflict.locations.push_back(locations[0]);
+					conflict.locations.push_back(locations[0]);
+				}
 			}
 			
 			swapcounter = 0;
