@@ -1,7 +1,7 @@
 #include "Menu.h"
 
 #define TOTAL_TESTCASES 1000
-#define MIN_AGENTS 13
+#define MIN_AGENTS 2
 #define MAX_PLAYERS 13
 
 Menu::Menu(void){

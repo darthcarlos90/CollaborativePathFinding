@@ -139,6 +139,8 @@ void CBTNode::ExpandNode(){
 		solution.
 	*/
 	if (conflict.empty){
+		validNode = false;
+		this->cost = 0;
 		return;
 	}
 
@@ -320,9 +322,6 @@ void CBTNode::CreateSpecialConflict(unsigned int time, vector<Location> location
 					blockingEntity = i;
 					break;
 				}
-				else {
-					other = i;
-				}
 
 			}
 
@@ -361,6 +360,9 @@ void CBTNode::CreateSpecialConflict(unsigned int time, vector<Location> location
 				else conflict.locations.push_back(locations[1]);
 			}
 			else {
+				// Unsolvable case
+				/*if (blockingEntity == users[0]) other = users[1];
+				else other = users[0];
 				conflict.users.push_back(other);
 				if (locations[0] == destination){
 					conflict.locations.push_back(locations[1]);
@@ -369,7 +371,11 @@ void CBTNode::CreateSpecialConflict(unsigned int time, vector<Location> location
 				else {
 					conflict.locations.push_back(locations[0]);
 					conflict.locations.push_back(locations[0]);
-				}
+				}*/
+				conflict.times.clear();
+				conflict.locations.clear();
+				conflict.users.clear();
+				validNode = false;
 			}
 			
 			swapcounter = 0;
